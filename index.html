@@ -900,13 +900,11 @@ function startExam(mode) {
   pendingExamMode = mode;
 
   if (mode === 'link') {
-    // 링크검사: 새 탭에서 외부 URL 열기 (필요 시 URL 수정)
-    const url = `https://psychibae-lang.github.io/clinic/?mode=selsi&name=${encodeURIComponent(state.childName)}&age=${age}`;
+    const url = `https://christalmun-sarang.github.io/selsi/?name=${encodeURIComponent(state.childName)}&age=${age}`;
     window.open(url, '_blank');
     return;
   }
   if (mode === 'qr') {
-    // QR검사: QR 코드 생성 팝업 (간단 구현 — 링크 URL을 QR로 표시)
     showQRModal(age);
     return;
   }
@@ -925,7 +923,7 @@ function closeGuideModal() {
 
 // QR 모달 (간단 — Google Chart API 사용)
 function showQRModal(age) {
-  const url = `https://psychibae-lang.github.io/clinic/?mode=selsi&name=${encodeURIComponent(state.childName)}&age=${age}`;
+  const url = `https://christalmun-sarang.github.io/selsi/?name=${encodeURIComponent(state.childName)}&age=${age}`;
   const qrUrl = `https://chart.googleapis.com/chart?chs=260x260&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
   const div = document.createElement("div");
   div.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
