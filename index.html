@@ -371,6 +371,92 @@
   @media (max-width: 480px) {
     .intro-features { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── 검사 진행 방식 선택 버튼 ── */
+  .exam-mode-btns {
+    display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap;
+  }
+  .exam-mode-btn {
+    flex: 1; min-width: 120px;
+    padding: 14px 10px;
+    border-radius: 14px; border: 2px solid var(--slate-200);
+    background: var(--slate-50); color: var(--slate-700);
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .exam-mode-btn .mode-icon { font-size: 24px; }
+  .exam-mode-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(37,99,235,0.18); }
+  .exam-mode-btn.link-btn { border-color: #6366f1; color: #4338ca; background: #eef2ff; }
+  .exam-mode-btn.link-btn:hover { background: #6366f1; color: white; }
+  .exam-mode-btn.qr-btn { border-color: #0891b2; color: #0e7490; background: #ecfeff; }
+  .exam-mode-btn.qr-btn:hover { background: #0891b2; color: white; }
+  .exam-mode-btn.direct-btn { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .exam-mode-btn.direct-btn:hover { background: var(--primary); color: white; }
+  .exam-mode-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  /* ── 모달 오버레이 ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 20px;
+    max-width: 560px; width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    overflow: hidden; animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform: scale(0.93) translateY(12px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white; padding: 18px 22px 16px;
+  }
+  .modal-header-title { font-size: 17px; font-weight: 800; margin-bottom: 2px; }
+  .modal-header-sub { font-size: 12px; opacity: 0.8; }
+  .modal-body { padding: 20px 22px 24px; }
+  .modal-guide-text {
+    font-size: 14px; line-height: 1.85; color: var(--slate-700);
+    background: var(--slate-50); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 16px;
+    border-left: 4px solid var(--primary);
+  }
+  .modal-guide-text strong { color: var(--slate-900); }
+  .modal-criteria {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;
+  }
+  .modal-criteria-title { font-size: 13px; font-weight: 800; color: #15803d; margin-bottom: 10px; }
+  .modal-criteria ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .modal-criteria ul li { font-size: 13px; color: #166534; line-height: 1.6; }
+  .modal-criteria ul li::before { content: "✔ "; font-weight: 700; }
+  .modal-example {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
+  }
+  .modal-example-title { font-size: 13px; font-weight: 800; color: #92400e; margin-bottom: 10px; }
+  .modal-example ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+  .modal-example ul li { font-size: 12px; color: #78350f; line-height: 1.6; }
+  .modal-btn-ok {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    color: white; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800; font-family: inherit;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    transition: all 0.2s;
+  }
+  .modal-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.4); }
+
+  /* 36개월 초과 경고 */
+  .age-chip.over-age {
+    background: #fef2f2; border-color: #fca5a5; color: var(--red);
+  }
 </style>
 </head>
 <body>
@@ -491,9 +577,29 @@
       </div>
     </div>
     <div id="ageChip" style="display:none" class="age-chip"></div>
-    <div class="btn-row">
+    <div id="age-over-msg" style="display:none;margin-top:12px;
+      background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;
+      padding:14px 18px;font-size:14px;color:#dc2626;font-weight:600;line-height:1.7;text-align:center;">
+      ⛔ SELSI 검사는 <strong>0~36개월</strong> 아동을 대상으로 합니다.<br>
+      현재 입력한 생활연령이 <strong>36개월을 초과</strong>하여 검사를 진행할 수 없습니다.
+    </div>
+
+    <div class="btn-row" style="margin-top:14px;">
       <button class="btn-secondary" onclick="showIntro()">← 처음으로</button>
-      <button class="btn-primary" id="btn-to-test" onclick="goStep(2)" disabled>다음 : 검사 시작 →</button>
+    </div>
+    <div class="exam-mode-btns">
+      <button class="exam-mode-btn link-btn" id="btn-link-exam" onclick="startExam('link')" disabled>
+        <span class="mode-icon">🔗</span>
+        <span>링크검사</span>
+      </button>
+      <button class="exam-mode-btn qr-btn" id="btn-qr-exam" onclick="startExam('qr')" disabled>
+        <span class="mode-icon">📷</span>
+        <span>QR검사</span>
+      </button>
+      <button class="exam-mode-btn direct-btn" id="btn-direct-exam" onclick="startExam('direct')" disabled>
+        <span class="mode-icon">▶️</span>
+        <span>바로검사</span>
+      </button>
     </div>
   </div>
 
@@ -746,18 +852,93 @@ function updateAgeChip() {
   const mo = parseInt(document.getElementById("birthMonth").value);
   const name = document.getElementById("childName").value.trim();
   const chip = document.getElementById("ageChip");
-  const btn = document.getElementById("btn-to-test");
+  const ageOverMsg = document.getElementById("age-over-msg");
+  const btnLink   = document.getElementById("btn-link-exam");
+  const btnQr     = document.getElementById("btn-qr-exam");
+  const btnDirect = document.getElementById("btn-direct-exam");
   const genderOk = !!state.gender;
 
   if (yr && mo && name && genderOk) {
     const age = calcAge(yr, mo);
     chip.style.display = "block";
-    chip.innerHTML = `✅ <strong>${name}</strong> 아동의 현재 생활연령: <strong>${age}개월</strong> (${Math.floor(age/12)}세 ${age%12}개월)`;
-    btn.disabled = false;
+
+    if (age > 36) {
+      // 36개월 초과 → 차단
+      chip.className = "age-chip over-age";
+      chip.innerHTML = `⛔ <strong>${name}</strong> 아동의 현재 생활연령: <strong>${age}개월</strong> (${Math.floor(age/12)}세 ${age%12}개월)`;
+      ageOverMsg.style.display = "block";
+      btnLink.disabled = true;
+      btnQr.disabled = true;
+      btnDirect.disabled = true;
+    } else {
+      chip.className = "age-chip";
+      chip.innerHTML = `✅ <strong>${name}</strong> 아동의 현재 생활연령: <strong>${age}개월</strong> (${Math.floor(age/12)}세 ${age%12}개월)`;
+      ageOverMsg.style.display = "none";
+      btnLink.disabled = false;
+      btnQr.disabled = false;
+      btnDirect.disabled = false;
+    }
   } else {
     chip.style.display = "none";
-    btn.disabled = true;
+    ageOverMsg.style.display = "none";
+    btnLink.disabled = true;
+    btnQr.disabled = true;
+    btnDirect.disabled = true;
   }
+}
+
+// ── 검사 시작 (모드별) ──
+let pendingExamMode = null;
+
+function startExam(mode) {
+  saveInfo();
+  const age = getAge();
+  if (age > 36) {
+    alert("36개월을 초과한 아동은 검사를 진행할 수 없습니다.");
+    return;
+  }
+  pendingExamMode = mode;
+
+  if (mode === 'link') {
+    // 링크검사: 새 탭에서 외부 URL 열기 (필요 시 URL 수정)
+    const url = `https://psychibae-lang.github.io/clinic/?mode=selsi&name=${encodeURIComponent(state.childName)}&age=${age}`;
+    window.open(url, '_blank');
+    return;
+  }
+  if (mode === 'qr') {
+    // QR검사: QR 코드 생성 팝업 (간단 구현 — 링크 URL을 QR로 표시)
+    showQRModal(age);
+    return;
+  }
+  // 바로검사: 안내 모달 → 검사 화면
+  openGuideModal();
+}
+
+function openGuideModal() {
+  document.getElementById("guide-modal").classList.add("open");
+}
+
+function closeGuideModal() {
+  document.getElementById("guide-modal").classList.remove("open");
+  goStep(2);
+}
+
+// QR 모달 (간단 — Google Chart API 사용)
+function showQRModal(age) {
+  const url = `https://psychibae-lang.github.io/clinic/?mode=selsi&name=${encodeURIComponent(state.childName)}&age=${age}`;
+  const qrUrl = `https://chart.googleapis.com/chart?chs=260x260&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+  const div = document.createElement("div");
+  div.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
+  div.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:28px 28px 24px;text-align:center;max-width:320px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+      <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:4px;">📷 QR 검사</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:18px;">보호자 스마트폰으로 QR을 스캔해 검사를 진행하세요</div>
+      <img src="${qrUrl}" style="width:200px;height:200px;border-radius:12px;border:1px solid #e2e8f0;" onerror="this.style.display='none';document.getElementById('qr-fallback').style.display='block'">
+      <div id="qr-fallback" style="display:none;font-size:12px;color:#94a3b8;margin-top:8px;">QR 생성 실패. 아래 링크를 공유해 주세요.</div>
+      <div style="margin-top:14px;background:#f1f5f9;border-radius:8px;padding:10px;font-size:11px;word-break:break-all;color:#475569;">${url}</div>
+      <button onclick="this.closest('div[style]').remove()" style="margin-top:16px;width:100%;padding:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">닫기</button>
+    </div>`;
+  document.body.appendChild(div);
 }
 
 function selectGender(g) {
@@ -1302,7 +1483,10 @@ function resetAll() {
   document.getElementById("btn-male").classList.remove("active");
   document.getElementById("btn-female").classList.remove("active");
   document.getElementById("ageChip").style.display = "none";
-  document.getElementById("btn-to-test").disabled = true;
+  document.getElementById("age-over-msg").style.display = "none";
+  document.getElementById("btn-link-exam").disabled = true;
+  document.getElementById("btn-qr-exam").disabled = true;
+  document.getElementById("btn-direct-exam").disabled = true;
   showIntro();
 }
 </script>
@@ -1315,6 +1499,44 @@ function resetAll() {
   font-size:13px; color:#1e293b;
   padding:0; margin:0;
 "><!-- 동적으로 채워짐 --></div>
+
+<!-- ════ 검사 시작 안내 모달 ════ -->
+<div class="modal-overlay" id="guide-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-title">📋 검사 전 안내사항</div>
+      <div class="modal-header-sub">아래 내용을 꼭 읽고 검사를 시작해 주세요</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-guide-text">
+        다음 문항은 아이의 평소 <strong>언어 및 의사소통 능력</strong>을 확인하기 위한 질문입니다.<br><br>
+        각 항목을 읽고 아이가 현재 실제로 할 수 있는 경우 <strong>"가능"</strong>, 하지 못하거나 확실하지 않은 경우 <strong>"불가능"</strong>으로 표시해 주세요.
+      </div>
+
+      <div class="modal-criteria">
+        <div class="modal-criteria-title">✅ 체크 기준</div>
+        <ul>
+          <li>최근 1~2개월 동안의 평소 모습을 기준으로 합니다.</li>
+          <li>우연히 1회 했던 행동은 제외합니다.</li>
+          <li>반복적으로 안정적으로 할 수 있어야 "가능"입니다.</li>
+          <li>보호자가 시켜서 겨우 하는 경우보다는 자연스럽게 수행 가능한지를 기준으로 합니다.</li>
+          <li>확실하지 않으면 "불가능"으로 체크해 주세요.</li>
+          <li>아이가 현재 사용하는 행동/언어만 표시합니다.</li>
+        </ul>
+      </div>
+
+      <div class="modal-example">
+        <div class="modal-example-title">💡 예시</div>
+        <ul>
+          <li>이름 부르면 돌아본다 → 대부분 상황에서 반복적으로 가능하면 <strong>"가능"</strong></li>
+          <li>엄마 따라 "맘마"를 한 번 흉내냄 → 반복적 사용이 아니면 <strong>"불가능"</strong></li>
+        </ul>
+      </div>
+
+      <button class="modal-btn-ok" onclick="closeGuideModal()">✔ 확인했습니다 — 검사 시작</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
