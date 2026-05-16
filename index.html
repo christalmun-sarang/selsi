@@ -337,6 +337,108 @@ const AGE_GROUPS = [
 ];
 
 
+// ── 완료된 세션 결과 계산 후 표시 ──
+function showCompletedResult() {
+  const ans = sessionData.answers || {};
+  const age = sessionData.child_age || 0;
+
+  // 월령 범위 헬퍼
+  function zn(item) {
+    const lo = age-6, hi = age+6;
+    if (item.mo < lo) return "below";
+    if (item.mo > hi) return "above";
+    return "active";
+  }
+
+  // 자동 채점 (below=가능, above=불가능)
+  function computeScore(type) {
+    const items = ITEMS[type];
+    let score = 0;
+    items.forEach(i => {
+      const v = ans[i.id] !== undefined ? ans[i.id] : (zn(i)==="below" ? true : false);
+      if (v === true) score++;
+    });
+    const total = items.length;
+    const pct = Math.round(score / total * 100);
+
+    // 등가월령: 통과율 50% 이상인 마지막 월령 구간
+    const byMo = {};
+    items.forEach(i => {
+      if (!byMo[i.mo]) byMo[i.mo] = {pass:0,total:0};
+      const v = ans[i.id] !== undefined ? ans[i.id] : (zn(i)==="below" ? true : false);
+      if (v === true) byMo[i.mo].pass++;
+      byMo[i.mo].total++;
+    });
+    let equiv = 0;
+    Object.keys(byMo).sort((a,b)=>+a-+b).forEach(mo => {
+      const d = byMo[mo];
+      if (d.total > 0 && d.pass/d.total >= 0.5) equiv = +mo;
+    });
+
+    const diff = equiv - age;
+    const cls = diff >= -3 ? "normal" : diff >= -6 ? "mild" : "delay";
+    return { score, total, pct, equiv, cls };
+  }
+
+  const r = computeScore("receptive");
+  const e = computeScore("expressive");
+
+  // showResultSummary 형식으로 변환해서 표시
+  const interpLabel = { normal:"정상 발달", mild:"약간 지연 의심", delay:"발달 지연 의심" };
+  const interpColor = { normal:"#16a34a", mild:"#d97706", delay:"#dc2626" };
+  const interpBg    = { normal:"#f0fdf4",  mild:"#fffbeb",  delay:"#fef2f2" };
+  const name = sessionData.child_name || "아동";
+  const opinion = (r.cls==="normal" && e.cls==="normal")
+    ? "수용언어와 표현언어 두 영역 모두 <strong>정상 발달</strong> 범위 내에 있습니다."
+    : "일부 영역에서 발달 지연이 의심됩니다. 전문 언어치료사의 정밀 평가를 권장합니다.";
+
+  showPage("pg-result");
+  document.getElementById("result-summary-content").innerHTML = `
+    <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;border-radius:14px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:11px;opacity:0.8;margin-bottom:4px;">SELSI 영·유아 언어발달 검사 결과</div>
+      <div style="font-size:20px;font-weight:900;">${name} <span style="font-size:14px;font-weight:500;opacity:0.85;">· ${age}개월</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:${interpBg[r.cls]};border:1.5px solid ${interpColor[r.cls]}40;border-radius:14px;padding:14px 12px;">
+        <div style="font-size:12px;font-weight:800;margin-bottom:10px;">🎧 수용언어</div>
+        <div style="text-align:center;margin-bottom:6px;">
+          <div style="font-size:30px;font-weight:900;color:${interpColor[r.cls]};line-height:1;">${r.equiv}<span style="font-size:13px;color:#94a3b8;">개월</span></div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">등가월령</div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="font-size:20px;font-weight:800;color:${interpColor[r.cls]};">${r.pct}%</div>
+          <div style="font-size:10px;color:#64748b;">정반응률</div>
+        </div>
+        <div style="background:${interpColor[r.cls]};color:white;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-align:center;">${interpLabel[r.cls]}</div>
+      </div>
+      <div style="background:${interpBg[e.cls]};border:1.5px solid ${interpColor[e.cls]}40;border-radius:14px;padding:14px 12px;">
+        <div style="font-size:12px;font-weight:800;margin-bottom:10px;">🗣️ 표현언어</div>
+        <div style="text-align:center;margin-bottom:6px;">
+          <div style="font-size:30px;font-weight:900;color:${interpColor[e.cls]};line-height:1;">${e.equiv}<span style="font-size:13px;color:#94a3b8;">개월</span></div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">등가월령</div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="font-size:20px;font-weight:800;color:${interpColor[e.cls]};">${e.pct}%</div>
+          <div style="font-size:10px;color:#64748b;">정반응률</div>
+        </div>
+        <div style="background:${interpColor[e.cls]};color:white;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;text-align:center;">${interpLabel[e.cls]}</div>
+      </div>
+    </div>
+    <div style="background:#f8fafc;border-left:4px solid #2563eb;border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:800;margin-bottom:6px;color:#1e293b;">📋 종합 소견</div>
+      <div style="font-size:13px;line-height:1.8;color:#475569;">
+        <strong>${name}</strong>(생활연령 ${age}개월)의 SELSI 결과,
+        수용언어 등가월령 <strong style="color:#1e293b;">${r.equiv}개월</strong>,
+        표현언어 등가월령 <strong style="color:#1e293b;">${e.equiv}개월</strong>으로 측정되었습니다.<br>
+        ${opinion}
+      </div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;font-size:12px;color:#78350f;line-height:1.7;">
+      ⚠️ 본 결과는 선별검사 참고용이며, 공식적인 임상 진단 자료로 사용할 수 없습니다.
+    </div>
+  `;
+}
+
 function showResultSummary() {
   showPage("pg-result");
   const interpLabel = { normal:"정상 발달", mild:"약간 지연 의심", delay:"발달 지연 의심" };
@@ -488,7 +590,12 @@ window.onload = async () => {
     }
     sessionData = rows[0];
     if (sessionData.status === "completed") {
-      showPage("pg-done");
+      // 이미 완료된 세션 → 결과 요약 표시 (검사 완료 화면 X)
+      if (sessionData.answers) {
+        showCompletedResult();
+      } else {
+        showPage("pg-done");
+      }
       return;
     }
     showGuide();
