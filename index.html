@@ -87,6 +87,34 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f0f4ff;min-height:100vh;c
 
 <div class="main">
 
+  <!-- 병원 안내 (파라미터 없는 루트 접속) -->
+  <div class="card" id="pg-landing" style="display:none">
+    <div style="text-align:center;padding:30px 10px 20px;">
+      <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;border-radius:14px;padding:16px 20px;margin-bottom:20px;">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:4px;letter-spacing:1px;">SELSI</div>
+        <div style="font-size:19px;font-weight:900;">영·유아 언어발달 검사</div>
+        <div style="font-size:12px;opacity:0.75;margin-top:3px;">보호자용 검사 시스템</div>
+      </div>
+      <div style="font-size:40px;margin-bottom:14px;">🏥</div>
+      <div style="font-size:17px;font-weight:800;color:#1e293b;margin-bottom:10px;">병원에서 받은 링크로 접속하세요</div>
+      <div style="font-size:14px;color:#64748b;line-height:1.8;margin-bottom:20px;">
+        이 페이지는 담당 선생님이 전송한<br>
+        <strong>링크 또는 QR 코드</strong>를 통해서만 이용하실 수 있습니다.
+      </div>
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:16px;text-align:left;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:800;color:#15803d;margin-bottom:8px;">📋 이용 방법</div>
+        <div style="font-size:13px;color:#166534;line-height:1.8;">
+          1. 병원 선생님께 검사 링크 또는 QR 코드를 받으세요.<br>
+          2. 링크를 클릭하거나 QR 코드를 스캔하세요.<br>
+          3. 안내에 따라 검사를 진행해 주세요.
+        </div>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;">
+        ※ 한강의원 언어발달 검사 시스템
+      </div>
+    </div>
+  </div>
+
   <!-- 로딩 -->
   <div class="card" id="pg-loading">
     <div class="spin-wrap">
@@ -417,7 +445,7 @@ let answers = {};
 
 // ── 페이지 전환 ──
 function showPage(id) {
-  ["pg-loading","pg-guide","pg-test","pg-done","pg-error","pg-result"]
+  ["pg-loading","pg-guide","pg-test","pg-done","pg-error","pg-result","pg-landing"]
     .forEach(p => {
       const el = document.getElementById(p);
       if (el) el.style.display = p===id?"block":"none";
@@ -426,19 +454,25 @@ function showPage(id) {
 
 // ── 초기화 ──
 window.onload = async () => {
-  // 결과 요약 보기 모드 (바로검사 QR 공유)
+  // ① 결과 요약 보기 모드 (바로검사 QR 공유)
   if (viewMode === "result" && pName && pAge) {
     showResultSummary();
     return;
   }
 
-  if (!sessionId && (!pName || !pAge)) {
-    showPage("pg-error");
-    document.getElementById("err-msg").textContent = "검사 링크에 필요한 정보가 없습니다. 병원에서 받은 링크를 다시 확인해 주세요.";
+  // ② 파라미터 없는 루트 접속 → 병원 안내 화면
+  if (!sessionId && !pName && !pAge) {
+    showPage("pg-landing");
     return;
   }
 
+  // ③ sid 없이 name+age만으로 검사 진행
   if (!sessionId) {
+    if (!pName || !pAge) {
+      showPage("pg-error");
+      document.getElementById("err-msg").textContent = "검사 링크에 필요한 정보가 없습니다. 병원에서 받은 링크를 다시 확인해 주세요.";
+      return;
+    }
     sessionData = { child_name: pName, child_age: pAge };
     showGuide();
     return;
