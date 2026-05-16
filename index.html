@@ -2,652 +2,219 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SELSI 영·유아 언어발달 검사</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SELSI 영·유아 언어발달 검사 (보호자용)</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
+:root {
+  --primary:#2563eb; --primary-light:#eff6ff; --primary-dark:#1d4ed8;
+  --green:#16a34a; --green-light:#f0fdf4;
+  --red:#dc2626; --red-light:#fef2f2;
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+  --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569;
+  --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Noto Sans KR',sans-serif; background:#f0f4ff; min-height:100vh; color:var(--slate-800); }
 
-  :root {
-    --primary: #2563eb;
-    --primary-light: #eff6ff;
-    --primary-dark: #1d4ed8;
-    --green: #16a34a;
-    --green-light: #f0fdf4;
-    --amber: #d97706;
-    --amber-light: #fffbeb;
-    --red: #dc2626;
-    --red-light: #fef2f2;
-    --slate-50: #f8fafc;
-    --slate-100: #f1f5f9;
-    --slate-200: #e2e8f0;
-    --slate-400: #94a3b8;
-    --slate-500: #64748b;
-    --slate-600: #475569;
-    --slate-700: #334155;
-    --slate-800: #1e293b;
-    --slate-900: #0f172a;
-  }
+.app-header {
+  background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 50%,#2563eb 100%);
+  color:white; padding:0; position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 16px rgba(37,99,235,0.25);
+}
+.header-inner { max-width:640px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; gap:12px; }
+.header-logo { background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.3); border-radius:10px; padding:5px 12px; font-weight:900; font-size:16px; letter-spacing:2px; }
+.header-title { font-size:15px; font-weight:700; }
+.header-sub { font-size:11px; opacity:0.75; margin-top:2px; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+.main { max-width:640px; margin:0 auto; padding:20px 14px 60px; }
+.card { background:white; border-radius:18px; box-shadow:0 2px 16px rgba(0,0,0,0.08); padding:24px 20px; }
+.card-title { font-size:18px; font-weight:800; color:var(--slate-900); margin-bottom:6px; }
+.card-sub { font-size:13px; color:var(--slate-500); margin-bottom:20px; line-height:1.6; }
 
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: #f0f4ff;
-    min-height: 100vh;
-    color: var(--slate-800);
-  }
+.progress-bar-wrap { margin-bottom:18px; }
+.progress-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--slate-500); margin-bottom:6px; }
+.progress-bar { height:8px; background:var(--slate-200); border-radius:99px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),#22c55e); border-radius:99px; transition:width 0.4s; }
 
-  /* ── 레이아웃 ── */
-  .app-header {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
-    color: white;
-    padding: 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 16px rgba(37,99,235,0.25);
-  }
-  .header-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .header-logo {
-    background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-weight: 900;
-    font-size: 18px;
-    letter-spacing: 2px;
-  }
-  .header-title { font-size: 17px; font-weight: 700; }
-  .header-sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+.section-banner {
+  display:flex; align-items:center; gap:12px;
+  background:linear-gradient(135deg,#1e3a8a,#2563eb);
+  color:white; border-radius:14px; padding:14px 18px;
+  margin:8px 0 4px; font-weight:800; font-size:15px;
+  box-shadow:0 3px 12px rgba(37,99,235,0.25);
+}
+.section-banner.expressive { background:linear-gradient(135deg,#065f46,#059669); box-shadow:0 3px 12px rgba(5,150,105,0.25); }
+.banner-icon { font-size:22px; }
+.banner-sub { font-size:11px; font-weight:400; opacity:0.85; margin-top:2px; }
 
-  .main { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
+.item-row {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; border-radius:11px;
+  border:1.5px solid var(--slate-200); background:var(--slate-50);
+  transition:all 0.15s; margin-bottom:6px;
+}
+.item-row.pass { background:var(--green-light); border-color:#86efac; }
+.item-row.fail { background:#fef2f2; border-color:#fca5a5; }
+.item-content { flex:1; }
+.item-header { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+.item-id { font-size:10px; font-weight:700; color:var(--slate-400); background:var(--slate-100); padding:2px 6px; border-radius:4px; }
+.item-age-tag { font-size:10px; font-weight:700; color:var(--primary); background:var(--primary-light); padding:2px 7px; border-radius:4px; }
+.item-text { font-size:14px; color:var(--slate-800); line-height:1.55; margin-bottom:8px; }
+.item-note { font-size:11px; color:var(--slate-400); margin-top:2px; }
+.ans-btns { display:flex; gap:8px; margin-top:4px; }
+.ans-btn {
+  flex:1; padding:10px 6px; border-radius:8px; border:1.5px solid var(--slate-200);
+  font-size:14px; font-weight:700; font-family:inherit; cursor:pointer;
+  background:white; color:var(--slate-400); transition:all 0.15s;
+}
+.ans-btn.pass-btn { border-color:#86efac; color:#15803d; background:#f0fdf4; }
+.ans-btn.pass-btn.active { background:#16a34a; color:white; border-color:#16a34a; }
+.ans-btn.fail-btn { border-color:#fca5a5; color:#dc2626; background:#fef2f2; }
+.ans-btn.fail-btn.active { background:#dc2626; color:white; border-color:#dc2626; }
 
-  /* ── 스텝 인디케이터 ── */
-  .steps {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    background: white;
-    border-radius: 14px;
-    padding: 16px 20px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    align-items: center;
-    justify-content: center;
-  }
-  .step-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-  }
-  .step-circle {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800;
-    background: var(--slate-200);
-    color: var(--slate-500);
-    transition: all 0.25s;
-    flex-shrink: 0;
-  }
-  .step-item.active .step-circle { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.35); }
-  .step-item.done .step-circle { background: var(--green); color: white; }
-  .step-label { font-size: 13px; font-weight: 600; color: var(--slate-400); white-space: nowrap; }
-  .step-item.active .step-label { color: var(--primary); }
-  .step-item.done .step-label { color: var(--green); }
-  .step-divider { width: 32px; height: 2px; background: var(--slate-200); margin: 0 4px; flex-shrink: 0; }
-  .step-divider.done { background: var(--green); }
+.btn-submit {
+  width:100%; padding:15px; margin-top:20px;
+  background:linear-gradient(135deg,var(--green),#15803d);
+  color:white; border:none; border-radius:14px;
+  font-size:16px; font-weight:800; font-family:inherit;
+  cursor:pointer; box-shadow:0 2px 8px rgba(22,163,74,0.3);
+  transition:all 0.2s;
+}
+.btn-submit:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-submit:not(:disabled):hover { transform:translateY(-1px); }
 
-  /* ── 카드 ── */
-  .card {
-    background: white;
-    border-radius: 18px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-    padding: 28px;
-  }
-  .card-title {
-    font-size: 20px; font-weight: 800; color: var(--slate-900);
-    margin-bottom: 6px;
-  }
-  .card-sub { font-size: 13px; color: var(--slate-500); margin-bottom: 24px; line-height: 1.6; }
+.incomplete-msg {
+  margin-top:12px; text-align:center;
+  background:#fff7ed; border:1px solid #fed7aa; border-radius:10px;
+  padding:10px 14px; font-size:13px; color:#c2410c; font-weight:600;
+}
 
-  /* ── 폼 ── */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group.full { grid-column: 1 / -1; }
-  label { font-size: 13px; font-weight: 600; color: var(--slate-600); }
-  input, select {
-    padding: 11px 14px;
-    border-radius: 10px;
-    border: 1.5px solid var(--slate-200);
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--slate-800);
-    background: var(--slate-50);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input:focus, select:focus { border-color: var(--primary); background: white; }
+/* 완료 화면 */
+.done-screen { text-align:center; padding:30px 20px; }
+.done-icon { font-size:60px; margin-bottom:16px; }
+.done-title { font-size:22px; font-weight:900; color:var(--slate-900); margin-bottom:8px; }
+.done-sub { font-size:14px; color:var(--slate-500); line-height:1.7; }
 
-  .radio-group { display: flex; gap: 10px; }
-  .radio-btn {
-    flex: 1; padding: 11px; border-radius: 10px;
-    border: 1.5px solid var(--slate-200);
-    background: var(--slate-50); color: var(--slate-600);
-    font-size: 14px; font-weight: 600; font-family: inherit;
-    cursor: pointer; transition: all 0.2s; text-align: center;
-  }
-  .radio-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+/* 로딩 */
+.loading-screen { text-align:center; padding:60px 20px; }
+.spinner { width:40px; height:40px; border:4px solid var(--slate-200); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-  .age-chip {
-    background: var(--green-light); border: 1px solid #bbf7d0;
-    border-radius: 10px; padding: 10px 16px;
-    font-size: 14px; color: var(--green); font-weight: 600;
-    text-align: center; margin-top: 4px;
-  }
-
-  /* ── 버튼 ── */
-  .btn-row { display: flex; gap: 10px; margin-top: 24px; }
-  .btn-primary {
-    flex: 1; padding: 13px 24px;
-    background: linear-gradient(135deg, var(--primary), #1d4ed8);
-    color: white; border: none; border-radius: 12px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.4); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .btn-secondary {
-    padding: 13px 20px;
-    background: var(--slate-100); color: var(--slate-600);
-    border: none; border-radius: 12px;
-    font-size: 14px; font-weight: 600; font-family: inherit;
-    cursor: pointer; transition: all 0.15s;
-  }
-  .btn-secondary:hover { background: var(--slate-200); }
-  .btn-green {
-    flex: 1; padding: 13px 24px;
-    background: linear-gradient(135deg, #16a34a, #15803d);
-    color: white; border: none; border-radius: 12px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
-    cursor: pointer; box-shadow: 0 2px 8px rgba(22,163,74,0.3);
-    transition: all 0.2s;
-  }
-  .btn-green:hover { transform: translateY(-1px); }
-
-  /* ── 검사 화면 ── */
-  .progress-bar-wrap { margin-bottom: 20px; }
-  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--slate-500); margin-bottom: 6px; }
-  .progress-bar { height: 7px; background: var(--slate-200); border-radius: 99px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #22c55e); border-radius: 99px; transition: width 0.4s; }
-
-  .lang-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .lang-tab {
-    flex: 1; padding: 11px;
-    border-radius: 12px; border: 1.5px solid var(--slate-200);
-    background: var(--slate-50); color: var(--slate-500);
-    font-size: 14px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all 0.2s; text-align: center;
-  }
-  .lang-tab.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
-
-  .age-group-scroll { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
-  .age-group-scroll::-webkit-scrollbar { height: 3px; }
-  .age-group-btn {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 8px 12px; border-radius: 10px;
-    border: 1.5px solid var(--slate-200); background: var(--slate-50);
-    color: var(--slate-500); font-family: inherit; cursor: pointer;
-    white-space: nowrap; gap: 3px; min-width: 78px; transition: all 0.2s;
-  }
-  .age-group-btn .ag-label { font-size: 12px; font-weight: 600; }
-  .age-group-btn .ag-prog { font-size: 11px; opacity: 0.75; }
-  .age-group-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
-  .age-group-btn.done { background: var(--green-light); border-color: #86efac; color: var(--green); }
-
-  .items-list { display: flex; flex-direction: column; gap: 7px; padding-right: 4px; }
-
-  /* 수용/표현 구분 배너 */
-  .section-banner {
-    display: flex; align-items: center; gap: 12px;
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
-    color: white; border-radius: 14px; padding: 16px 20px;
-    margin: 8px 0 4px; font-weight: 800; font-size: 16px;
-    box-shadow: 0 3px 12px rgba(37,99,235,0.25);
-  }
-  .section-banner .banner-icon { font-size: 26px; }
-  .section-banner .banner-sub { font-size: 12px; font-weight: 400; opacity: 0.85; margin-top: 2px; }
-  .section-banner.expressive { background: linear-gradient(135deg, #065f46, #059669); box-shadow: 0 3px 12px rgba(5,150,105,0.25); }
-
-  .item-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 13px 15px; border-radius: 11px;
-    border: 1.5px solid var(--slate-200); background: var(--slate-50);
-    transition: all 0.15s; user-select: none;
-  }
-  .item-row.pass { background: var(--green-light); border-color: #86efac; }
-  .item-row.fail { background: #fef2f2; border-color: #fca5a5; }
-
-  .item-content { flex: 1; }
-  .item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .item-id { font-size: 10px; font-weight: 700; color: var(--slate-400); background: var(--slate-100); padding: 2px 6px; border-radius: 4px; }
-  .item-age-tag { font-size: 10px; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 2px 7px; border-radius: 4px; }
-  .item-text { font-size: 14px; color: var(--slate-800); line-height: 1.55; margin-bottom: 10px; }
-  .item-note { font-size: 11px; color: var(--slate-400); margin-top: 3px; line-height: 1.4; }
-
-  /* 가능/불가능 버튼 */
-  .ans-btns { display: flex; gap: 8px; margin-top: 4px; }
-  .ans-btn {
-    flex: 1; padding: 8px 6px; border-radius: 8px; border: 1.5px solid var(--slate-200);
-    font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
-    background: white; color: var(--slate-400); transition: all 0.15s;
-  }
-  .ans-btn.pass-btn { border-color: #86efac; color: #15803d; background: #f0fdf4; }
-  .ans-btn.pass-btn.active { background: #16a34a; color: white; border-color: #16a34a; box-shadow: 0 2px 8px rgba(22,163,74,0.3); }
-  .ans-btn.fail-btn { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
-  .ans-btn.fail-btn.active { background: #dc2626; color: white; border-color: #dc2626; box-shadow: 0 2px 8px rgba(220,38,38,0.25); }
-
-  /* ── 결과 화면 ── */
-  .result-header {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--slate-50); border-radius: 12px;
-    padding: 14px 18px; margin-bottom: 20px;
-  }
-  .result-name { font-size: 18px; font-weight: 800; color: var(--slate-900); }
-  .result-info { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
-  .result-age-badge {
-    background: var(--primary-light); color: var(--primary);
-    border-radius: 10px; padding: 8px 16px;
-    font-size: 14px; font-weight: 700; text-align: center;
-  }
-
-  .score-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-  .score-card {
-    border-radius: 14px; padding: 18px;
-    border: 1.5px solid transparent;
-  }
-  .score-card.normal { background: var(--green-light); border-color: #86efac; }
-  .score-card.mild { background: var(--amber-light); border-color: #fde68a; }
-  .score-card.delay { background: var(--red-light); border-color: #fca5a5; }
-
-  .sc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .sc-title { font-size: 14px; font-weight: 800; color: var(--slate-900); }
-  .sc-badge { border-radius: 7px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: white; }
-  .sc-badge.normal { background: var(--green); }
-  .sc-badge.mild { background: var(--amber); }
-  .sc-badge.delay { background: var(--red); }
-
-  .sc-nums { display: flex; gap: 6px; margin-bottom: 12px; }
-  .sc-num { flex: 1; text-align: center; background: rgba(255,255,255,0.7); border-radius: 9px; padding: 10px 4px; }
-  .sc-val { font-size: 22px; font-weight: 900; line-height: 1; }
-  .sc-unit { font-size: 12px; color: var(--slate-500); margin-left: 1px; }
-  .sc-key { font-size: 10px; color: var(--slate-400); font-weight: 600; margin-top: 4px; }
-
-  .sc-bar-bg { height: 7px; background: rgba(0,0,0,0.08); border-radius: 99px; overflow: hidden; }
-  .sc-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s; }
-  .normal .sc-bar-fill { background: var(--green); }
-  .mild .sc-bar-fill { background: var(--amber); }
-  .delay .sc-bar-fill { background: var(--red); }
-
-  /* 프로파일 차트 */
-  .profile-section { margin-bottom: 20px; }
-  .section-title { font-size: 15px; font-weight: 800; color: var(--slate-900); margin-bottom: 12px; }
-  .profile-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .profile-table th { background: var(--slate-100); padding: 8px 12px; text-align: left; font-weight: 700; color: var(--slate-600); }
-  .profile-table td { padding: 9px 12px; border-bottom: 1px solid var(--slate-100); color: var(--slate-700); }
-  .profile-table tr:last-child td { border-bottom: none; }
-  .pct-bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .pct-bar-bg { flex: 1; height: 6px; background: var(--slate-200); border-radius: 99px; overflow: hidden; }
-  .pct-bar-fill { height: 100%; border-radius: 99px; }
-
-  /* 소견 */
-  .opinion-box {
-    background: #f8fafc; border-radius: 14px;
-    padding: 18px 20px; margin-bottom: 20px;
-    border-left: 4px solid var(--primary);
-  }
-  .opinion-title { font-size: 15px; font-weight: 800; color: var(--slate-900); margin-bottom: 10px; }
-  .opinion-text { font-size: 13px; color: var(--slate-600); line-height: 1.8; }
-  .opinion-warn { font-size: 12px; color: var(--slate-400); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--slate-200); }
-
-  .result-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  /* ── 반응형 ── */
-  @media (max-width: 580px) {
-    .score-cards { grid-template-columns: 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-    .form-group.full { grid-column: 1; }
-    .steps { gap: 0; padding: 12px; }
-    .step-label { display: none; }
-    .step-divider { width: 20px; }
-    .card { padding: 20px 16px; }
-  }
-
-  /* ── 인트로 ── */
-  .intro-hero {
-    text-align: center; padding: 20px 0 28px;
-  }
-  .intro-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--primary), #7c3aed);
-    color: white; border-radius: 12px;
-    padding: 10px 26px; font-size: 28px; font-weight: 900;
-    letter-spacing: 3px; margin-bottom: 18px;
-    box-shadow: 0 4px 20px rgba(37,99,235,0.3);
-  }
-  .intro-title { font-size: 26px; font-weight: 900; color: var(--slate-900); margin-bottom: 6px; }
-  .intro-en { font-size: 13px; color: var(--slate-400); margin-bottom: 28px; }
-
-  .intro-features {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 12px; margin-bottom: 28px;
-  }
-  .intro-feat {
-    background: white; border-radius: 14px;
-    padding: 18px 14px; text-align: center;
-    border: 1.5px solid var(--slate-200);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-  }
-  .feat-icon { font-size: 26px; margin-bottom: 8px; }
-  .feat-label { font-size: 12px; font-weight: 700; color: var(--slate-700); }
-  .feat-sub { font-size: 11px; color: var(--slate-400); margin-top: 3px; }
-
-  .intro-note {
-    background: var(--amber-light); border: 1px solid #fde68a;
-    border-radius: 12px; padding: 12px 16px;
-    font-size: 12px; color: #92400e; line-height: 1.7; margin-bottom: 24px;
-  }
-
-  @media (max-width: 480px) {
-    .intro-features { grid-template-columns: 1fr 1fr; }
-  }
-
-  /* ── 검사 진행 방식 선택 버튼 ── */
-  .exam-mode-btns {
-    display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap;
-  }
-  .exam-mode-btn {
-    flex: 1; min-width: 120px;
-    padding: 14px 10px;
-    border-radius: 14px; border: 2px solid var(--slate-200);
-    background: var(--slate-50); color: var(--slate-700);
-    font-size: 14px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .exam-mode-btn .mode-icon { font-size: 24px; }
-  .exam-mode-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(37,99,235,0.18); }
-  .exam-mode-btn.link-btn { border-color: #6366f1; color: #4338ca; background: #eef2ff; }
-  .exam-mode-btn.link-btn:hover { background: #6366f1; color: white; }
-  .exam-mode-btn.qr-btn { border-color: #0891b2; color: #0e7490; background: #ecfeff; }
-  .exam-mode-btn.qr-btn:hover { background: #0891b2; color: white; }
-  .exam-mode-btn.direct-btn { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-  .exam-mode-btn.direct-btn:hover { background: var(--primary); color: white; }
-  .exam-mode-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
-  /* ── 모달 오버레이 ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55); z-index: 9999;
-    align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal-box {
-    background: white; border-radius: 20px;
-    max-width: 560px; width: 100%;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
-    overflow: hidden; animation: modalIn 0.25s ease;
-  }
-  @keyframes modalIn {
-    from { opacity:0; transform: scale(0.93) translateY(12px); }
-    to   { opacity:1; transform: scale(1) translateY(0); }
-  }
-  .modal-header {
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
-    color: white; padding: 18px 22px 16px;
-  }
-  .modal-header-title { font-size: 17px; font-weight: 800; margin-bottom: 2px; }
-  .modal-header-sub { font-size: 12px; opacity: 0.8; }
-  .modal-body { padding: 20px 22px 24px; }
-  .modal-guide-text {
-    font-size: 14px; line-height: 1.85; color: var(--slate-700);
-    background: var(--slate-50); border-radius: 12px;
-    padding: 16px 18px; margin-bottom: 16px;
-    border-left: 4px solid var(--primary);
-  }
-  .modal-guide-text strong { color: var(--slate-900); }
-  .modal-criteria {
-    background: #f0fdf4; border: 1px solid #bbf7d0;
-    border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;
-  }
-  .modal-criteria-title { font-size: 13px; font-weight: 800; color: #15803d; margin-bottom: 10px; }
-  .modal-criteria ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-  .modal-criteria ul li { font-size: 13px; color: #166534; line-height: 1.6; }
-  .modal-criteria ul li::before { content: "✔ "; font-weight: 700; }
-  .modal-example {
-    background: #fffbeb; border: 1px solid #fde68a;
-    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
-  }
-  .modal-example-title { font-size: 13px; font-weight: 800; color: #92400e; margin-bottom: 10px; }
-  .modal-example ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
-  .modal-example ul li { font-size: 12px; color: #78350f; line-height: 1.6; }
-  .modal-btn-ok {
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, var(--primary), #1d4ed8);
-    color: white; border: none; border-radius: 12px;
-    font-size: 16px; font-weight: 800; font-family: inherit;
-    cursor: pointer; box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-    transition: all 0.2s;
-  }
-  .modal-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.4); }
-
-  /* 36개월 초과 경고 */
-  .age-chip.over-age {
-    background: #fef2f2; border-color: #fca5a5; color: var(--red);
-  }
+/* 안내 모달 */
+.guide-box { background:var(--slate-50); border-radius:14px; padding:18px; margin-bottom:20px; border-left:4px solid var(--primary); }
+.guide-text { font-size:14px; line-height:1.85; color:var(--slate-700); }
+.criteria-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+.criteria-title { font-size:13px; font-weight:800; color:#15803d; margin-bottom:8px; }
+.criteria-list { list-style:none; padding:0; }
+.criteria-list li { font-size:13px; color:#166534; line-height:1.65; padding-left:18px; position:relative; }
+.criteria-list li::before { content:"✔"; position:absolute; left:0; font-weight:700; }
+.example-box { background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.example-title { font-size:13px; font-weight:800; color:#92400e; margin-bottom:8px; }
+.example-list { list-style:none; padding:0; }
+.example-list li { font-size:12px; color:#78350f; line-height:1.65; padding-left:14px; position:relative; }
+.example-list li::before { content:"•"; position:absolute; left:0; }
+.btn-start {
+  width:100%; padding:14px;
+  background:linear-gradient(135deg,var(--primary),#1d4ed8);
+  color:white; border:none; border-radius:12px;
+  font-size:16px; font-weight:800; font-family:inherit;
+  cursor:pointer; box-shadow:0 2px 8px rgba(37,99,235,0.3);
+}
 </style>
 </head>
 <body>
-
 <header class="app-header">
   <div class="header-inner">
     <div class="header-logo">SELSI</div>
     <div>
       <div class="header-title">영·유아 언어발달 검사</div>
-      <div class="header-sub">Sequenced Language Scale for Infants</div>
+      <div class="header-sub">보호자용 — 검사 진행 화면</div>
     </div>
   </div>
 </header>
 
 <div class="main">
-  <!-- 스텝 인디케이터 -->
-  <div class="steps" id="stepBar">
-    <div class="step-item active" id="step1-ind" onclick="goStep(1)">
-      <div class="step-circle">1</div>
-      <div class="step-label">아동 정보</div>
-    </div>
-    <div class="step-divider" id="div1"></div>
-    <div class="step-item" id="step2-ind" onclick="goStep(2)">
-      <div class="step-circle">2</div>
-      <div class="step-label">검사 실시</div>
-    </div>
-    <div class="step-divider" id="div2"></div>
-    <div class="step-item" id="step3-ind" onclick="goStep(3)">
-      <div class="step-circle">3</div>
-      <div class="step-label">결과 확인</div>
+  <!-- 로딩 -->
+  <div class="card" id="page-loading">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <div style="font-size:14px;color:var(--slate-500);">검사 정보를 불러오는 중...</div>
     </div>
   </div>
 
-  <!-- 인트로 -->
-  <div id="page-intro" class="card">
-    <div class="intro-hero">
-      <div class="intro-badge">SELSI</div>
-      <div class="intro-title">영·유아 언어발달 검사</div>
-      <div class="intro-en">Sequenced Language Scale for Infants</div>
-      <div class="intro-features">
-        <div class="intro-feat">
-          <div class="feat-icon">🎧</div>
-          <div class="feat-label">수용언어</div>
-          <div class="feat-sub">56문항</div>
-        </div>
-        <div class="intro-feat">
-          <div class="feat-icon">🗣️</div>
-          <div class="feat-label">표현언어</div>
-          <div class="feat-sub">56문항</div>
-        </div>
-        <div class="intro-feat">
-          <div class="feat-icon">📊</div>
-          <div class="feat-label">등가월령 산출</div>
-          <div class="feat-sub">자동 계산</div>
-        </div>
-        <div class="intro-feat">
-          <div class="feat-icon">📋</div>
-          <div class="feat-label">PDF 결과지</div>
-          <div class="feat-sub">즉시 출력</div>
-        </div>
-        <div class="intro-feat">
-          <div class="feat-icon">👶</div>
-          <div class="feat-label">적용 연령</div>
-          <div class="feat-sub">0 ~ 36개월</div>
-        </div>
-        <div class="intro-feat">
-          <div class="feat-icon">🏥</div>
-          <div class="feat-label">언어치료</div>
-          <div class="feat-sub">임상 보조 도구</div>
-        </div>
-      </div>
-      <div class="intro-note">
-        ⚠️ 본 앱은 SELSI(김영태·김경희, 2004) 검사 구조를 기반으로 한 <strong>교육·참고용</strong> 도구입니다.<br>
-        임상적 진단은 반드시 자격을 갖춘 언어치료사의 전문 평가가 필요합니다.
+  <!-- 안내 -->
+  <div class="card" id="page-guide" style="display:none">
+    <div class="card-title">📋 검사 전 안내사항</div>
+    <div class="card-sub" id="child-info-display"></div>
+    <div class="guide-box">
+      <div class="guide-text">
+        다음 문항은 아이의 평소 <strong>언어 및 의사소통 능력</strong>을 확인하기 위한 질문입니다.<br><br>
+        각 항목을 읽고 아이가 현재 실제로 할 수 있는 경우 <strong>"가능"</strong>, 하지 못하거나 확실하지 않은 경우 <strong>"불가능"</strong>으로 표시해 주세요.
       </div>
     </div>
-    <button class="btn-primary" onclick="goStep(1)">검사 시작하기 →</button>
+    <div class="criteria-box">
+      <div class="criteria-title">✅ 체크 기준</div>
+      <ul class="criteria-list">
+        <li>최근 1~2개월 동안의 평소 모습을 기준으로 합니다.</li>
+        <li>우연히 1회 했던 행동은 제외합니다.</li>
+        <li>반복적으로 안정적으로 할 수 있어야 "가능"입니다.</li>
+        <li>보호자가 시켜서 겨우 하는 경우보다 자연스럽게 수행 가능한지를 기준으로 합니다.</li>
+        <li>확실하지 않으면 "불가능"으로 체크해 주세요.</li>
+        <li>아이가 현재 사용하는 행동/언어만 표시합니다.</li>
+      </ul>
+    </div>
+    <div class="example-box">
+      <div class="example-title">💡 예시</div>
+      <ul class="example-list">
+        <li>이름 부르면 돌아본다 → 대부분 상황에서 반복적으로 가능하면 <strong>"가능"</strong></li>
+        <li>엄마 따라 "맘마"를 한 번 흉내냄 → 반복적 사용이 아니면 <strong>"불가능"</strong></li>
+      </ul>
+    </div>
+    <button class="btn-start" onclick="startTest()">✔ 확인했습니다 — 검사 시작</button>
   </div>
 
-  <!-- 1단계: 아동 정보 -->
-  <div id="page-1" class="card" style="display:none">
-    <div class="card-title">👶 아동 정보 입력</div>
-    <div class="card-sub">검사 대상 아동의 기본 정보를 입력해 주세요. 생년월일로 생활연령을 자동 계산합니다.</div>
-
-    <div class="form-grid">
-      <div class="form-group full">
-        <label>아동 이름 *</label>
-        <input type="text" id="childName" placeholder="예: 홍길동" oninput="updateAgeChip()">
-      </div>
-      <div class="form-group">
-        <label>출생 연도 *</label>
-        <input type="number" id="birthYear" placeholder="예: 2023" min="2018" max="2026" oninput="updateAgeChip()">
-      </div>
-      <div class="form-group">
-        <label>출생 월 *</label>
-        <select id="birthMonth" onchange="updateAgeChip()">
-          <option value="">월 선택</option>
-          <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
-          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
-          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
-          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>성별 *</label>
-        <div class="radio-group">
-          <button class="radio-btn" id="btn-male" onclick="selectGender('남아')">남아</button>
-          <button class="radio-btn" id="btn-female" onclick="selectGender('여아')">여아</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>검사자</label>
-        <input type="text" id="examiner" placeholder="검사자 이름 (선택)">
-      </div>
-      <div class="form-group full">
-        <label>검사일</label>
-        <input type="date" id="examDate">
-      </div>
-    </div>
-    <div id="ageChip" style="display:none" class="age-chip"></div>
-    <div id="age-over-msg" style="display:none;margin-top:12px;
-      background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;
-      padding:14px 18px;font-size:14px;color:#dc2626;font-weight:600;line-height:1.7;text-align:center;">
-      ⛔ SELSI 검사는 <strong>0~36개월</strong> 아동을 대상으로 합니다.<br>
-      현재 입력한 생활연령이 <strong>36개월을 초과</strong>하여 검사를 진행할 수 없습니다.
-    </div>
-
-    <div class="btn-row" style="margin-top:14px;">
-      <button class="btn-secondary" onclick="showIntro()">← 처음으로</button>
-    </div>
-    <div class="exam-mode-btns">
-      <button class="exam-mode-btn link-btn" id="btn-link-exam" onclick="startExam('link')" disabled>
-        <span class="mode-icon">🔗</span>
-        <span>링크검사</span>
-      </button>
-      <button class="exam-mode-btn qr-btn" id="btn-qr-exam" onclick="startExam('qr')" disabled>
-        <span class="mode-icon">📷</span>
-        <span>QR검사</span>
-      </button>
-      <button class="exam-mode-btn direct-btn" id="btn-direct-exam" onclick="startExam('direct')" disabled>
-        <span class="mode-icon">▶️</span>
-        <span>바로검사</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 2단계: 검사 실시 -->
-  <div id="page-2" class="card" style="display:none">
-    <div class="card-title">📝 검사 실시</div>
-
-    <!-- 진행률 -->
+  <!-- 검사 -->
+  <div class="card" id="page-test" style="display:none">
+    <div class="card-title">📝 검사 진행</div>
     <div class="progress-bar-wrap">
       <div class="progress-meta">
-        <span id="progText">0 / 112 문항 완료</span>
-        <span id="progPct">0%</span>
+        <span id="prog-text">0 / 0 문항 완료</span>
+        <span id="prog-pct">0%</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
     </div>
+    <div id="items-container"></div>
+    <button class="btn-submit" id="btn-submit" onclick="submitResult()" disabled>✅ 검사 완료 — 결과 전송</button>
+    <div class="incomplete-msg" id="incomplete-msg" style="display:none">
+      ⚠️ 아직 <span id="remaining-count">0</span>개 문항이 남아있습니다.
+    </div>
+  </div>
 
-    <!-- 전체 문항 스크롤 목록 -->
-    <div id="allItemsList" style="display:flex;flex-direction:column;gap:8px;"></div>
-
-    <div style="margin-top:20px;">
-      <button class="btn-secondary" onclick="goStep(1)" style="margin-bottom:10px;">← 이전</button>
-      <button class="btn-primary" id="btn-to-result" onclick="goResult()" disabled style="width:100%;">결과 보기 →</button>
-      <div id="incomplete-msg" style="display:none;margin-top:10px;text-align:center;
-        background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;
-        font-size:13px;color:#c2410c;font-weight:600;">
-        ⚠️ 아직 <span id="remaining-count"></span>개 문항이 남아있습니다. 모든 문항을 체크한 후 결과를 확인할 수 있습니다.
+  <!-- 완료 -->
+  <div class="card" id="page-done" style="display:none">
+    <div class="done-screen">
+      <div class="done-icon">🎉</div>
+      <div class="done-title">검사가 완료되었습니다!</div>
+      <div class="done-sub" style="margin-top:12px;">
+        결과가 병원으로 전송되었습니다.<br>
+        선생님께서 결과를 확인하실 것입니다.<br><br>
+        <span style="font-size:12px;color:var(--slate-400);">이 창을 닫으셔도 됩니다.</span>
       </div>
     </div>
   </div>
 
-  <!-- 3단계: 결과 -->
-  <div id="page-3" class="card" style="display:none">
-    <div class="card-title">📊 검사 결과</div>
-    <div id="resultContent"></div>
-    <div class="result-btns">
-      <button class="btn-secondary" onclick="goStep(2)">← 검사 수정</button>
-      <button class="btn-green" onclick="downloadPDF()">📄 PDF 결과지 저장</button>
-      <button class="btn-secondary" onclick="resetAll()" style="background:#fef2f2;color:#dc2626">🔄 새 검사</button>
+  <!-- 오류 -->
+  <div class="card" id="page-error" style="display:none">
+    <div style="text-align:center;padding:30px 20px;">
+      <div style="font-size:40px;margin-bottom:14px;">⚠️</div>
+      <div style="font-size:17px;font-weight:800;color:var(--slate-900);margin-bottom:8px;">검사 링크 오류</div>
+      <div class="card-sub" id="error-msg">올바른 검사 링크인지 확인해 주세요.</div>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// SELSI 전체 표준 문항 데이터
-// 출처: 김영태·김경희(2004), SELSI 검사 구조 기반
-// 수용언어 56문항 + 표현언어 56문항 = 총 112문항
-// ══════════════════════════════════════════════════════════════════
 const ITEMS = {
   receptive: [
     // 0~2개월
@@ -795,225 +362,114 @@ let state = {
   currentPage: "intro",
   childName: "", birthYear: "", birthMonth: "", gender: "", examiner: "", examDate: "",
   activeTab: "receptive",
-  activeGroup: "0-5",
-  answers: {}  // { "R01": true, "E03": true, ... }
-};
+const SUPABASE_URL = "https://algfzvbqxxvcaunlsrxd.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s";
 
-// ── 초기화 ──
-window.onload = () => {
-  document.getElementById("examDate").value = new Date().toISOString().split("T")[0];
-  showIntro();
-};
-
-function showIntro() {
-  document.getElementById("page-intro").style.display = "block";
-  document.getElementById("page-1").style.display = "none";
-  document.getElementById("page-2").style.display = "none";
-  document.getElementById("page-3").style.display = "none";
-  updateStepBar(0);
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      "Prefer": opts.prefer || "return=representation",
+      ...(opts.headers || {})
+    },
+    method: opts.method || "GET",
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.status === 204 ? null : res.json();
 }
 
-function goStep(n) {
-  if (n === 1 && !validateInfo() && n > 1) return;
+// URL 파라미터 파싱
+const params = new URLSearchParams(location.search);
+const sessionId = params.get("sid");
+const childName = decodeURIComponent(params.get("name") || "");
+const childAge  = parseInt(params.get("age") || "0");
 
-  document.getElementById("page-intro").style.display = "none";
-  document.getElementById("page-1").style.display = n === 1 ? "block" : "none";
-  document.getElementById("page-2").style.display = n === 2 ? "block" : "none";
-  document.getElementById("page-3").style.display = n === 3 ? "block" : "none";
+let sessionData = null;
+let answers = {};
 
-  updateStepBar(n);
-
-  if (n === 2) {
-    saveInfo();
-    renderAllItems();
-  }
-  if (n === 3) {
-    saveInfo();
-    renderResult();
-  }
+// 페이지 표시 헬퍼
+function showPage(id) {
+  ["page-loading","page-guide","page-test","page-done","page-error"]
+    .forEach(p => document.getElementById(p).style.display = p === id ? "block" : "none");
 }
 
-function updateStepBar(n) {
-  for (let i = 1; i <= 3; i++) {
-    const el = document.getElementById(`step${i}-ind`);
-    el.classList.remove("active","done");
-    if (i === n) el.classList.add("active");
-    else if (i < n) el.classList.add("done");
-  }
-  for (let i = 1; i <= 2; i++) {
-    const el = document.getElementById(`div${i}`);
-    el.classList.toggle("done", i < n);
-  }
-}
-
-// ── 아동 정보 ──
-function updateAgeChip() {
-  const yr = parseInt(document.getElementById("birthYear").value);
-  const mo = parseInt(document.getElementById("birthMonth").value);
-  const name = document.getElementById("childName").value.trim();
-  const chip = document.getElementById("ageChip");
-  const ageOverMsg = document.getElementById("age-over-msg");
-  const btnLink   = document.getElementById("btn-link-exam");
-  const btnQr     = document.getElementById("btn-qr-exam");
-  const btnDirect = document.getElementById("btn-direct-exam");
-  const genderOk = !!state.gender;
-
-  if (yr && mo && name && genderOk) {
-    const age = calcAge(yr, mo);
-    chip.style.display = "block";
-
-    if (age > 36) {
-      // 36개월 초과 → 차단
-      chip.className = "age-chip over-age";
-      chip.innerHTML = `⛔ <strong>${name}</strong> 아동의 현재 생활연령: <strong>${age}개월</strong> (${Math.floor(age/12)}세 ${age%12}개월)`;
-      ageOverMsg.style.display = "block";
-      btnLink.disabled = true;
-      btnQr.disabled = true;
-      btnDirect.disabled = true;
-    } else {
-      chip.className = "age-chip";
-      chip.innerHTML = `✅ <strong>${name}</strong> 아동의 현재 생활연령: <strong>${age}개월</strong> (${Math.floor(age/12)}세 ${age%12}개월)`;
-      ageOverMsg.style.display = "none";
-      btnLink.disabled = false;
-      btnQr.disabled = false;
-      btnDirect.disabled = false;
+// 초기화
+window.onload = async () => {
+  if (!sessionId) {
+    // sid 없으면 name/age만으로 진행 (직접 링크 공유 시)
+    if (!childName || !childAge) {
+      showPage("page-error");
+      document.getElementById("error-msg").textContent = "검사 링크에 필요한 정보가 없습니다. 병원에서 받은 링크를 다시 확인해 주세요.";
+      return;
     }
-  } else {
-    chip.style.display = "none";
-    ageOverMsg.style.display = "none";
-    btnLink.disabled = true;
-    btnQr.disabled = true;
-    btnDirect.disabled = true;
-  }
-}
-
-// ── 검사 시작 (모드별) ──
-let pendingExamMode = null;
-
-function startExam(mode) {
-  saveInfo();
-  const age = getAge();
-  if (age > 36) {
-    alert("36개월을 초과한 아동은 검사를 진행할 수 없습니다.");
+    sessionData = { child_name: childName, child_age: childAge };
+    showGuide();
     return;
   }
-  pendingExamMode = mode;
 
-  if (mode === 'link') {
-    const url = `https://christalmun-sarang.github.io/selsi/?name=${encodeURIComponent(state.childName)}&age=${age}`;
-    window.open(url, '_blank');
-    return;
+  // Supabase에서 세션 조회
+  try {
+    const rows = await sbFetch(`selsi_sessions?session_id=eq.${sessionId}&select=*`);
+    if (!rows || rows.length === 0) throw new Error("세션 없음");
+    sessionData = rows[0];
+    if (sessionData.status === "completed") {
+      showPage("page-done");
+      return;
+    }
+    showGuide();
+  } catch(e) {
+    // 세션 조회 실패해도 파라미터 기반으로 진행
+    sessionData = { child_name: childName, child_age: childAge };
+    showGuide();
   }
-  if (mode === 'qr') {
-    showQRModal(age);
-    return;
-  }
-  // 바로검사: 안내 모달 → 검사 화면
-  openGuideModal();
+};
+
+function showGuide() {
+  showPage("page-guide");
+  const age = sessionData.child_age;
+  document.getElementById("child-info-display").textContent =
+    `아동 이름: ${sessionData.child_name}  |  생활연령: ${age}개월 (${Math.floor(age/12)}세 ${age%12}개월)`;
 }
 
-function openGuideModal() {
-  document.getElementById("guide-modal").classList.add("open");
+function startTest() {
+  showPage("page-test");
+  renderItems();
 }
 
-function closeGuideModal() {
-  document.getElementById("guide-modal").classList.remove("open");
-  goStep(2);
-}
-
-// QR 모달 (간단 — Google Chart API 사용)
-function showQRModal(age) {
-  const url = `https://christalmun-sarang.github.io/selsi/?name=${encodeURIComponent(state.childName)}&age=${age}`;
-  const qrUrl = `https://chart.googleapis.com/chart?chs=260x260&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
-  const div = document.createElement("div");
-  div.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
-  div.innerHTML = `
-    <div style="background:white;border-radius:20px;padding:28px 28px 24px;text-align:center;max-width:320px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
-      <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:4px;">📷 QR 검사</div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:18px;">보호자 스마트폰으로 QR을 스캔해 검사를 진행하세요</div>
-      <img src="${qrUrl}" style="width:200px;height:200px;border-radius:12px;border:1px solid #e2e8f0;" onerror="this.style.display='none';document.getElementById('qr-fallback').style.display='block'">
-      <div id="qr-fallback" style="display:none;font-size:12px;color:#94a3b8;margin-top:8px;">QR 생성 실패. 아래 링크를 공유해 주세요.</div>
-      <div style="margin-top:14px;background:#f1f5f9;border-radius:8px;padding:10px;font-size:11px;word-break:break-all;color:#475569;">${url}</div>
-      <button onclick="this.closest('div[style]').remove()" style="margin-top:16px;width:100%;padding:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">닫기</button>
-    </div>`;
-  document.body.appendChild(div);
-}
-
-function selectGender(g) {
-  state.gender = g;
-  document.getElementById("btn-male").classList.toggle("active", g === "남아");
-  document.getElementById("btn-female").classList.toggle("active", g === "여아");
-  updateAgeChip();
-}
-
-function saveInfo() {
-  state.childName = document.getElementById("childName").value.trim();
-  state.birthYear = document.getElementById("birthYear").value;
-  state.birthMonth = document.getElementById("birthMonth").value;
-  state.examiner = document.getElementById("examiner").value.trim();
-  state.examDate = document.getElementById("examDate").value;
-}
-
-function validateInfo() {
-  return state.childName || document.getElementById("childName").value.trim();
-}
-
-function calcAge(yr, mo) {
-  if (!yr || !mo) return 0;
-  const now = new Date();
-  const birth = new Date(yr, mo - 1);
-  return Math.max(0, (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth()));
-}
-
-function getAge() {
-  return calcAge(parseInt(state.birthYear), parseInt(state.birthMonth));
-}
-
-// ══════════════════════════════════════════════════════
-// 월령 범위 헬퍼
-// activeRange: 아동 월령 ±6개월 범위 내 문항 → 직접 체크
-// below: 월령 -6 미만 → 자동 가능(true)
-// above: 월령 +6 초과 → 자동 불가능(false)
-// ══════════════════════════════════════════════════════
+// ── 월령 범위 ──
 function getItemZone(item) {
-  const age = getAge();
-  const lo = age - 6;   // 범위 하한
-  const hi = age + 6;   // 범위 상한
-  if (item.mo < lo) return "below";   // 자동 가능
-  if (item.mo > hi) return "above";   // 자동 불가능
-  return "active";                    // 직접 체크
+  const age = sessionData.child_age;
+  const lo = age - 6, hi = age + 6;
+  if (item.mo < lo) return "below";
+  if (item.mo > hi) return "above";
+  return "active";
 }
 
-// 검사 화면 진입 시 범위 밖 문항에 자동 답변 세팅
+function getActiveItems(type) {
+  return ITEMS[type].filter(i => getItemZone(i) === "active").sort((a,b) => a.mo - b.mo);
+}
+
 function applyAutoAnswers() {
-  const allItems = [...ITEMS.receptive, ...ITEMS.expressive];
-  allItems.forEach(item => {
+  [...ITEMS.receptive, ...ITEMS.expressive].forEach(item => {
     const zone = getItemZone(item);
-    if (zone === "below") state.answers[item.id] = true;
-    else if (zone === "above") state.answers[item.id] = false;
-    // active 구간은 기존 답변 유지 (새 검사면 undefined)
+    if (zone === "below") answers[item.id] = true;
+    else if (zone === "above") answers[item.id] = false;
   });
 }
 
-// 직접 체크해야 할 문항 목록
-function getActiveItems(type) {
-  return ITEMS[type].filter(i => getItemZone(i) === "active")
-    .sort((a,b) => a.mo - b.mo);
-}
-
-// ── 검사 실시 ──
-function renderAllItems() {
+function renderItems() {
   applyAutoAnswers();
-  const container = document.getElementById("allItemsList");
-  const age = getAge();
+  const age = sessionData.child_age;
   const lo = age - 6, hi = age + 6;
+  const rActive = getActiveItems("receptive");
+  const eActive = getActiveItems("expressive");
 
   function itemHTML(item) {
-    const val = state.answers[item.id];
-    const rowCls = val === true ? "pass" : val === false ? "fail" : "";
-    const passCls = val === true ? "active" : "";
-    const failCls = val === false ? "active" : "";
-    return `<div class="item-row ${rowCls}" id="row-${item.id}">
+    const val = answers[item.id];
+    return `<div class="item-row ${val===true?'pass':val===false?'fail':''}" id="row-${item.id}">
       <div class="item-content">
         <div class="item-header">
           <span class="item-id">${item.id}</span>
@@ -1022,591 +478,103 @@ function renderAllItems() {
         <div class="item-text">${item.text}</div>
         ${item.note ? `<div class="item-note">📎 ${item.note}</div>` : ""}
         <div class="ans-btns">
-          <button class="ans-btn pass-btn ${passCls}" onclick="setAnswer('${item.id}', true)">✅ 가능</button>
-          <button class="ans-btn fail-btn ${failCls}" onclick="setAnswer('${item.id}', false)">❌ 불가능</button>
+          <button class="ans-btn pass-btn ${val===true?'active':''}" onclick="setAns('${item.id}',true)">✅ 가능</button>
+          <button class="ans-btn fail-btn ${val===false?'active':''}" onclick="setAns('${item.id}',false)">❌ 불가능</button>
         </div>
       </div>
     </div>`;
   }
 
-  const rActive = getActiveItems("receptive");
-  const eActive = getActiveItems("expressive");
-
-  let html = "";
-
-  // 검사 범위 안내 배너
-  html += `<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:white;border-radius:14px;
-    padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;">
-    🎯 <strong>검사 범위 안내</strong> — 생활연령 <strong>${age}개월</strong> 기준<br>
-    <span style="opacity:0.85;">
-      ✅ <strong>${lo}개월 미만</strong> 문항(${ITEMS.receptive.filter(i=>i.mo<lo).length + ITEMS.expressive.filter(i=>i.mo<lo).length}개): 자동 <em>가능</em> 처리&emsp;
-      📝 <strong>${lo}~${hi}개월</strong> 문항(${rActive.length + eActive.length}개): 직접 체크&emsp;
-      ❌ <strong>${hi}개월 초과</strong> 문항(${ITEMS.receptive.filter(i=>i.mo>hi).length + ITEMS.expressive.filter(i=>i.mo>hi).length}개): 자동 <em>불가능</em> 처리
-    </span>
+  let html = `
+  <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:white;border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:12px;line-height:1.7;">
+    🎯 생활연령 <strong>${age}개월</strong> 기준 · 직접 체크 문항: <strong>${rActive.length + eActive.length}개</strong>
+    (${lo}~${hi}개월 범위)
   </div>`;
 
-  // ── 수용언어 배너 ──
-  const rDone = rActive.every(i => state.answers[i.id] !== undefined);
-  const rChecked = rActive.filter(i => state.answers[i.id] !== undefined).length;
-  html += `<div class="section-banner">
-    <span class="banner-icon">🎧</span>
-    <div>
-      <div>수용언어 검사</div>
-      <div class="banner-sub" id="r-banner-sub">Receptive Language · 체크 대상 ${rActive.length}문항&nbsp;&nbsp;
-        ${rDone ? "✅ 완료" : "("+rChecked+"/"+rActive.length+" 완료)"}</div>
-    </div>
-  </div>`;
+  html += `<div class="section-banner"><span class="banner-icon">🎧</span>
+    <div><div>수용언어 검사</div>
+    <div class="banner-sub">체크 대상 ${rActive.length}문항</div></div></div>`;
+  html += rActive.map(itemHTML).join("");
 
-  if (rActive.length === 0) {
-    html += `<div style="text-align:center;padding:16px;color:#64748b;font-size:13px;">
-      ✅ 수용언어 문항이 모두 자동 처리되었습니다.</div>`;
-  } else {
-    html += rActive.map(itemHTML).join("");
-  }
+  html += `<div class="section-banner expressive" style="margin-top:20px;"><span class="banner-icon">🗣️</span>
+    <div><div>표현언어 검사</div>
+    <div class="banner-sub">체크 대상 ${eActive.length}문항</div></div></div>`;
+  html += eActive.map(itemHTML).join("");
 
-  // ── 표현언어 배너 ──
-  const eDone = eActive.every(i => state.answers[i.id] !== undefined);
-  const eChecked = eActive.filter(i => state.answers[i.id] !== undefined).length;
-  html += `<div class="section-banner expressive" style="margin-top:24px;">
-    <span class="banner-icon">🗣️</span>
-    <div>
-      <div>표현언어 검사</div>
-      <div class="banner-sub" id="e-banner-sub">Expressive Language · 체크 대상 ${eActive.length}문항&nbsp;&nbsp;
-        ${eDone ? "✅ 완료" : "("+eChecked+"/"+eActive.length+" 완료)"}</div>
-    </div>
-  </div>`;
-
-  if (eActive.length === 0) {
-    html += `<div style="text-align:center;padding:16px;color:#64748b;font-size:13px;">
-      ✅ 표현언어 문항이 모두 자동 처리되었습니다.</div>`;
-  } else {
-    html += eActive.map(itemHTML).join("");
-  }
-
-  container.innerHTML = html;
+  document.getElementById("items-container").innerHTML = html;
   updateProgress();
 }
 
-function setAnswer(id, val) {
-  state.answers[id] = val;
-  const item = [...ITEMS.receptive, ...ITEMS.expressive].find(i => i.id === id);
-  if (!item) return;
+function setAns(id, val) {
+  answers[id] = val;
   const row = document.getElementById("row-" + id);
   if (row) {
-    const rowCls = val === true ? "pass" : val === false ? "fail" : "";
-    row.className = "item-row " + rowCls;
+    row.className = "item-row " + (val ? "pass" : "fail");
     row.querySelectorAll(".pass-btn").forEach(b => b.classList.toggle("active", val === true));
     row.querySelectorAll(".fail-btn").forEach(b => b.classList.toggle("active", val === false));
   }
-  renderBannerCounts();
   updateProgress();
 }
 
-function renderBannerCounts() {
-  const rActive = getActiveItems("receptive");
-  const eActive = getActiveItems("expressive");
-  const rChecked = rActive.filter(i => state.answers[i.id] !== undefined).length;
-  const eChecked = eActive.filter(i => state.answers[i.id] !== undefined).length;
-  const rDone = rChecked === rActive.length;
-  const eDone = eChecked === eActive.length;
-  const rs = document.getElementById("r-banner-sub");
-  const es = document.getElementById("e-banner-sub");
-  if (rs) rs.innerHTML = `Receptive Language · 체크 대상 ${rActive.length}문항&nbsp;&nbsp;` +
-    (rDone ? "✅ 완료" : `(${rChecked}/${rActive.length} 완료)`);
-  if (es) es.innerHTML = `Expressive Language · 체크 대상 ${eActive.length}문항&nbsp;&nbsp;` +
-    (eDone ? "✅ 완료" : `(${eChecked}/${eActive.length} 완료)`);
-}
-
 function updateProgress() {
-  const rActive = getActiveItems("receptive");
-  const eActive = getActiveItems("expressive");
-  const activeItems = [...rActive, ...eActive];
-  const total = activeItems.length;
-  const done  = activeItems.filter(i => state.answers[i.id] !== undefined).length;
-  const pct = total === 0 ? 100 : Math.round((done/total)*100);
-  const remaining = total - done;
-
-  document.getElementById("progText").textContent =
-    total === 0 ? "모든 문항 자동 처리됨" : `${done} / ${total} 문항 완료 (직접 체크)`;
-  document.getElementById("progPct").textContent = `${pct}%`;
-  document.getElementById("progFill").style.width = pct + "%";
-
-  const btn = document.getElementById("btn-to-result");
+  const active = [...getActiveItems("receptive"), ...getActiveItems("expressive")];
+  const total = active.length;
+  const done  = active.filter(i => answers[i.id] !== undefined).length;
+  const pct   = total === 0 ? 100 : Math.round(done/total*100);
+  document.getElementById("prog-text").textContent = `${done} / ${total} 문항 완료`;
+  document.getElementById("prog-pct").textContent  = `${pct}%`;
+  document.getElementById("prog-fill").style.width = pct + "%";
+  const btn = document.getElementById("btn-submit");
   const msg = document.getElementById("incomplete-msg");
-  const rc  = document.getElementById("remaining-count");
-  if (btn) {
-    if (remaining === 0) {
-      btn.disabled = false;
-      btn.style.background = "linear-gradient(135deg,#16a34a,#15803d)";
-      btn.textContent = "✅ 결과 보기 →";
-      if (msg) msg.style.display = "none";
-    } else {
-      btn.disabled = true;
-      btn.style.background = "";
-      btn.textContent = "결과 보기 →";
-      if (rc) rc.textContent = remaining;
-      if (msg) msg.style.display = "block";
-    }
+  if (done === total) {
+    btn.disabled = false;
+    msg.style.display = "none";
+  } else {
+    btn.disabled = true;
+    document.getElementById("remaining-count").textContent = total - done;
   }
 }
 
-function goResult() {
-  const rActive = getActiveItems("receptive");
-  const eActive = getActiveItems("expressive");
-  const activeItems = [...rActive, ...eActive];
-  const done = activeItems.filter(i => state.answers[i.id] !== undefined).length;
-  const msg = document.getElementById("incomplete-msg");
-  if (done < activeItems.length) {
-    if (msg) msg.style.display = "block";
-    return;
-  }
-  goStep(3);
-}
-
-// ── 점수 계산 ──
-function calcScores() {
-  const rItems = ITEMS.receptive;
-  const eItems = ITEMS.expressive;
-  const rScore = rItems.filter(i => state.answers[i.id]).length;
-  const eScore = eItems.filter(i => state.answers[i.id]).length;
-
-  // 등가월령: 구간별 통과율로 추정
-  function equivAge(items, score) {
-    // 각 구간별 통과 문항 수 누적하여 마지막 완전 통과 구간 + 부분 통과 보정
-    let cumScore = 0;
-    for (const g of AGE_GROUPS) {
-      const gItems = items.filter(i => i.ag === g.id);
-      const gPassed = gItems.filter(i => state.answers[i.id]).length;
-      const gTotal = gItems.length;
-      // 구간 중간점 계산
-      const [lo, hi] = g.id.split("-").map(Number);
-      const midAge = (lo + hi) / 2;
-      cumScore += gPassed;
-      if (gPassed < gTotal) {
-        // 부분 통과: 구간 내 비율로 보간
-        const ratio = gTotal > 0 ? gPassed / gTotal : 0;
-        return Math.round(lo + ratio * (hi - lo + 1));
-      }
-    }
-    return 36; // 모두 통과
-  }
-
-  const rEquiv = equivAge(rItems, rScore);
-  const eEquiv = equivAge(eItems, eScore);
-  const age = getAge();
-
-  function interp(equiv, actual) {
-    const diff = equiv - actual;
-    if (diff >= -3) return { label:"정상 발달", cls:"normal" };
-    if (diff >= -6) return { label:"약간 지연 의심", cls:"mild" };
-    return { label:"발달 지연 의심", cls:"delay" };
-  }
-
-  return {
-    age,
-    r: { score: rScore, total: rItems.length, equiv: rEquiv, pct: Math.round(rScore/rItems.length*100), interp: interp(rEquiv, age) },
-    e: { score: eScore, total: eItems.length, equiv: eEquiv, pct: Math.round(eScore/eItems.length*100), interp: interp(eEquiv, age) },
-  };
-}
-
-// ── 구간별 점수 프로파일 ──
-function groupProfile(type) {
-  const age = getAge();
-  const lo = age - 6, hi = age + 6;
-  return AGE_GROUPS.map(g => {
-    const items = ITEMS[type].filter(i => i.ag === g.id);
-    const passed = items.filter(i => state.answers[i.id] === true).length;
-    const pct = items.length > 0 ? Math.round(passed/items.length*100) : 0;
-    const color = pct >= 80 ? "#16a34a" : pct >= 50 ? "#d97706" : "#dc2626";
-    // 이 구간이 자동 처리됐는지 여부
-    const allBelow = items.every(i => i.mo < lo);
-    const allAbove = items.every(i => i.mo > hi);
-    const autoMode = allBelow ? "auto-pass" : allAbove ? "auto-fail" : "mixed";
-    return { label: g.label, passed, total: items.length, pct, color, autoMode };
-  });
-}
-
-// ── 결과 렌더링 ──
-function renderResult() {
-  const sc = calcScores();
-  const rProfile = groupProfile("receptive");
-  const eProfile = groupProfile("expressive");
-
-  const examDateFmt = state.examDate
-    ? new Date(state.examDate).toLocaleDateString("ko-KR", {year:"numeric",month:"long",day:"numeric"})
-    : "-";
-
-  const interpColors = { normal: "#16a34a", mild: "#d97706", delay: "#dc2626" };
-
-  function scoreCard(label, d) {
-    return `<div class="score-card ${d.interp.cls}">
-      <div class="sc-head">
-        <div class="sc-title">${label}</div>
-        <div class="sc-badge ${d.interp.cls}">${d.interp.label}</div>
-      </div>
-      <div class="sc-nums">
-        <div class="sc-num">
-          <div class="sc-val">${d.score}<span class="sc-unit">점</span></div>
-          <div class="sc-key">원점수 (/${d.total})</div>
-        </div>
-        <div class="sc-num">
-          <div class="sc-val">${d.pct}<span class="sc-unit">%</span></div>
-          <div class="sc-key">정반응률</div>
-        </div>
-        <div class="sc-num">
-          <div class="sc-val" style="color:${interpColors[d.interp.cls]}">${d.equiv}<span class="sc-unit">개월</span></div>
-          <div class="sc-key">등가월령</div>
-        </div>
-      </div>
-      <div class="sc-bar-bg"><div class="sc-bar-fill" style="width:${d.pct}%"></div></div>
-    </div>`;
-  }
-
-  function profileTable(profile, label) {
-    const rows = profile.map(p => {
-      const autoTag = p.autoMode === "auto-pass"
-        ? `<span style="font-size:10px;background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">자동가능</span>`
-        : p.autoMode === "auto-fail"
-        ? `<span style="font-size:10px;background:#fee2e2;color:#dc2626;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">자동불가</span>`
-        : `<span style="font-size:10px;background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">직접체크</span>`;
-      return `<tr>
-        <td>${p.label}${autoTag}</td>
-        <td>${p.passed} / ${p.total}</td>
-        <td>
-          <div class="pct-bar-wrap">
-            <div class="pct-bar-bg"><div class="pct-bar-fill" style="width:${p.pct}%;background:${p.color}"></div></div>
-            <span style="font-size:12px;font-weight:700;color:${p.color};min-width:35px">${p.pct}%</span>
-          </div>
-        </td>
-      </tr>`;
-    }).join("");
-    return `<div class="profile-section">
-      <div class="section-title">${label} 월령별 프로파일</div>
-      <table class="profile-table">
-        <thead><tr><th>월령 구간</th><th>통과 문항</th><th>정반응률</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-  }
-
-  // 종합 소견 생성
-  const bothNormal = sc.r.interp.cls === "normal" && sc.e.interp.cls === "normal";
-  const bothDelay = sc.r.interp.cls === "delay" && sc.e.interp.cls === "delay";
-  const rOnly = sc.r.interp.cls !== "normal" && sc.e.interp.cls === "normal";
-  const eOnly = sc.e.interp.cls !== "normal" && sc.r.interp.cls === "normal";
-
-  let opinionText = `${state.childName}(생활연령 ${sc.age}개월)의 SELSI 검사 결과, 수용언어 등가월령은 <strong>${sc.r.equiv}개월</strong>, 표현언어 등가월령은 <strong>${sc.e.equiv}개월</strong>으로 측정되었습니다.<br><br>`;
-  if (bothNormal) opinionText += "수용언어와 표현언어 두 영역 모두 <strong>정상 발달</strong> 범위 내에 있습니다.";
-  else if (bothDelay) opinionText += "수용언어와 표현언어 <strong>두 영역 모두 발달 지연이 의심</strong>됩니다. 전문 언어치료사에 의한 정밀 평가 및 조기 중재를 강력히 권장합니다.";
-  else if (rOnly) opinionText += `<strong>수용언어(${sc.r.interp.label})</strong>에서 발달 지연이 의심되며, 표현언어는 정상 범위에 있습니다. 언어 이해력 향상을 위한 전문가 상담이 권장됩니다.`;
-  else if (eOnly) opinionText += `<strong>표현언어(${sc.e.interp.label})</strong>에서 발달 지연이 의심되며, 수용언어는 정상 범위에 있습니다. 언어 표현 능력 향상을 위한 전문가 상담이 권장됩니다.`;
-  else opinionText += "일부 영역에서 발달 지연이 의심됩니다. 전문 언어치료사의 정밀 평가를 권장합니다.";
-
-  const html = `
-    <div class="result-header">
-      <div>
-        <div class="result-name">${state.childName || "미입력"} (${state.gender || "-"})</div>
-        <div class="result-info">검사일: ${examDateFmt} | 검사자: ${state.examiner || "-"}</div>
-      </div>
-      <div class="result-age-badge">생활연령<br><strong>${sc.age}개월</strong></div>
-    </div>
-    <div class="score-cards">
-      ${scoreCard("🎧 수용언어 (Receptive)", sc.r)}
-      ${scoreCard("🗣️ 표현언어 (Expressive)", sc.e)}
-    </div>
-    ${profileTable(rProfile, "🎧 수용언어")}
-    ${profileTable(eProfile, "🗣️ 표현언어")}
-    <div class="opinion-box">
-      <div class="opinion-title">📋 종합 소견</div>
-      <div class="opinion-text">${opinionText}</div>
-      <div class="opinion-warn">⚠️ 본 결과는 선별검사 참고용이며, 공식적인 임상 진단 자료로 사용할 수 없습니다. 정확한 평가는 반드시 자격을 갖춘 언어치료사가 실시해야 합니다.</div>
-    </div>
-  `;
-
-  document.getElementById("resultContent").innerHTML = html;
-}
-
-// ── PDF 출력 ──
-function downloadPDF() {
-  const sc = calcScores();
-  const rProfile = groupProfile("receptive");
-  const eProfile = groupProfile("expressive");
-  const examDateFmt = state.examDate
-    ? new Date(state.examDate).toLocaleDateString("ko-KR")
-    : "-";
-
-  const interpLabel = { normal:"정상 발달", mild:"약간 지연 의심", delay:"발달 지연 의심" };
-  const interpColor = { normal:"#16a34a", mild:"#d97706", delay:"#dc2626" };
-  const interpBg    = { normal:"#f0fdf4",  mild:"#fffbeb",  delay:"#fef2f2" };
-
-  // ── 결과지 HTML 생성 ──
-  function profileRows(profile) {
-    return profile.map(p => {
-      const c = p.pct >= 80 ? "#16a34a" : p.pct >= 50 ? "#d97706" : "#dc2626";
-      const autoTag = p.autoMode === "auto-pass"
-        ? `<span style="font-size:9px;background:#dcfce7;color:#15803d;border-radius:3px;padding:1px 5px;margin-left:4px;">자동가능</span>`
-        : p.autoMode === "auto-fail"
-        ? `<span style="font-size:9px;background:#fee2e2;color:#dc2626;border-radius:3px;padding:1px 5px;margin-left:4px;">자동불가</span>`
-        : `<span style="font-size:9px;background:#dbeafe;color:#1d4ed8;border-radius:3px;padding:1px 5px;margin-left:4px;">직접체크</span>`;
-      return `<tr style="border-bottom:1px solid #e2e8f0;">
-        <td style="padding:7px 10px;">${p.label}${autoTag}</td>
-        <td style="padding:7px 10px;text-align:center;">${p.passed} / ${p.total}</td>
-        <td style="padding:7px 10px;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="flex:1;height:6px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
-              <div style="width:${p.pct}%;height:100%;background:${c};border-radius:99px;"></div>
-            </div>
-            <span style="font-weight:700;color:${c};min-width:36px;">${p.pct}%</span>
-          </div>
-        </td>
-      </tr>`;
-    }).join("");
-  }
-
-  const bothOk = sc.r.interp.cls === "normal" && sc.e.interp.cls === "normal";
-  const opinion = bothOk
-    ? "수용언어와 표현언어 두 영역 모두 정상 발달 범위 내에 있습니다."
-    : "일부 영역에서 발달 지연이 의심됩니다. 전문 언어치료사에 의한 정밀 평가를 권장합니다.";
-
-  function scoreBox(label, d) {
-    const c = interpColor[d.interp.cls];
-    const bg = interpBg[d.interp.cls];
-    return `
-    <div style="flex:1;border-radius:12px;border:1.5px solid ${c}40;background:${bg};padding:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-weight:800;font-size:14px;">${label}</span>
-        <span style="background:${c};color:white;border-radius:6px;padding:2px 10px;font-size:11px;font-weight:700;">${interpLabel[d.interp.cls]}</span>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.7);border-radius:8px;padding:8px 4px;">
-          <div style="font-size:22px;font-weight:900;line-height:1;">${d.score}<span style="font-size:12px;color:#94a3b8;">/${d.total}</span></div>
-          <div style="font-size:10px;color:#64748b;margin-top:3px;">원점수</div>
-        </div>
-        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.7);border-radius:8px;padding:8px 4px;">
-          <div style="font-size:22px;font-weight:900;line-height:1;">${d.pct}<span style="font-size:12px;color:#94a3b8;">%</span></div>
-          <div style="font-size:10px;color:#64748b;margin-top:3px;">정반응률</div>
-        </div>
-        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.7);border-radius:8px;padding:8px 4px;">
-          <div style="font-size:22px;font-weight:900;line-height:1;color:${c};">${d.equiv}<span style="font-size:12px;color:#94a3b8;">개월</span></div>
-          <div style="font-size:10px;color:#64748b;margin-top:3px;">등가월령</div>
-        </div>
-      </div>
-      <div style="height:7px;background:rgba(0,0,0,0.08);border-radius:99px;overflow:hidden;">
-        <div style="width:${d.pct}%;height:100%;background:${c};border-radius:99px;"></div>
-      </div>
-    </div>`;
-  }
-
-  const printHTML = `
-  <div style="font-family:'Noto Sans KR',sans-serif;width:754px;padding:20px;color:#1e293b;">
-
-    <!-- 헤더 -->
-    <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;border-radius:14px;padding:20px 24px;margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 14px;font-weight:900;font-size:20px;letter-spacing:3px;">SELSI</div>
-        <div>
-          <div style="font-size:18px;font-weight:800;">영·유아 언어발달 검사 결과지</div>
-          <div style="font-size:12px;opacity:0.8;margin-top:2px;">Sequenced Language Scale for Infants</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 아동 정보 -->
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:#1e293b;">👶 아동 정보</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-        ${[["이름", state.childName||"-"], ["성별", state.gender||"-"],
-           ["생활연령", sc.age+"개월 ("+Math.floor(sc.age/12)+"세 "+sc.age%12+"개월)"],
-           ["검사일", examDateFmt], ["검사자", state.examiner||"-"]
-          ].map(([k,v]) => `<div style="background:white;border-radius:8px;padding:8px 10px;">
-            <div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:2px;">${k}</div>
-            <div style="font-weight:700;font-size:13px;">${v}</div>
-          </div>`).join("")}
-      </div>
-    </div>
-
-    <!-- 점수 요약 -->
-    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📊 검사 결과 요약</div>
-    <div style="display:flex;gap:12px;margin-bottom:16px;">
-      ${scoreBox("🎧 수용언어 (Receptive)", sc.r)}
-      ${scoreBox("🗣️ 표현언어 (Expressive)", sc.e)}
-    </div>
-
-    <!-- 수용언어 프로파일 -->
-    <div style="font-weight:800;font-size:14px;margin-bottom:8px;">🎧 수용언어 월령별 프로파일</div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;background:white;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
-      <thead><tr style="background:#f1f5f9;">
-        <th style="padding:8px 10px;text-align:left;font-weight:700;color:#475569;">월령 구간</th>
-        <th style="padding:8px 10px;text-align:center;font-weight:700;color:#475569;">통과 문항</th>
-        <th style="padding:8px 10px;text-align:left;font-weight:700;color:#475569;">정반응률</th>
-      </tr></thead>
-      <tbody>${profileRows(rProfile)}</tbody>
-    </table>
-
-    <!-- 표현언어 프로파일 -->
-    <div style="font-weight:800;font-size:14px;margin-bottom:8px;">🗣️ 표현언어 월령별 프로파일</div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;background:white;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
-      <thead><tr style="background:#f1f5f9;">
-        <th style="padding:8px 10px;text-align:left;font-weight:700;color:#475569;">월령 구간</th>
-        <th style="padding:8px 10px;text-align:center;font-weight:700;color:#475569;">통과 문항</th>
-        <th style="padding:8px 10px;text-align:left;font-weight:700;color:#475569;">정반응률</th>
-      </tr></thead>
-      <tbody>${profileRows(eProfile)}</tbody>
-    </table>
-
-    <!-- 종합 소견 -->
-    <div style="background:#f8fafc;border-left:4px solid #2563eb;border-radius:0 12px 12px 0;padding:16px 18px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📋 종합 소견</div>
-      <div style="font-size:13px;line-height:1.9;color:#475569;">
-        ${state.childName||"대상아동"}(생활연령 ${sc.age}개월)의 검사 결과,
-        수용언어 등가월령은 <strong style="color:#1e293b;">${sc.r.equiv}개월</strong>
-        (정반응률 ${sc.r.pct}%, ${interpLabel[sc.r.interp.cls]}),
-        표현언어 등가월령은 <strong style="color:#1e293b;">${sc.e.equiv}개월</strong>
-        (정반응률 ${sc.e.pct}%, ${interpLabel[sc.e.interp.cls]})으로 측정되었습니다.<br>
-        ${opinion}
-      </div>
-      <div style="font-size:11px;color:#94a3b8;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;">
-        ※ 본 결과는 선별검사 참고용이며, 공식적인 임상 진단 자료로 사용할 수 없습니다.
-      </div>
-    </div>
-
-    <!-- 서명란 -->
-    <div style="display:flex;justify-content:space-between;padding:10px 4px;border-top:1px solid #e2e8f0;margin-top:8px;">
-      <div style="font-size:11px;color:#94a3b8;">검사자 서명: ____________________</div>
-      <div style="font-size:11px;color:#94a3b8;">검사일: ${examDateFmt}</div>
-    </div>
-
-  </div>`;
-
-  // ── html2canvas → jsPDF 변환 ──
-  const printArea = document.getElementById("pdf-print-area");
-  printArea.innerHTML = printHTML;
-  printArea.style.left = "-9999px";
-  printArea.style.display = "block";
-
-  const btn = document.querySelector(".btn-green");
-  const origText = btn.textContent;
-  btn.textContent = "⏳ PDF 생성 중...";
+async function submitResult() {
+  const btn = document.getElementById("btn-submit");
+  btn.textContent = "⏳ 전송 중...";
   btn.disabled = true;
 
-  setTimeout(() => {
-    html2canvas(printArea, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-      width: 794,
-    }).then(canvas => {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation:"portrait", unit:"mm", format:"a4" });
-      const pageW = 210, pageH = 297;
-      const imgW = pageW;
-      const imgH = canvas.height * (pageW / canvas.width);
-
-      let posY = 0;
-      let remaining = imgH;
-      let page = 0;
-
-      while (remaining > 0) {
-        if (page > 0) pdf.addPage();
-        const sliceH = Math.min(pageH - 10, remaining);
-        const sliceCanvas = document.createElement("canvas");
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = sliceH * (canvas.width / pageW);
-        const ctx = sliceCanvas.getContext("2d");
-        ctx.drawImage(canvas, 0, posY * (canvas.width / pageW),
-          canvas.width, sliceCanvas.height, 0, 0, sliceCanvas.width, sliceCanvas.height);
-        const sliceImg = sliceCanvas.toDataURL("image/png");
-        pdf.addImage(sliceImg, "PNG", 0, 5, imgW, sliceH);
-        posY += sliceH;
-        remaining -= sliceH;
-        page++;
-      }
-
-      pdf.save(`SELSI_${state.childName || "결과"}_${state.examDate || "검사"}.pdf`);
-      printArea.style.display = "none";
-      printArea.innerHTML = "";
-      btn.textContent = origText;
-      btn.disabled = false;
-    }).catch(err => {
-      alert("PDF 생성 중 오류가 발생했습니다: " + err.message);
-      printArea.style.display = "none";
-      btn.textContent = origText;
-      btn.disabled = false;
-    });
-  }, 200);
-}
-
-// ── 리셋 ──
-function resetAll() {
-  if (!confirm("모든 검사 데이터를 초기화하고 처음부터 다시 시작하시겠습니까?")) return;
-  state = {
-    currentPage:"intro", childName:"", birthYear:"", birthMonth:"",
-    gender:"", examiner:"", examDate:"",
-    activeTab:"receptive", activeGroup:"0-5", answers:{}
+  const payload = {
+    answers: answers,
+    status: "completed",
+    completed_at: new Date().toISOString()
   };
-  document.getElementById("childName").value = "";
-  document.getElementById("birthYear").value = "";
-  document.getElementById("birthMonth").value = "";
-  document.getElementById("examiner").value = "";
-  document.getElementById("examDate").value = new Date().toISOString().split("T")[0];
-  document.getElementById("btn-male").classList.remove("active");
-  document.getElementById("btn-female").classList.remove("active");
-  document.getElementById("ageChip").style.display = "none";
-  document.getElementById("age-over-msg").style.display = "none";
-  document.getElementById("btn-link-exam").disabled = true;
-  document.getElementById("btn-qr-exam").disabled = true;
-  document.getElementById("btn-direct-exam").disabled = true;
-  showIntro();
+
+  try {
+    if (sessionId) {
+      await sbFetch(`selsi_sessions?session_id=eq.${sessionId}`, {
+        method: "PATCH",
+        body: payload,
+        prefer: "return=minimal"
+      });
+    } else {
+      // sid 없이 직접 접근한 경우 — 새 레코드 삽입
+      await sbFetch("selsi_sessions", {
+        method: "POST",
+        body: {
+          session_id: "direct_" + Date.now(),
+          child_name: sessionData.child_name,
+          child_age: sessionData.child_age,
+          status: "completed",
+          answers: answers,
+          completed_at: new Date().toISOString()
+        }
+      });
+    }
+    showPage("page-done");
+  } catch(e) {
+    alert("전송 중 오류가 발생했습니다: " + e.message + "\n\n잠시 후 다시 시도해 주세요.");
+    btn.textContent = "✅ 검사 완료 — 결과 전송";
+    btn.disabled = false;
+  }
 }
 </script>
-
-<!-- ════ PDF 출력용 숨김 영역 ════ -->
-<div id="pdf-print-area" style="
-  position:fixed; left:-9999px; top:0;
-  width:794px; background:white;
-  font-family:'Noto Sans KR',sans-serif;
-  font-size:13px; color:#1e293b;
-  padding:0; margin:0;
-"><!-- 동적으로 채워짐 --></div>
-
-<!-- ════ 검사 시작 안내 모달 ════ -->
-<div class="modal-overlay" id="guide-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-header-title">📋 검사 전 안내사항</div>
-      <div class="modal-header-sub">아래 내용을 꼭 읽고 검사를 시작해 주세요</div>
-    </div>
-    <div class="modal-body">
-      <div class="modal-guide-text">
-        다음 문항은 아이의 평소 <strong>언어 및 의사소통 능력</strong>을 확인하기 위한 질문입니다.<br><br>
-        각 항목을 읽고 아이가 현재 실제로 할 수 있는 경우 <strong>"가능"</strong>, 하지 못하거나 확실하지 않은 경우 <strong>"불가능"</strong>으로 표시해 주세요.
-      </div>
-
-      <div class="modal-criteria">
-        <div class="modal-criteria-title">✅ 체크 기준</div>
-        <ul>
-          <li>최근 1~2개월 동안의 평소 모습을 기준으로 합니다.</li>
-          <li>우연히 1회 했던 행동은 제외합니다.</li>
-          <li>반복적으로 안정적으로 할 수 있어야 "가능"입니다.</li>
-          <li>보호자가 시켜서 겨우 하는 경우보다는 자연스럽게 수행 가능한지를 기준으로 합니다.</li>
-          <li>확실하지 않으면 "불가능"으로 체크해 주세요.</li>
-          <li>아이가 현재 사용하는 행동/언어만 표시합니다.</li>
-        </ul>
-      </div>
-
-      <div class="modal-example">
-        <div class="modal-example-title">💡 예시</div>
-        <ul>
-          <li>이름 부르면 돌아본다 → 대부분 상황에서 반복적으로 가능하면 <strong>"가능"</strong></li>
-          <li>엄마 따라 "맘마"를 한 번 흉내냄 → 반복적 사용이 아니면 <strong>"불가능"</strong></li>
-        </ul>
-      </div>
-
-      <button class="modal-btn-ok" onclick="closeGuideModal()">✔ 확인했습니다 — 검사 시작</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
