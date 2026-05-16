@@ -971,9 +971,44 @@ function getAge() {
   return calcAge(parseInt(state.birthYear), parseInt(state.birthMonth));
 }
 
+// ══════════════════════════════════════════════════════
+// 월령 범위 헬퍼
+// activeRange: 아동 월령 ±6개월 범위 내 문항 → 직접 체크
+// below: 월령 -6 미만 → 자동 가능(true)
+// above: 월령 +6 초과 → 자동 불가능(false)
+// ══════════════════════════════════════════════════════
+function getItemZone(item) {
+  const age = getAge();
+  const lo = age - 6;   // 범위 하한
+  const hi = age + 6;   // 범위 상한
+  if (item.mo < lo) return "below";   // 자동 가능
+  if (item.mo > hi) return "above";   // 자동 불가능
+  return "active";                    // 직접 체크
+}
+
+// 검사 화면 진입 시 범위 밖 문항에 자동 답변 세팅
+function applyAutoAnswers() {
+  const allItems = [...ITEMS.receptive, ...ITEMS.expressive];
+  allItems.forEach(item => {
+    const zone = getItemZone(item);
+    if (zone === "below") state.answers[item.id] = true;
+    else if (zone === "above") state.answers[item.id] = false;
+    // active 구간은 기존 답변 유지 (새 검사면 undefined)
+  });
+}
+
+// 직접 체크해야 할 문항 목록
+function getActiveItems(type) {
+  return ITEMS[type].filter(i => getItemZone(i) === "active")
+    .sort((a,b) => a.mo - b.mo);
+}
+
 // ── 검사 실시 ──
 function renderAllItems() {
+  applyAutoAnswers();
   const container = document.getElementById("allItemsList");
+  const age = getAge();
+  const lo = age - 6, hi = age + 6;
 
   function itemHTML(item) {
     const val = state.answers[item.id];
@@ -996,46 +1031,59 @@ function renderAllItems() {
     </div>`;
   }
 
-  const rScore  = ITEMS.receptive.filter(i => state.answers[i.id] !== undefined).length;
-  const eScore  = ITEMS.expressive.filter(i => state.answers[i.id] !== undefined).length;
-  const rDone   = rScore === ITEMS.receptive.length;
-  const eDone   = eScore === ITEMS.expressive.length;
+  const rActive = getActiveItems("receptive");
+  const eActive = getActiveItems("expressive");
 
   let html = "";
 
+  // 검사 범위 안내 배너
+  html += `<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:white;border-radius:14px;
+    padding:14px 18px;margin-bottom:16px;font-size:13px;line-height:1.7;">
+    🎯 <strong>검사 범위 안내</strong> — 생활연령 <strong>${age}개월</strong> 기준<br>
+    <span style="opacity:0.85;">
+      ✅ <strong>${lo}개월 미만</strong> 문항(${ITEMS.receptive.filter(i=>i.mo<lo).length + ITEMS.expressive.filter(i=>i.mo<lo).length}개): 자동 <em>가능</em> 처리&emsp;
+      📝 <strong>${lo}~${hi}개월</strong> 문항(${rActive.length + eActive.length}개): 직접 체크&emsp;
+      ❌ <strong>${hi}개월 초과</strong> 문항(${ITEMS.receptive.filter(i=>i.mo>hi).length + ITEMS.expressive.filter(i=>i.mo>hi).length}개): 자동 <em>불가능</em> 처리
+    </span>
+  </div>`;
+
   // ── 수용언어 배너 ──
+  const rDone = rActive.every(i => state.answers[i.id] !== undefined);
+  const rChecked = rActive.filter(i => state.answers[i.id] !== undefined).length;
   html += `<div class="section-banner">
     <span class="banner-icon">🎧</span>
     <div>
-      <div>수용언어 검사를 시작합니다</div>
-      <div class="banner-sub">Receptive Language · R01 ~ R56 · 총 ${ITEMS.receptive.length}문항
-        ${rDone ? " &nbsp;✅ 완료" : " &nbsp;(" + rScore + "/" + ITEMS.receptive.length + " 완료)"}</div>
+      <div>수용언어 검사</div>
+      <div class="banner-sub" id="r-banner-sub">Receptive Language · 체크 대상 ${rActive.length}문항&nbsp;&nbsp;
+        ${rDone ? "✅ 완료" : "("+rChecked+"/"+rActive.length+" 완료)"}</div>
     </div>
   </div>`;
 
-  // R01 ~ R56 정렬 출력
-  const rSorted = [...ITEMS.receptive].sort((a,b) => {
-    const n = x => parseInt(x.id.replace(/\D/g,""));
-    return n(a) - n(b);
-  });
-  html += rSorted.map(itemHTML).join("");
+  if (rActive.length === 0) {
+    html += `<div style="text-align:center;padding:16px;color:#64748b;font-size:13px;">
+      ✅ 수용언어 문항이 모두 자동 처리되었습니다.</div>`;
+  } else {
+    html += rActive.map(itemHTML).join("");
+  }
 
   // ── 표현언어 배너 ──
+  const eDone = eActive.every(i => state.answers[i.id] !== undefined);
+  const eChecked = eActive.filter(i => state.answers[i.id] !== undefined).length;
   html += `<div class="section-banner expressive" style="margin-top:24px;">
     <span class="banner-icon">🗣️</span>
     <div>
-      <div>표현언어 검사를 시작합니다</div>
-      <div class="banner-sub">Expressive Language · E01 ~ E56 · 총 ${ITEMS.expressive.length}문항
-        ${eDone ? " &nbsp;✅ 완료" : " &nbsp;(" + eScore + "/" + ITEMS.expressive.length + " 완료)"}</div>
+      <div>표현언어 검사</div>
+      <div class="banner-sub" id="e-banner-sub">Expressive Language · 체크 대상 ${eActive.length}문항&nbsp;&nbsp;
+        ${eDone ? "✅ 완료" : "("+eChecked+"/"+eActive.length+" 완료)"}</div>
     </div>
   </div>`;
 
-  // E01 ~ E56 정렬 출력
-  const eSorted = [...ITEMS.expressive].sort((a,b) => {
-    const n = x => parseInt(x.id.replace(/\D/g,""));
-    return n(a) - n(b);
-  });
-  html += eSorted.map(itemHTML).join("");
+  if (eActive.length === 0) {
+    html += `<div style="text-align:center;padding:16px;color:#64748b;font-size:13px;">
+      ✅ 표현언어 문항이 모두 자동 처리되었습니다.</div>`;
+  } else {
+    html += eActive.map(itemHTML).join("");
+  }
 
   container.innerHTML = html;
   updateProgress();
@@ -1043,7 +1091,6 @@ function renderAllItems() {
 
 function setAnswer(id, val) {
   state.answers[id] = val;
-  // 해당 문항 행만 부분 업데이트 (전체 리렌더 없이)
   const item = [...ITEMS.receptive, ...ITEMS.expressive].find(i => i.id === id);
   if (!item) return;
   const row = document.getElementById("row-" + id);
@@ -1053,35 +1100,39 @@ function setAnswer(id, val) {
     row.querySelectorAll(".pass-btn").forEach(b => b.classList.toggle("active", val === true));
     row.querySelectorAll(".fail-btn").forEach(b => b.classList.toggle("active", val === false));
   }
-  // 배너 카운터 업데이트
   renderBannerCounts();
   updateProgress();
 }
 
 function renderBannerCounts() {
-  const rScore = ITEMS.receptive.filter(i => state.answers[i.id] !== undefined).length;
-  const eScore = ITEMS.expressive.filter(i => state.answers[i.id] !== undefined).length;
-  const rDone  = rScore === ITEMS.receptive.length;
-  const eDone  = eScore === ITEMS.expressive.length;
-  const banners = document.querySelectorAll(".section-banner .banner-sub");
-  if (banners[0]) banners[0].innerHTML =
-    `Receptive Language · R01 ~ R56 · 총 ${ITEMS.receptive.length}문항&nbsp;&nbsp;` +
-    (rDone ? "✅ 완료" : `(${rScore}/${ITEMS.receptive.length} 완료)`);
-  if (banners[1]) banners[1].innerHTML =
-    `Expressive Language · E01 ~ E56 · 총 ${ITEMS.expressive.length}문항&nbsp;&nbsp;` +
-    (eDone ? "✅ 완료" : `(${eScore}/${ITEMS.expressive.length} 완료)`);
+  const rActive = getActiveItems("receptive");
+  const eActive = getActiveItems("expressive");
+  const rChecked = rActive.filter(i => state.answers[i.id] !== undefined).length;
+  const eChecked = eActive.filter(i => state.answers[i.id] !== undefined).length;
+  const rDone = rChecked === rActive.length;
+  const eDone = eChecked === eActive.length;
+  const rs = document.getElementById("r-banner-sub");
+  const es = document.getElementById("e-banner-sub");
+  if (rs) rs.innerHTML = `Receptive Language · 체크 대상 ${rActive.length}문항&nbsp;&nbsp;` +
+    (rDone ? "✅ 완료" : `(${rChecked}/${rActive.length} 완료)`);
+  if (es) es.innerHTML = `Expressive Language · 체크 대상 ${eActive.length}문항&nbsp;&nbsp;` +
+    (eDone ? "✅ 완료" : `(${eChecked}/${eActive.length} 완료)`);
 }
 
 function updateProgress() {
-  const total = ITEMS.receptive.length + ITEMS.expressive.length;
-  const done = Object.values(state.answers).filter(v => v !== undefined).length;
-  const pct = Math.round((done/total)*100);
+  const rActive = getActiveItems("receptive");
+  const eActive = getActiveItems("expressive");
+  const activeItems = [...rActive, ...eActive];
+  const total = activeItems.length;
+  const done  = activeItems.filter(i => state.answers[i.id] !== undefined).length;
+  const pct = total === 0 ? 100 : Math.round((done/total)*100);
   const remaining = total - done;
-  document.getElementById("progText").textContent = `${done} / ${total} 문항 완료`;
+
+  document.getElementById("progText").textContent =
+    total === 0 ? "모든 문항 자동 처리됨" : `${done} / ${total} 문항 완료 (직접 체크)`;
   document.getElementById("progPct").textContent = `${pct}%`;
   document.getElementById("progFill").style.width = pct + "%";
 
-  // 결과보기 버튼 활성/비활성
   const btn = document.getElementById("btn-to-result");
   const msg = document.getElementById("incomplete-msg");
   const rc  = document.getElementById("remaining-count");
@@ -1096,15 +1147,18 @@ function updateProgress() {
       btn.style.background = "";
       btn.textContent = "결과 보기 →";
       if (rc) rc.textContent = remaining;
+      if (msg) msg.style.display = "block";
     }
   }
 }
 
 function goResult() {
-  const total = ITEMS.receptive.length + ITEMS.expressive.length;
-  const done = Object.values(state.answers).filter(v => v !== undefined).length;
+  const rActive = getActiveItems("receptive");
+  const eActive = getActiveItems("expressive");
+  const activeItems = [...rActive, ...eActive];
+  const done = activeItems.filter(i => state.answers[i.id] !== undefined).length;
   const msg = document.getElementById("incomplete-msg");
-  if (done < total) {
+  if (done < activeItems.length) {
     if (msg) msg.style.display = "block";
     return;
   }
@@ -1159,12 +1213,18 @@ function calcScores() {
 
 // ── 구간별 점수 프로파일 ──
 function groupProfile(type) {
+  const age = getAge();
+  const lo = age - 6, hi = age + 6;
   return AGE_GROUPS.map(g => {
     const items = ITEMS[type].filter(i => i.ag === g.id);
-    const passed = items.filter(i => state.answers[i.id]).length;
+    const passed = items.filter(i => state.answers[i.id] === true).length;
     const pct = items.length > 0 ? Math.round(passed/items.length*100) : 0;
     const color = pct >= 80 ? "#16a34a" : pct >= 50 ? "#d97706" : "#dc2626";
-    return { label: g.label, passed, total: items.length, pct, color };
+    // 이 구간이 자동 처리됐는지 여부
+    const allBelow = items.every(i => i.mo < lo);
+    const allAbove = items.every(i => i.mo > hi);
+    const autoMode = allBelow ? "auto-pass" : allAbove ? "auto-fail" : "mixed";
+    return { label: g.label, passed, total: items.length, pct, color, autoMode };
   });
 }
 
@@ -1205,16 +1265,23 @@ function renderResult() {
   }
 
   function profileTable(profile, label) {
-    const rows = profile.map(p => `<tr>
-      <td>${p.label}</td>
-      <td>${p.passed} / ${p.total}</td>
-      <td>
-        <div class="pct-bar-wrap">
-          <div class="pct-bar-bg"><div class="pct-bar-fill" style="width:${p.pct}%;background:${p.color}"></div></div>
-          <span style="font-size:12px;font-weight:700;color:${p.color};min-width:35px">${p.pct}%</span>
-        </div>
-      </td>
-    </tr>`).join("");
+    const rows = profile.map(p => {
+      const autoTag = p.autoMode === "auto-pass"
+        ? `<span style="font-size:10px;background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">자동가능</span>`
+        : p.autoMode === "auto-fail"
+        ? `<span style="font-size:10px;background:#fee2e2;color:#dc2626;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">자동불가</span>`
+        : `<span style="font-size:10px;background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:700;">직접체크</span>`;
+      return `<tr>
+        <td>${p.label}${autoTag}</td>
+        <td>${p.passed} / ${p.total}</td>
+        <td>
+          <div class="pct-bar-wrap">
+            <div class="pct-bar-bg"><div class="pct-bar-fill" style="width:${p.pct}%;background:${p.color}"></div></div>
+            <span style="font-size:12px;font-weight:700;color:${p.color};min-width:35px">${p.pct}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
     return `<div class="profile-section">
       <div class="section-title">${label} 월령별 프로파일</div>
       <table class="profile-table">
@@ -1278,8 +1345,13 @@ function downloadPDF() {
   function profileRows(profile) {
     return profile.map(p => {
       const c = p.pct >= 80 ? "#16a34a" : p.pct >= 50 ? "#d97706" : "#dc2626";
+      const autoTag = p.autoMode === "auto-pass"
+        ? `<span style="font-size:9px;background:#dcfce7;color:#15803d;border-radius:3px;padding:1px 5px;margin-left:4px;">자동가능</span>`
+        : p.autoMode === "auto-fail"
+        ? `<span style="font-size:9px;background:#fee2e2;color:#dc2626;border-radius:3px;padding:1px 5px;margin-left:4px;">자동불가</span>`
+        : `<span style="font-size:9px;background:#dbeafe;color:#1d4ed8;border-radius:3px;padding:1px 5px;margin-left:4px;">직접체크</span>`;
       return `<tr style="border-bottom:1px solid #e2e8f0;">
-        <td style="padding:7px 10px;">${p.label}</td>
+        <td style="padding:7px 10px;">${p.label}${autoTag}</td>
         <td style="padding:7px 10px;text-align:center;">${p.passed} / ${p.total}</td>
         <td style="padding:7px 10px;">
           <div style="display:flex;align-items:center;gap:6px;">
