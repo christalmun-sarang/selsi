@@ -2,216 +2,162 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SELSI 영·유아 언어발달 검사 (보호자용)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SELSI 언어발달 검사 (보호자용)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
-:root {
-  --primary:#2563eb; --primary-light:#eff6ff; --primary-dark:#1d4ed8;
-  --green:#16a34a; --green-light:#f0fdf4;
-  --red:#dc2626; --red-light:#fef2f2;
-  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
-  --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569;
-  --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
-}
-* { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:'Noto Sans KR',sans-serif; background:#f0f4ff; min-height:100vh; color:var(--slate-800); }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#f0f4ff;min-height:100vh;color:#1e293b}
+.hdr{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;padding:12px 18px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(37,99,235,.3);display:flex;align-items:center;gap:12px}
+.hdr-logo{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 12px;font-weight:900;font-size:16px;letter-spacing:2px}
+.hdr-text .t1{font-size:15px;font-weight:700}
+.hdr-text .t2{font-size:11px;opacity:.75;margin-top:1px}
+.main{max-width:640px;margin:0 auto;padding:20px 14px 80px}
+.card{background:white;border-radius:18px;box-shadow:0 2px 16px rgba(0,0,0,.08);padding:24px 20px}
 
-.app-header {
-  background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 50%,#2563eb 100%);
-  color:white; padding:0; position:sticky; top:0; z-index:100;
-  box-shadow:0 2px 16px rgba(37,99,235,0.25);
-}
-.header-inner { max-width:640px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; gap:12px; }
-.header-logo { background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.3); border-radius:10px; padding:5px 12px; font-weight:900; font-size:16px; letter-spacing:2px; }
-.header-title { font-size:15px; font-weight:700; }
-.header-sub { font-size:11px; opacity:0.75; margin-top:2px; }
+/* spinner */
+.spin-wrap{text-align:center;padding:60px 20px}
+.spinner{width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-.main { max-width:640px; margin:0 auto; padding:20px 14px 60px; }
-.card { background:white; border-radius:18px; box-shadow:0 2px 16px rgba(0,0,0,0.08); padding:24px 20px; }
-.card-title { font-size:18px; font-weight:800; color:var(--slate-900); margin-bottom:6px; }
-.card-sub { font-size:13px; color:var(--slate-500); margin-bottom:20px; line-height:1.6; }
+/* guide */
+.guide-lead{font-size:14px;line-height:1.85;color:#475569;background:#eff6ff;border-left:4px solid #2563eb;border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:14px}
+.box-green{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.box-amber{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.box-title{font-size:13px;font-weight:800;margin-bottom:8px}
+.box-green .box-title{color:#15803d}
+.box-amber .box-title{color:#92400e}
+.chk-list,.ex-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px}
+.chk-list li{font-size:13px;color:#166534;line-height:1.65;padding-left:20px;position:relative}
+.chk-list li::before{content:"✔";position:absolute;left:0;font-weight:700}
+.ex-list li{font-size:12px;color:#78350f;line-height:1.65;padding-left:14px;position:relative}
+.ex-list li::before{content:"•";position:absolute;left:0}
+.btn-start{width:100%;padding:15px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:14px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(37,99,235,.3)}
 
-.progress-bar-wrap { margin-bottom:18px; }
-.progress-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--slate-500); margin-bottom:6px; }
-.progress-bar { height:8px; background:var(--slate-200); border-radius:99px; overflow:hidden; }
-.progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),#22c55e); border-radius:99px; transition:width 0.4s; }
+/* progress */
+.prog-wrap{margin-bottom:18px}
+.prog-meta{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px}
+.prog-bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#2563eb,#22c55e);border-radius:99px;transition:width .4s}
 
-.section-banner {
-  display:flex; align-items:center; gap:12px;
-  background:linear-gradient(135deg,#1e3a8a,#2563eb);
-  color:white; border-radius:14px; padding:14px 18px;
-  margin:8px 0 4px; font-weight:800; font-size:15px;
-  box-shadow:0 3px 12px rgba(37,99,235,0.25);
-}
-.section-banner.expressive { background:linear-gradient(135deg,#065f46,#059669); box-shadow:0 3px 12px rgba(5,150,105,0.25); }
-.banner-icon { font-size:22px; }
-.banner-sub { font-size:11px; font-weight:400; opacity:0.85; margin-top:2px; }
+/* banners */
+.sec-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;border-radius:14px;padding:13px 16px;margin:8px 0 6px;font-weight:800;font-size:14px}
+.sec-banner.exp{background:linear-gradient(135deg,#065f46,#059669)}
+.banner-icon{font-size:20px}
+.banner-sub{font-size:11px;font-weight:400;opacity:.85;margin-top:1px}
+.range-info{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:white;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:12px;line-height:1.7}
 
-.item-row {
-  display:flex; align-items:flex-start; gap:10px;
-  padding:12px 14px; border-radius:11px;
-  border:1.5px solid var(--slate-200); background:var(--slate-50);
-  transition:all 0.15s; margin-bottom:6px;
-}
-.item-row.pass { background:var(--green-light); border-color:#86efac; }
-.item-row.fail { background:#fef2f2; border-color:#fca5a5; }
-.item-content { flex:1; }
-.item-header { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
-.item-id { font-size:10px; font-weight:700; color:var(--slate-400); background:var(--slate-100); padding:2px 6px; border-radius:4px; }
-.item-age-tag { font-size:10px; font-weight:700; color:var(--primary); background:var(--primary-light); padding:2px 7px; border-radius:4px; }
-.item-text { font-size:14px; color:var(--slate-800); line-height:1.55; margin-bottom:8px; }
-.item-note { font-size:11px; color:var(--slate-400); margin-top:2px; }
-.ans-btns { display:flex; gap:8px; margin-top:4px; }
-.ans-btn {
-  flex:1; padding:10px 6px; border-radius:8px; border:1.5px solid var(--slate-200);
-  font-size:14px; font-weight:700; font-family:inherit; cursor:pointer;
-  background:white; color:var(--slate-400); transition:all 0.15s;
-}
-.ans-btn.pass-btn { border-color:#86efac; color:#15803d; background:#f0fdf4; }
-.ans-btn.pass-btn.active { background:#16a34a; color:white; border-color:#16a34a; }
-.ans-btn.fail-btn { border-color:#fca5a5; color:#dc2626; background:#fef2f2; }
-.ans-btn.fail-btn.active { background:#dc2626; color:white; border-color:#dc2626; }
+/* items */
+.item-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:11px;border:1.5px solid #e2e8f0;background:#f8fafc;margin-bottom:7px;transition:all .15s}
+.item-row.pass{background:#f0fdf4;border-color:#86efac}
+.item-row.fail{background:#fef2f2;border-color:#fca5a5}
+.item-content{flex:1}
+.item-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.iid{font-size:10px;font-weight:700;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px}
+.itage{font-size:10px;font-weight:700;color:#2563eb;background:#eff6ff;padding:2px 7px;border-radius:4px}
+.item-text{font-size:14px;color:#1e293b;line-height:1.55;margin-bottom:8px}
+.item-note{font-size:11px;color:#94a3b8;line-height:1.4}
+.ans-btns{display:flex;gap:8px;margin-top:4px}
+.ans-btn{flex:1;padding:10px 6px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;background:white;color:#94a3b8;transition:all .15s}
+.ans-btn.p-btn{border-color:#86efac;color:#15803d;background:#f0fdf4}
+.ans-btn.p-btn.on{background:#16a34a;color:white;border-color:#16a34a}
+.ans-btn.f-btn{border-color:#fca5a5;color:#dc2626;background:#fef2f2}
+.ans-btn.f-btn.on{background:#dc2626;color:white;border-color:#dc2626}
 
-.btn-submit {
-  width:100%; padding:15px; margin-top:20px;
-  background:linear-gradient(135deg,var(--green),#15803d);
-  color:white; border:none; border-radius:14px;
-  font-size:16px; font-weight:800; font-family:inherit;
-  cursor:pointer; box-shadow:0 2px 8px rgba(22,163,74,0.3);
-  transition:all 0.2s;
-}
-.btn-submit:disabled { opacity:0.4; cursor:not-allowed; }
-.btn-submit:not(:disabled):hover { transform:translateY(-1px); }
+/* submit */
+.btn-submit{width:100%;padding:15px;margin-top:20px;background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none;border-radius:14px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .2s}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed}
+.incomplete{margin-top:12px;text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:13px;color:#c2410c;font-weight:600;display:none}
 
-.incomplete-msg {
-  margin-top:12px; text-align:center;
-  background:#fff7ed; border:1px solid #fed7aa; border-radius:10px;
-  padding:10px 14px; font-size:13px; color:#c2410c; font-weight:600;
-}
-
-/* 완료 화면 */
-.done-screen { text-align:center; padding:30px 20px; }
-.done-icon { font-size:60px; margin-bottom:16px; }
-.done-title { font-size:22px; font-weight:900; color:var(--slate-900); margin-bottom:8px; }
-.done-sub { font-size:14px; color:var(--slate-500); line-height:1.7; }
-
-/* 로딩 */
-.loading-screen { text-align:center; padding:60px 20px; }
-.spinner { width:40px; height:40px; border:4px solid var(--slate-200); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* 안내 모달 */
-.guide-box { background:var(--slate-50); border-radius:14px; padding:18px; margin-bottom:20px; border-left:4px solid var(--primary); }
-.guide-text { font-size:14px; line-height:1.85; color:var(--slate-700); }
-.criteria-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
-.criteria-title { font-size:13px; font-weight:800; color:#15803d; margin-bottom:8px; }
-.criteria-list { list-style:none; padding:0; }
-.criteria-list li { font-size:13px; color:#166534; line-height:1.65; padding-left:18px; position:relative; }
-.criteria-list li::before { content:"✔"; position:absolute; left:0; font-weight:700; }
-.example-box { background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
-.example-title { font-size:13px; font-weight:800; color:#92400e; margin-bottom:8px; }
-.example-list { list-style:none; padding:0; }
-.example-list li { font-size:12px; color:#78350f; line-height:1.65; padding-left:14px; position:relative; }
-.example-list li::before { content:"•"; position:absolute; left:0; }
-.btn-start {
-  width:100%; padding:14px;
-  background:linear-gradient(135deg,var(--primary),#1d4ed8);
-  color:white; border:none; border-radius:12px;
-  font-size:16px; font-weight:800; font-family:inherit;
-  cursor:pointer; box-shadow:0 2px 8px rgba(37,99,235,0.3);
-}
+/* done / error */
+.done-wrap,.err-wrap{text-align:center;padding:40px 20px}
+.done-icon{font-size:64px;margin-bottom:16px}
+.done-title{font-size:22px;font-weight:900;color:#0f172a;margin-bottom:8px}
+.done-sub{font-size:14px;color:#64748b;line-height:1.75}
 </style>
 </head>
 <body>
-<header class="app-header">
-  <div class="header-inner">
-    <div class="header-logo">SELSI</div>
-    <div>
-      <div class="header-title">영·유아 언어발달 검사</div>
-      <div class="header-sub">보호자용 — 검사 진행 화면</div>
-    </div>
+<div class="hdr">
+  <div class="hdr-logo">SELSI</div>
+  <div class="hdr-text">
+    <div class="t1">영·유아 언어발달 검사</div>
+    <div class="t2">보호자용 검사 화면</div>
   </div>
-</header>
+</div>
 
 <div class="main">
+
   <!-- 로딩 -->
-  <div class="card" id="page-loading">
-    <div class="loading-screen">
+  <div class="card" id="pg-loading">
+    <div class="spin-wrap">
       <div class="spinner"></div>
-      <div style="font-size:14px;color:var(--slate-500);">검사 정보를 불러오는 중...</div>
+      <div style="font-size:14px;color:#64748b">검사 정보를 불러오는 중...</div>
     </div>
   </div>
 
   <!-- 안내 -->
-  <div class="card" id="page-guide" style="display:none">
-    <div class="card-title">📋 검사 전 안내사항</div>
-    <div class="card-sub" id="child-info-display"></div>
-    <div class="guide-box">
-      <div class="guide-text">
-        다음 문항은 아이의 평소 <strong>언어 및 의사소통 능력</strong>을 확인하기 위한 질문입니다.<br><br>
-        각 항목을 읽고 아이가 현재 실제로 할 수 있는 경우 <strong>"가능"</strong>, 하지 못하거나 확실하지 않은 경우 <strong>"불가능"</strong>으로 표시해 주세요.
-      </div>
+  <div class="card" id="pg-guide" style="display:none">
+    <div style="font-size:19px;font-weight:800;color:#0f172a;margin-bottom:6px">📋 검사 전 안내</div>
+    <div style="font-size:13px;color:#64748b;margin-bottom:16px" id="child-info"></div>
+    <div class="guide-lead">
+      다음 문항은 아이의 평소 <strong>언어 및 의사소통 능력</strong>을 확인하기 위한 질문입니다.<br><br>
+      각 항목을 읽고 아이가 현재 실제로 할 수 있으면 <strong>"가능"</strong>, 하지 못하거나 확실하지 않으면 <strong>"불가능"</strong>으로 표시해 주세요.
     </div>
-    <div class="criteria-box">
-      <div class="criteria-title">✅ 체크 기준</div>
-      <ul class="criteria-list">
+    <div class="box-green">
+      <div class="box-title">✅ 체크 기준</div>
+      <ul class="chk-list">
         <li>최근 1~2개월 동안의 평소 모습을 기준으로 합니다.</li>
         <li>우연히 1회 했던 행동은 제외합니다.</li>
         <li>반복적으로 안정적으로 할 수 있어야 "가능"입니다.</li>
-        <li>보호자가 시켜서 겨우 하는 경우보다 자연스럽게 수행 가능한지를 기준으로 합니다.</li>
+        <li>시켜서 겨우 하는 것보다 자연스럽게 수행 가능한지가 기준입니다.</li>
         <li>확실하지 않으면 "불가능"으로 체크해 주세요.</li>
         <li>아이가 현재 사용하는 행동/언어만 표시합니다.</li>
       </ul>
     </div>
-    <div class="example-box">
-      <div class="example-title">💡 예시</div>
-      <ul class="example-list">
-        <li>이름 부르면 돌아본다 → 대부분 상황에서 반복적으로 가능하면 <strong>"가능"</strong></li>
-        <li>엄마 따라 "맘마"를 한 번 흉내냄 → 반복적 사용이 아니면 <strong>"불가능"</strong></li>
+    <div class="box-amber">
+      <div class="box-title">💡 예시</div>
+      <ul class="ex-list">
+        <li>이름 부르면 돌아본다 → 대부분 상황에서 반복 가능하면 <strong>"가능"</strong></li>
+        <li>엄마 따라 "맘마" 한 번 흉내냄 → 반복 사용이 아니면 <strong>"불가능"</strong></li>
       </ul>
     </div>
     <button class="btn-start" onclick="startTest()">✔ 확인했습니다 — 검사 시작</button>
   </div>
 
   <!-- 검사 -->
-  <div class="card" id="page-test" style="display:none">
-    <div class="card-title">📝 검사 진행</div>
-    <div class="progress-bar-wrap">
-      <div class="progress-meta">
-        <span id="prog-text">0 / 0 문항 완료</span>
-        <span id="prog-pct">0%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="card" id="pg-test" style="display:none">
+    <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:14px">📝 검사 진행</div>
+    <div class="prog-wrap">
+      <div class="prog-meta"><span id="prog-text">0 / 0 완료</span><span id="prog-pct">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
     </div>
-    <div id="items-container"></div>
-    <button class="btn-submit" id="btn-submit" onclick="submitResult()" disabled>✅ 검사 완료 — 결과 전송</button>
-    <div class="incomplete-msg" id="incomplete-msg" style="display:none">
-      ⚠️ 아직 <span id="remaining-count">0</span>개 문항이 남아있습니다.
-    </div>
+    <div id="items-wrap"></div>
+    <button class="btn-submit" id="btn-done" onclick="submitResult()" disabled>✅ 검사 완료 — 결과 전송</button>
+    <div class="incomplete" id="incomplete-msg">⚠️ 아직 <span id="remain-cnt">0</span>개 문항이 남아있습니다.</div>
   </div>
 
   <!-- 완료 -->
-  <div class="card" id="page-done" style="display:none">
-    <div class="done-screen">
+  <div class="card" id="pg-done" style="display:none">
+    <div class="done-wrap">
       <div class="done-icon">🎉</div>
       <div class="done-title">검사가 완료되었습니다!</div>
-      <div class="done-sub" style="margin-top:12px;">
+      <div class="done-sub" style="margin-top:10px">
         결과가 병원으로 전송되었습니다.<br>
-        선생님께서 결과를 확인하실 것입니다.<br><br>
-        <span style="font-size:12px;color:var(--slate-400);">이 창을 닫으셔도 됩니다.</span>
+        선생님께서 확인하실 예정입니다.<br><br>
+        <span style="font-size:12px;color:#94a3b8">이 창을 닫으셔도 됩니다.</span>
       </div>
     </div>
   </div>
 
   <!-- 오류 -->
-  <div class="card" id="page-error" style="display:none">
-    <div style="text-align:center;padding:30px 20px;">
-      <div style="font-size:40px;margin-bottom:14px;">⚠️</div>
-      <div style="font-size:17px;font-weight:800;color:var(--slate-900);margin-bottom:8px;">검사 링크 오류</div>
-      <div class="card-sub" id="error-msg">올바른 검사 링크인지 확인해 주세요.</div>
+  <div class="card" id="pg-error" style="display:none">
+    <div class="err-wrap">
+      <div style="font-size:48px;margin-bottom:14px">⚠️</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:8px">검사 링크 오류</div>
+      <div style="font-size:14px;color:#64748b" id="err-msg">올바른 검사 링크인지 확인해 주세요.</div>
     </div>
   </div>
+
 </div>
 
 <script>
@@ -357,22 +303,18 @@ const AGE_GROUPS = [
   { id:"30-36", label:"30~36개월" },
 ];
 
-// ── 상태 ──
-let state = {
-  currentPage: "intro",
-  childName: "", birthYear: "", birthMonth: "", gender: "", examiner: "", examDate: "",
-  activeTab: "receptive",
-const SUPABASE_URL = "https://algfzvbqxxvcaunlsrxd.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s";
 
-async function sbFetch(path, opts = {}) {
-  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+// ── Supabase ──
+const SB_URL = "https://algfzvbqxxvcaunlsrxd.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s";
+
+async function sbFetch(path, opts={}) {
+  const res = await fetch(SB_URL + "/rest/v1/" + path, {
     headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + SUPABASE_KEY,
+      "apikey": SB_KEY,
+      "Authorization": "Bearer " + SB_KEY,
       "Content-Type": "application/json",
-      "Prefer": opts.prefer || "return=representation",
-      ...(opts.headers || {})
+      "Prefer": opts.prefer || "return=representation"
     },
     method: opts.method || "GET",
     body: opts.body ? JSON.stringify(opts.body) : undefined
@@ -381,66 +323,71 @@ async function sbFetch(path, opts = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-// URL 파라미터 파싱
-const params = new URLSearchParams(location.search);
+// ── URL 파라미터 ──
+const params   = new URLSearchParams(location.search);
 const sessionId = params.get("sid");
-const childName = decodeURIComponent(params.get("name") || "");
-const childAge  = parseInt(params.get("age") || "0");
+const pName    = decodeURIComponent(params.get("name") || "");
+const pAge     = parseInt(params.get("age") || "0");
 
 let sessionData = null;
 let answers = {};
 
-// 페이지 표시 헬퍼
+// ── 페이지 전환 ──
 function showPage(id) {
-  ["page-loading","page-guide","page-test","page-done","page-error"]
-    .forEach(p => document.getElementById(p).style.display = p === id ? "block" : "none");
+  ["pg-loading","pg-guide","pg-test","pg-done","pg-error"]
+    .forEach(p => document.getElementById(p).style.display = p===id?"block":"none");
 }
 
-// 초기화
+// ── 초기화 ──
 window.onload = async () => {
+  if (!sessionId && (!pName || !pAge)) {
+    showPage("pg-error");
+    document.getElementById("err-msg").textContent = "검사 링크에 필요한 정보가 없습니다. 병원에서 받은 링크를 다시 확인해 주세요.";
+    return;
+  }
+
   if (!sessionId) {
-    // sid 없으면 name/age만으로 진행 (직접 링크 공유 시)
-    if (!childName || !childAge) {
-      showPage("page-error");
-      document.getElementById("error-msg").textContent = "검사 링크에 필요한 정보가 없습니다. 병원에서 받은 링크를 다시 확인해 주세요.";
-      return;
-    }
-    sessionData = { child_name: childName, child_age: childAge };
+    // sid 없이 name+age만으로 진행
+    sessionData = { child_name: pName, child_age: pAge };
     showGuide();
     return;
   }
 
-  // Supabase에서 세션 조회
   try {
-    const rows = await sbFetch(`selsi_sessions?session_id=eq.${sessionId}&select=*`);
-    if (!rows || rows.length === 0) throw new Error("세션 없음");
+    const rows = await sbFetch("selsi_sessions?session_id=eq." + sessionId + "&select=*");
+    if (!rows || rows.length === 0) {
+      // 세션 없어도 파라미터로 진행
+      sessionData = { child_name: pName, child_age: pAge };
+      showGuide();
+      return;
+    }
     sessionData = rows[0];
     if (sessionData.status === "completed") {
-      showPage("page-done");
+      showPage("pg-done");
       return;
     }
     showGuide();
   } catch(e) {
-    // 세션 조회 실패해도 파라미터 기반으로 진행
-    sessionData = { child_name: childName, child_age: childAge };
+    // Supabase 오류여도 진행
+    sessionData = { child_name: pName, child_age: pAge };
     showGuide();
   }
 };
 
 function showGuide() {
-  showPage("page-guide");
+  showPage("pg-guide");
   const age = sessionData.child_age;
-  document.getElementById("child-info-display").textContent =
-    `아동 이름: ${sessionData.child_name}  |  생활연령: ${age}개월 (${Math.floor(age/12)}세 ${age%12}개월)`;
+  document.getElementById("child-info").textContent =
+    "아동: " + sessionData.child_name + "  |  생활연령: " + age + "개월 (" + Math.floor(age/12) + "세 " + (age%12) + "개월)";
 }
 
 function startTest() {
-  showPage("page-test");
+  showPage("pg-test");
   renderItems();
 }
 
 // ── 월령 범위 ──
-function getItemZone(item) {
+function zone(item) {
   const age = sessionData.child_age;
   const lo = age - 6, hi = age + 6;
   if (item.mo < lo) return "below";
@@ -448,129 +395,116 @@ function getItemZone(item) {
   return "active";
 }
 
-function getActiveItems(type) {
-  return ITEMS[type].filter(i => getItemZone(i) === "active").sort((a,b) => a.mo - b.mo);
+function getActive(type) {
+  return ITEMS[type].filter(i => zone(i) === "active").sort((a,b) => a.mo - b.mo);
 }
 
-function applyAutoAnswers() {
+function autoFill() {
   [...ITEMS.receptive, ...ITEMS.expressive].forEach(item => {
-    const zone = getItemZone(item);
-    if (zone === "below") answers[item.id] = true;
-    else if (zone === "above") answers[item.id] = false;
+    const z = zone(item);
+    if (z === "below") answers[item.id] = true;
+    else if (z === "above") answers[item.id] = false;
   });
 }
 
+// ── 문항 렌더링 ──
 function renderItems() {
-  applyAutoAnswers();
+  autoFill();
   const age = sessionData.child_age;
-  const lo = age - 6, hi = age + 6;
-  const rActive = getActiveItems("receptive");
-  const eActive = getActiveItems("expressive");
+  const lo = age-6, hi = age+6;
+  const rA = getActive("receptive");
+  const eA = getActive("expressive");
 
   function itemHTML(item) {
-    const val = answers[item.id];
-    return `<div class="item-row ${val===true?'pass':val===false?'fail':''}" id="row-${item.id}">
-      <div class="item-content">
-        <div class="item-header">
-          <span class="item-id">${item.id}</span>
-          <span class="item-age-tag">${item.mo}개월</span>
-        </div>
-        <div class="item-text">${item.text}</div>
-        ${item.note ? `<div class="item-note">📎 ${item.note}</div>` : ""}
-        <div class="ans-btns">
-          <button class="ans-btn pass-btn ${val===true?'active':''}" onclick="setAns('${item.id}',true)">✅ 가능</button>
-          <button class="ans-btn fail-btn ${val===false?'active':''}" onclick="setAns('${item.id}',false)">❌ 불가능</button>
-        </div>
-      </div>
-    </div>`;
+    const v = answers[item.id];
+    return '<div class="item-row ' + (v===true?"pass":v===false?"fail":"") + '" id="row-'+item.id+'">' +
+      '<div class="item-content">' +
+        '<div class="item-hdr">' +
+          '<span class="iid">'+item.id+'</span>' +
+          '<span class="itage">'+item.mo+'개월</span>' +
+        '</div>' +
+        '<div class="item-text">'+item.text+'</div>' +
+        (item.note?'<div class="item-note">📎 '+item.note+'</div>':'') +
+        '<div class="ans-btns">' +
+          '<button class="ans-btn p-btn'+(v===true?" on":"") + '" onclick="setAns(\''+item.id+'\',true)">✅ 가능</button>' +
+          '<button class="ans-btn f-btn'+(v===false?" on":"") + '" onclick="setAns(\''+item.id+'\',false)">❌ 불가능</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }
 
-  let html = `
-  <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:white;border-radius:12px;
-    padding:12px 16px;margin-bottom:14px;font-size:12px;line-height:1.7;">
-    🎯 생활연령 <strong>${age}개월</strong> 기준 · 직접 체크 문항: <strong>${rActive.length + eActive.length}개</strong>
-    (${lo}~${hi}개월 범위)
-  </div>`;
+  let html = '<div class="range-info">🎯 생활연령 <strong>'+age+'개월</strong> 기준 · 직접 체크 범위: <strong>'+lo+'~'+hi+'개월</strong> · 체크 문항 <strong>'+(rA.length+eA.length)+'개</strong></div>';
 
-  html += `<div class="section-banner"><span class="banner-icon">🎧</span>
-    <div><div>수용언어 검사</div>
-    <div class="banner-sub">체크 대상 ${rActive.length}문항</div></div></div>`;
-  html += rActive.map(itemHTML).join("");
+  html += '<div class="sec-banner"><span class="banner-icon">🎧</span><div><div>수용언어 검사</div><div class="banner-sub">직접 체크 '+rA.length+'문항</div></div></div>';
+  if (rA.length === 0) html += '<div style="text-align:center;padding:14px;color:#94a3b8;font-size:13px;">✅ 수용언어 문항이 자동 처리되었습니다.</div>';
+  else html += rA.map(itemHTML).join("");
 
-  html += `<div class="section-banner expressive" style="margin-top:20px;"><span class="banner-icon">🗣️</span>
-    <div><div>표현언어 검사</div>
-    <div class="banner-sub">체크 대상 ${eActive.length}문항</div></div></div>`;
-  html += eActive.map(itemHTML).join("");
+  html += '<div class="sec-banner exp" style="margin-top:20px"><span class="banner-icon">🗣️</span><div><div>표현언어 검사</div><div class="banner-sub">직접 체크 '+eA.length+'문항</div></div></div>';
+  if (eA.length === 0) html += '<div style="text-align:center;padding:14px;color:#94a3b8;font-size:13px;">✅ 표현언어 문항이 자동 처리되었습니다.</div>';
+  else html += eA.map(itemHTML).join("");
 
-  document.getElementById("items-container").innerHTML = html;
-  updateProgress();
+  document.getElementById("items-wrap").innerHTML = html;
+  updateProg();
 }
 
 function setAns(id, val) {
   answers[id] = val;
-  const row = document.getElementById("row-" + id);
+  const row = document.getElementById("row-"+id);
   if (row) {
-    row.className = "item-row " + (val ? "pass" : "fail");
-    row.querySelectorAll(".pass-btn").forEach(b => b.classList.toggle("active", val === true));
-    row.querySelectorAll(".fail-btn").forEach(b => b.classList.toggle("active", val === false));
+    row.className = "item-row " + (val?"pass":"fail");
+    row.querySelectorAll(".p-btn").forEach(b => b.classList.toggle("on", val===true));
+    row.querySelectorAll(".f-btn").forEach(b => b.classList.toggle("on", val===false));
   }
-  updateProgress();
+  updateProg();
 }
 
-function updateProgress() {
-  const active = [...getActiveItems("receptive"), ...getActiveItems("expressive")];
+function updateProg() {
+  const active = [...getActive("receptive"), ...getActive("expressive")];
   const total = active.length;
   const done  = active.filter(i => answers[i.id] !== undefined).length;
-  const pct   = total === 0 ? 100 : Math.round(done/total*100);
-  document.getElementById("prog-text").textContent = `${done} / ${total} 문항 완료`;
-  document.getElementById("prog-pct").textContent  = `${pct}%`;
+  const pct   = total===0 ? 100 : Math.round(done/total*100);
+  const remain= total - done;
+  document.getElementById("prog-text").textContent = done + " / " + total + " 완료";
+  document.getElementById("prog-pct").textContent  = pct + "%";
   document.getElementById("prog-fill").style.width = pct + "%";
-  const btn = document.getElementById("btn-submit");
+  const btn = document.getElementById("btn-done");
   const msg = document.getElementById("incomplete-msg");
-  if (done === total) {
+  if (remain === 0) {
     btn.disabled = false;
     msg.style.display = "none";
   } else {
     btn.disabled = true;
-    document.getElementById("remaining-count").textContent = total - done;
+    document.getElementById("remain-cnt").textContent = remain;
   }
 }
 
+// ── 결과 전송 ──
 async function submitResult() {
-  const btn = document.getElementById("btn-submit");
+  const btn = document.getElementById("btn-done");
   btn.textContent = "⏳ 전송 중...";
   btn.disabled = true;
-
-  const payload = {
-    answers: answers,
-    status: "completed",
-    completed_at: new Date().toISOString()
-  };
-
+  const payload = { answers, status: "completed", completed_at: new Date().toISOString() };
   try {
     if (sessionId) {
-      await sbFetch(`selsi_sessions?session_id=eq.${sessionId}`, {
-        method: "PATCH",
-        body: payload,
-        prefer: "return=minimal"
+      await sbFetch("selsi_sessions?session_id=eq."+sessionId, {
+        method: "PATCH", body: payload, prefer: "return=minimal"
       });
     } else {
-      // sid 없이 직접 접근한 경우 — 새 레코드 삽입
       await sbFetch("selsi_sessions", {
         method: "POST",
         body: {
           session_id: "direct_" + Date.now(),
           child_name: sessionData.child_name,
-          child_age: sessionData.child_age,
+          child_age:  sessionData.child_age,
           status: "completed",
-          answers: answers,
+          answers,
           completed_at: new Date().toISOString()
         }
       });
     }
-    showPage("page-done");
+    showPage("pg-done");
   } catch(e) {
-    alert("전송 중 오류가 발생했습니다: " + e.message + "\n\n잠시 후 다시 시도해 주세요.");
+    alert("전송 오류: " + e.message + "\n\n잠시 후 다시 시도해 주세요.");
     btn.textContent = "✅ 검사 완료 — 결과 전송";
     btn.disabled = false;
   }
