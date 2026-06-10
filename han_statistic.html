@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>병원 가계 통계</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a18; min-height: 100vh; }
+
+  .header { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 500; }
+  .header .subtitle { font-size: 13px; color: #888780; margin-top: 2px; }
+
+  .status-bar { background: #eaf3de; border-bottom: 0.5px solid #c0dd97; padding: 8px 24px; font-size: 13px; color: #3b6d11; display: flex; align-items: center; gap: 8px; }
+  .status-bar.error { background: #fcebeb; border-color: #f09595; color: #a32d2d; }
+  .status-bar.loading { background: #e6f1fb; border-color: #85b7eb; color: #185fa5; }
+
+  .controls { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 12px 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  select, button { border: 0.5px solid #b4b2a9; border-radius: 8px; padding: 6px 14px; font-size: 14px; background: #fff; cursor: pointer; color: #1a1a18; }
+  button { background: #1a1a18; color: #fff; border-color: #1a1a18; font-weight: 500; }
+  button:hover { background: #333; }
+  button.secondary { background: #fff; color: #1a1a18; border-color: #b4b2a9; }
+  button.secondary:hover { background: #f5f5f0; }
+  .label { font-size: 13px; color: #888780; }
+
+  .main { padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
+
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .metric-card { background: #f1efe8; border-radius: 8px; padding: 14px 16px; }
+  .metric-card .label { font-size: 12px; color: #888780; margin-bottom: 4px; }
+  .metric-card .value { font-size: 22px; font-weight: 500; color: #1a1a18; }
+  .metric-card .sub { font-size: 12px; color: #888780; margin-top: 2px; }
+  .metric-card .delta { font-size: 12px; margin-top: 3px; }
+  .delta.up { color: #3b6d11; }
+  .delta.down { color: #a32d2d; }
+
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 16px 18px; }
+  .chart-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #444441; }
+  .chart-card.wide { grid-column: 1 / -1; }
+
+  .table-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+  .table-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #444441; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #888780; font-weight: 500; padding: 6px 8px; border-bottom: 0.5px solid #ddddd5; }
+  td { padding: 8px 8px; border-bottom: 0.5px solid #f1efe8; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: #f5f5f0; }
+
+  .upload-section { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .upload-section h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+  .sql-block { background: #f5f5f0; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 12px; line-height: 1.6; color: #444441; overflow-x: auto; white-space: pre; margin-bottom: 12px; border: 0.5px solid #ddddd5; }
+  .copy-btn { font-size: 12px; padding: 4px 12px; }
+
+  #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); align-items: center; justify-content: center; z-index: 100; flex-direction: column; gap: 12px; }
+  #loading-overlay.visible { display: flex; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #ddddd5; border-top-color: #1a1a18; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <span style="font-size:14px;color:#888780;">데이터 불러오는 중...</span>
+</div>
+
+<div class="header">
+  <div>
+    <h1>🏥 병원 가계 통계</h1>
+    <div class="subtitle">Han_statics · Supabase</div>
+  </div>
+  <button class="secondary" onclick="refreshData()">↻ 새로고침</button>
+</div>
+
+<div id="status-bar" class="status-bar loading">⏳ Supabase 연결 중...</div>
+
+<div class="controls">
+  <span class="label">기간:</span>
+  <select id="view-type" onchange="updateView()">
+    <option value="monthly">월별</option>
+    <option value="yearly">연도별</option>
+    <option value="daily">일별 (최근 30일)</option>
+  </select>
+  <select id="year-select" onchange="updateView()">
+    <option value="2026">2026</option>
+    <option value="2025" selected>2025</option>
+    <option value="2024">2024</option>
+    <option value="2023">2023</option>
+    <option value="2022">2022</option>
+    <option value="2021">2021</option>
+    <option value="2020">2020</option>
+    <option value="2019">2019</option>
+    <option value="2018">2018</option>
+    <option value="2017">2017</option>
+    <option value="2016">2016</option>
+  </select>
+  <button onclick="updateView()">조회</button>
+</div>
+
+<div class="main">
+  <div class="metric-grid" id="metrics">
+    <div class="metric-card"><div class="label">총 매출</div><div class="value" id="m-revenue">-</div><div class="sub" id="m-revenue-sub"></div></div>
+    <div class="metric-card"><div class="label">총 환자수</div><div class="value" id="m-patients">-</div><div class="sub" id="m-patients-sub"></div></div>
+    <div class="metric-card"><div class="label">일평균 매출</div><div class="value" id="m-avg-revenue">-</div></div>
+    <div class="metric-card"><div class="label">일평균 환자수</div><div class="value" id="m-avg-patients">-</div></div>
+    <div class="metric-card"><div class="label">초진 환자</div><div class="value" id="m-new">-</div></div>
+    <div class="metric-card"><div class="label">청구액 합계</div><div class="value" id="m-claim">-</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card wide">
+      <h3 id="revenue-chart-title">월별 매출</h3>
+      <div style="position:relative; height:260px;">
+        <canvas id="revenueChart" role="img" aria-label="매출 추이 차트">매출 데이터 차트</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3 id="patient-chart-title">월별 환자수</h3>
+      <div style="position:relative; height:220px;">
+        <canvas id="patientChart" role="img" aria-label="환자수 추이 차트">환자수 데이터 차트</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>결제 수단 비율</h3>
+      <div style="position:relative; height:220px;">
+        <canvas id="paymentChart" role="img" aria-label="결제 수단 비율 차트">결제수단 비율</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h3 id="table-title">상세 데이터</h3>
+    <div style="overflow-x:auto;">
+      <table id="data-table">
+        <thead><tr id="table-head"></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="upload-section">
+    <h3>📥 데이터 업로드 가이드</h3>
+    <p style="font-size:13px;color:#888780;margin-bottom:12px;">아래 SQL을 Supabase SQL Editor에서 먼저 실행하세요 (테이블 컬럼 추가)</p>
+    <div class="sql-block" id="sql-display">ALTER TABLE "Han_statics"
+  ADD COLUMN IF NOT EXISTS date DATE,
+  ADD COLUMN IF NOT EXISTS day_of_week TEXT,
+  ADD COLUMN IF NOT EXISTS total_patients INTEGER,
+  ADD COLUMN IF NOT EXISTS new_patients INTEGER,
+  ADD COLUMN IF NOT EXISTS return_patients INTEGER,
+  ADD COLUMN IF NOT EXISTS daily_revenue BIGINT,
+  ADD COLUMN IF NOT EXISTS cash INTEGER,
+  ADD COLUMN IF NOT EXISTS card INTEGER,
+  ADD COLUMN IF NOT EXISTS insurance_claim BIGINT,
+  ADD COLUMN IF NOT EXISTS deposit INTEGER;
+
+ALTER TABLE "Han_statics"
+  ADD CONSTRAINT han_statics_date_unique UNIQUE (date);
+
+CREATE INDEX IF NOT EXISTS idx_han_statics_date ON "Han_statics" (date);</div>
+    <button class="secondary copy-btn" onclick="copySQL()">SQL 복사</button>
+    <p style="font-size:13px;color:#888780;margin-top:12px;">그 후 아래 Python 스크립트로 CSV 데이터를 업로드하세요.</p>
+    <div class="sql-block">import pandas as pd, json, requests
+
+SUPABASE_URL = "https://algfzvbqxxvcaunlsrxd.supabase.co"
+SUPABASE_KEY = "YOUR_SERVICE_ROLE_KEY"  # Supabase > Settings > API
+
+df = pd.read_csv("병원가계통계앱개발자료_-_기초자료.csv")
+# ... (아래 Python 파일 참조)</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://algfzvbqxxvcaunlsrxd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MTc3NzMsImV4cCI6MjA2NTE5Mzc3M30.fGBx0rFIUBMTfXwuT1N3xE3yP9bJI1VItG38LjFdaWY';
+
+let revenueChart, patientChart, paymentChart;
+let allData = [];
+
+async function fetchData(year) {
+  const start = `${year}-01-01`;
+  const end = `${year}-12-31`;
+  const url = `${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${start}&date=lte.${end}&order=date.asc&limit=400`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+async function fetchAllYears() {
+  const url = `${SUPABASE_URL}/rest/v1/Han_statics?select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+function fmt(n) {
+  if (n === null || n === undefined) return '-';
+  if (n >= 100000000) return (n/100000000).toFixed(1) + '억';
+  if (n >= 10000) return (n/10000).toFixed(0) + '만';
+  return n.toLocaleString();
+}
+function fmtFull(n) {
+  if (!n) return '-';
+  return n.toLocaleString() + '원';
+}
+
+function aggregateMonthly(data) {
+  const months = {};
+  for (const r of data) {
+    if (!r.date) continue;
+    const m = r.date.slice(0, 7);
+    if (!months[m]) months[m] = { revenue: 0, patients: 0, new_patients: 0, cash: 0, card: 0, claim: 0, days: 0 };
+    months[m].revenue += r.daily_revenue || 0;
+    months[m].patients += r.total_patients || 0;
+    months[m].new_patients += r.new_patients || 0;
+    months[m].cash += r.cash || 0;
+    months[m].card += r.card || 0;
+    months[m].claim += r.insurance_claim || 0;
+    if (r.daily_revenue > 0) months[m].days++;
+  }
+  return Object.entries(months).sort((a,b) => a[0] > b[0] ? 1 : -1);
+}
+
+function aggregateYearly(data) {
+  const years = {};
+  for (const r of data) {
+    if (!r.date) continue;
+    const y = r.date.slice(0, 4);
+    if (!years[y]) years[y] = { revenue: 0, patients: 0, new_patients: 0, cash: 0, card: 0, claim: 0, days: 0 };
+    years[y].revenue += r.daily_revenue || 0;
+    years[y].patients += r.total_patients || 0;
+    years[y].new_patients += r.new_patients || 0;
+    years[y].cash += r.cash || 0;
+    years[y].card += r.card || 0;
+    years[y].claim += r.insurance_claim || 0;
+    if (r.daily_revenue > 0) years[y].days++;
+  }
+  return Object.entries(years).sort((a,b) => a[0] > b[0] ? 1 : -1);
+}
+
+function updateMetrics(data) {
+  const totalRev = data.reduce((s, r) => s + (r.daily_revenue || 0), 0);
+  const totalPat = data.reduce((s, r) => s + (r.total_patients || 0), 0);
+  const totalNew = data.reduce((s, r) => s + (r.new_patients || 0), 0);
+  const totalClaim = data.reduce((s, r) => s + (r.insurance_claim || 0), 0);
+  const workDays = data.filter(r => r.daily_revenue > 0).length;
+
+  document.getElementById('m-revenue').textContent = fmt(totalRev);
+  document.getElementById('m-revenue-sub').textContent = fmtFull(totalRev);
+  document.getElementById('m-patients').textContent = totalPat.toLocaleString() + '명';
+  document.getElementById('m-patients-sub').textContent = `진료일 ${workDays}일`;
+  document.getElementById('m-avg-revenue').textContent = workDays ? fmt(Math.round(totalRev / workDays)) : '-';
+  document.getElementById('m-avg-patients').textContent = workDays ? Math.round(totalPat / workDays) + '명' : '-';
+  document.getElementById('m-new').textContent = totalNew.toLocaleString() + '명';
+  document.getElementById('m-claim').textContent = fmt(totalClaim);
+}
+
+function destroyChart(chart) { if (chart) chart.destroy(); }
+
+function drawRevenueChart(labels, revenues, title) {
+  destroyChart(revenueChart);
+  document.getElementById('revenue-chart-title').textContent = title;
+  revenueChart = new Chart(document.getElementById('revenueChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: '매출',
+        data: revenues.map(v => Math.round(v / 10000)),
+        backgroundColor: '#185fa5',
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { autoSkip: false, maxRotation: 45, font: { size: 11 } } },
+        y: { ticks: { callback: v => v + '만' } }
+      }
+    }
+  });
+}
+
+function drawPatientChart(labels, patients, title) {
+  destroyChart(patientChart);
+  document.getElementById('patient-chart-title').textContent = title;
+  patientChart = new Chart(document.getElementById('patientChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '환자수',
+        data: patients,
+        borderColor: '#3b6d11',
+        backgroundColor: 'rgba(59,109,17,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12, font: { size: 11 } } } }
+    }
+  });
+}
+
+function drawPaymentChart(cash, card, claim) {
+  destroyChart(paymentChart);
+  paymentChart = new Chart(document.getElementById('paymentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['현금', '카드', '건보청구'],
+      datasets: [{
+        data: [Math.round(cash/10000), Math.round(card/10000), Math.round(claim/10000)],
+        backgroundColor: ['#378add', '#3b6d11', '#ba7517'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 10 } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toLocaleString() + '만원' } }
+      }
+    }
+  });
+}
+
+function renderMonthlyTable(rows) {
+  document.getElementById('table-title').textContent = '월별 상세';
+  document.getElementById('table-head').innerHTML = `<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = rows.map(([m, d]) => `<tr>
+    <td>${m}</td>
+    <td class="num">${d.revenue.toLocaleString()}</td>
+    <td class="num">${d.patients.toLocaleString()}</td>
+    <td class="num">${d.new_patients.toLocaleString()}</td>
+    <td class="num">${d.cash.toLocaleString()}</td>
+    <td class="num">${d.card.toLocaleString()}</td>
+    <td class="num">${d.claim.toLocaleString()}</td>
+    <td class="num">${d.days}</td>
+  </tr>`).join('');
+}
+
+function renderYearlyTable(rows) {
+  document.getElementById('table-title').textContent = '연도별 상세';
+  document.getElementById('table-head').innerHTML = `<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = rows.map(([y, d]) => `<tr>
+    <td>${y}</td>
+    <td class="num">${d.revenue.toLocaleString()}</td>
+    <td class="num">${d.patients.toLocaleString()}</td>
+    <td class="num">${d.new_patients.toLocaleString()}</td>
+    <td class="num">${d.days ? Math.round(d.revenue/d.days).toLocaleString() : '-'}</td>
+    <td class="num">${d.days ? Math.round(d.patients/d.days) : '-'}</td>
+    <td class="num">${d.days}</td>
+  </tr>`).join('');
+}
+
+function renderDailyTable(data) {
+  document.getElementById('table-title').textContent = '일별 상세 (최근 30일)';
+  const recent = [...data].sort((a,b) => b.date > a.date ? 1 : -1).slice(0, 30);
+  document.getElementById('table-head').innerHTML = `<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = recent.map(r => `<tr>
+    <td>${r.date}</td>
+    <td>${r.day_of_week || ''}</td>
+    <td class="num">${(r.daily_revenue||0).toLocaleString()}</td>
+    <td class="num">${r.total_patients || 0}</td>
+    <td class="num">${r.new_patients || 0}</td>
+    <td class="num">${(r.cash||0).toLocaleString()}</td>
+    <td class="num">${(r.card||0).toLocaleString()}</td>
+    <td class="num">${(r.insurance_claim||0).toLocaleString()}</td>
+  </tr>`).join('');
+}
+
+function setStatus(msg, type = 'success') {
+  const el = document.getElementById('status-bar');
+  el.className = `status-bar ${type}`;
+  el.textContent = msg;
+}
+
+async function updateView() {
+  const viewType = document.getElementById('view-type').value;
+  const year = document.getElementById('year-select').value;
+  document.getElementById('loading-overlay').classList.add('visible');
+
+  try {
+    let data;
+    if (viewType === 'yearly') {
+      data = allData.length ? allData : await fetchAllYears();
+      if (!allData.length) allData = data;
+      const rows = aggregateYearly(data);
+      const labels = rows.map(([y]) => y);
+      const revenues = rows.map(([, d]) => d.revenue);
+      const patients = rows.map(([, d]) => d.patients);
+      const totCash = rows.reduce((s, [, d]) => s + d.cash, 0);
+      const totCard = rows.reduce((s, [, d]) => s + d.card, 0);
+      const totClaim = rows.reduce((s, [, d]) => s + d.claim, 0);
+      updateMetrics(data);
+      drawRevenueChart(labels, revenues, '연도별 매출');
+      drawPatientChart(labels, patients, '연도별 환자수');
+      drawPaymentChart(totCash, totCard, totClaim);
+      renderYearlyTable(rows);
+    } else if (viewType === 'monthly') {
+      data = await fetchData(year);
+      const rows = aggregateMonthly(data);
+      const labels = rows.map(([m]) => m.slice(5) + '월');
+      const revenues = rows.map(([, d]) => d.revenue);
+      const patients = rows.map(([, d]) => d.patients);
+      const totCash = rows.reduce((s, [, d]) => s + d.cash, 0);
+      const totCard = rows.reduce((s, [, d]) => s + d.card, 0);
+      const totClaim = rows.reduce((s, [, d]) => s + d.claim, 0);
+      updateMetrics(data);
+      drawRevenueChart(labels, revenues, `${year}년 월별 매출`);
+      drawPatientChart(labels, patients, `${year}년 월별 환자수`);
+      drawPaymentChart(totCash, totCard, totClaim);
+      renderMonthlyTable(rows);
+    } else {
+      data = await fetchData(year);
+      updateMetrics(data);
+      const sorted = [...data].filter(r => r.daily_revenue > 0).sort((a,b) => a.date > b.date ? 1 : -1);
+      const labels = sorted.slice(-30).map(r => r.date.slice(5));
+      const revenues = sorted.slice(-30).map(r => r.daily_revenue || 0);
+      const patients = sorted.slice(-30).map(r => r.total_patients || 0);
+      const totCash = data.reduce((s, r) => s + (r.cash||0), 0);
+      const totCard = data.reduce((s, r) => s + (r.card||0), 0);
+      const totClaim = data.reduce((s, r) => s + (r.insurance_claim||0), 0);
+      drawRevenueChart(labels, revenues, `${year}년 일별 매출 (최근 30일)`);
+      drawPatientChart(labels, patients, `${year}년 일별 환자수`);
+      drawPaymentChart(totCash, totCard, totClaim);
+      renderDailyTable(data);
+    }
+    setStatus(`✓ 데이터 로드 완료 · ${data.length}개 레코드`, 'success');
+  } catch (err) {
+    setStatus(`⚠ 오류: ${err.message} — 데이터가 아직 업로드되지 않았을 수 있습니다`, 'error');
+    console.error(err);
+  } finally {
+    document.getElementById('loading-overlay').classList.remove('visible');
+  }
+}
+
+async function refreshData() {
+  allData = [];
+  await updateView();
+}
+
+function copySQL() {
+  navigator.clipboard.writeText(document.getElementById('sql-display').textContent);
+  alert('SQL이 클립보드에 복사되었습니다!');
+}
+
+updateView();
+</script>
+</body>
+</html>
