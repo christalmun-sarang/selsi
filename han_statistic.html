@@ -123,6 +123,13 @@ tr:hover td { background: #f5f5f0; }
 #loading-overlay.visible { display: flex; }
 .spinner { width: 32px; height: 32px; border: 3px solid #ddddd5; border-top-color: #1a1a18; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 가계통계 ── */
+#page-household .metric-card .mvalue { font-size: 18px; }
+.hh-source { font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+.hh-src-ie { background: #e6f1fb; color: #185fa5; }
+.hh-src-mf { background: #eaf3de; color: #3b6d11; }
+.hh-src-both { background: #f1efe8; color: #888780; }
 </style>
 </head>
 <body>
@@ -135,6 +142,7 @@ tr:hover td { background: #f5f5f0; }
   <div class="tabs">
     <button class="tab active" onclick="showPage('input',this)">데이터 입력</button>
     <button class="tab" onclick="showPage('stats',this)">병원 통계</button>
+    <button class="tab" onclick="showPage('household',this)">가계 통계</button>
   </div>
 </div>
 <div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
@@ -334,6 +342,74 @@ tr:hover td { background: #f5f5f0; }
   </div>
 </div>
 
+<!-- ════════════════════════════════
+     가계 통계 페이지
+════════════════════════════════ -->
+<div id="page-household" class="page">
+  <div class="controls">
+    <span class="ctrl-label">기간:</span>
+    <select id="hh-year">
+      <option value="2026" selected>2026</option><option value="2025">2025</option>
+      <option value="2024">2024</option><option value="2023">2023</option>
+      <option value="2022">2022</option><option value="2021">2021</option>
+      <option value="2020">2020</option><option value="2019">2019</option>
+    </select>
+    <button onclick="loadHousehold()">조회</button>
+    <button class="secondary" onclick="loadHousehold()">↻ 새로고침</button>
+    <span style="font-size:12px;color:#888780;margin-left:8px;">Income_Expense + Monthly_finance 연동</span>
+  </div>
+  <div class="main">
+    <!-- 요약 카드 -->
+    <div class="metric-grid" id="hh-metric-grid">
+      <div class="metric-card"><div class="mlabel">한강 연매출</div><div class="mvalue" id="hh-han-rev">-</div></div>
+      <div class="metric-card"><div class="mlabel">한강 연지출</div><div class="mvalue" id="hh-han-exp">-</div></div>
+      <div class="metric-card"><div class="mlabel">한강 실수입</div><div class="mvalue" id="hh-han-net">-</div></div>
+      <div class="metric-card"><div class="mlabel">사랑 연매출</div><div class="mvalue" id="hh-sarang-rev">-</div></div>
+      <div class="metric-card"><div class="mlabel">사랑 연지출</div><div class="mvalue" id="hh-sarang-exp">-</div></div>
+      <div class="metric-card"><div class="mlabel">사랑 실수입</div><div class="mvalue" id="hh-sarang-net">-</div></div>
+      <div class="metric-card" style="background:#e6f1fb;"><div class="mlabel">총 합산 실수입</div><div class="mvalue" id="hh-total-net">-</div></div>
+    </div>
+
+    <!-- 월별 차트 -->
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3 id="hh-chart-title">월별 매출·실수입 비교</h3>
+        <div style="position:relative;height:280px;"><canvas id="hhRevenueChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>한강 월별 실수입</h3>
+        <div style="position:relative;height:220px;"><canvas id="hhHanNetChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>사랑 월별 실수입</h3>
+        <div style="position:relative;height:220px;"><canvas id="hhSarangNetChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 월별 상세 테이블 -->
+    <div class="table-card">
+      <h3>월별 상세 (한강 + 사랑)</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>월</th>
+            <th class="num" style="color:#185fa5;">한강매출</th>
+            <th class="num" style="color:#185fa5;">한강지출</th>
+            <th class="num" style="color:#185fa5;">한강실수입</th>
+            <th class="num" style="color:#3b6d11;">사랑매출</th>
+            <th class="num" style="color:#3b6d11;">사랑지출</th>
+            <th class="num" style="color:#3b6d11;">사랑실수입</th>
+            <th class="num" style="font-weight:600;">합산실수입</th>
+            <th class="num">수익률</th>
+            <th style="font-size:11px;color:#888780;">출처</th>
+          </tr></thead>
+          <tbody id="hh-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://algfzvbqxxvcaunlsrxd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s';
@@ -418,6 +494,7 @@ function showPage(name, el) {
   el.classList.add('active');
   if (name==='stats') updateView();
   if (name==='input') loadRecent();
+  if (name==='household') initHousehold();
 }
 function showSubpage(name, el) {
   document.querySelectorAll('.subpage').forEach(p=>p.classList.remove('active'));
@@ -869,6 +946,169 @@ function nextDay(dateStr) {
   const d = new Date(dateStr);
   d.setDate(d.getDate()+1);
   return d.toISOString().slice(0,10);
+}
+
+
+/* ══════════════════════════════════════
+   가계 통계 (Income_Expense + Monthly_finance)
+══════════════════════════════════════ */
+let hhRevChart, hhHanNetChart, hhSarangNetChart;
+
+async function initHousehold() {
+  const yr = document.getElementById('hh-year').value;
+  await loadHousehold(yr);
+}
+
+async function loadHousehold(yr) {
+  yr = yr || document.getElementById('hh-year').value;
+  loading(true);
+  try {
+    // 1. Income_Expense 테이블: year_month like yr
+    const ieRes = await fetch(
+      SUPABASE_URL+'/rest/v1/Income_Expense?year_month=gte.'+yr+'-01&year_month=lte.'+yr+'-12&order=year_month.asc&limit=12',
+      {headers:HDR}
+    );
+    const ieData = await ieRes.json();
+
+    // 2. Monthly_finance 테이블: 해당 연도
+    const mfRes = await fetch(
+      SUPABASE_URL+'/rest/v1/Monthly_finance?year_month=gte.'+yr+'-01&year_month=lte.'+yr+'-12&order=year_month.asc&limit=24',
+      {headers:HDR}
+    );
+    const mfData = await mfRes.json();
+
+    // 3. 병합: 월별로 합산
+    const months = {};
+    // Income_Expense 행: han_revenue, han_expense, han_net, sarang_revenue, sarang_expense, sarang_net
+    if (Array.isArray(ieData)) {
+      for (const r of ieData) {
+        const m = r.year_month;
+        if (!months[m]) months[m] = {ym:m, hanRev:0, hanExp:0, hanNet:0, sarangRev:0, sarangExp:0, sarangNet:0, src:'ie'};
+        months[m].hanRev    += r.han_revenue  || 0;
+        months[m].hanExp    += r.han_expense  || 0;
+        months[m].hanNet    += r.han_net      || 0;
+        months[m].sarangRev += r.sarang_revenue || 0;
+        months[m].sarangExp += r.sarang_expense || 0;
+        months[m].sarangNet += r.sarang_net   || 0;
+      }
+    }
+    // Monthly_finance 행: clinic('han'/'sarang'), total_revenue, total_expense, net_income
+    if (Array.isArray(mfData)) {
+      for (const r of mfData) {
+        const m = r.year_month;
+        if (!months[m]) months[m] = {ym:m, hanRev:0, hanExp:0, hanNet:0, sarangRev:0, sarangExp:0, sarangNet:0, src:'mf'};
+        else if (months[m].src==='ie') months[m].src='both';
+        if (r.clinic==='han') {
+          // Monthly_finance 값이 있으면 override (더 최신)
+          if (months[m].src==='mf' || months[m].src==='both') {
+            months[m].hanRev  = r.total_revenue || 0;
+            months[m].hanExp  = r.total_expense || 0;
+            months[m].hanNet  = r.net_income    || 0;
+          }
+        } else if (r.clinic==='sarang') {
+          if (months[m].src==='mf' || months[m].src==='both') {
+            months[m].sarangRev = r.total_revenue || 0;
+            months[m].sarangExp = r.total_expense || 0;
+            months[m].sarangNet = r.net_income    || 0;
+          }
+        }
+      }
+    }
+
+    const rows = Object.values(months).sort((a,b)=>a.ym>b.ym?1:-1);
+
+    // 4. 연간 합계
+    const totHanRev    = rows.reduce((s,r)=>s+r.hanRev,0);
+    const totHanExp    = rows.reduce((s,r)=>s+r.hanExp,0);
+    const totHanNet    = rows.reduce((s,r)=>s+r.hanNet,0);
+    const totSarangRev = rows.reduce((s,r)=>s+r.sarangRev,0);
+    const totSarangExp = rows.reduce((s,r)=>s+r.sarangExp,0);
+    const totSarangNet = rows.reduce((s,r)=>s+r.sarangNet,0);
+    const totNet       = totHanNet + totSarangNet;
+
+    // 5. 요약 카드
+    const setM = (id,v,colored) => {
+      const el = document.getElementById(id);
+      el.textContent = fmt(v);
+      if (colored) el.style.color = v>=0 ? '#3b6d11' : '#a32d2d';
+    };
+    setM('hh-han-rev',    totHanRev);
+    setM('hh-han-exp',    totHanExp);
+    setM('hh-han-net',    totHanNet,    true);
+    setM('hh-sarang-rev', totSarangRev);
+    setM('hh-sarang-exp', totSarangExp);
+    setM('hh-sarang-net', totSarangNet, true);
+    setM('hh-total-net',  totNet,       true);
+
+    // 6. 차트
+    const labels = rows.map(r=>r.ym.slice(5)+'월');
+    drawHhRevChart(labels, rows);
+    drawHhNetChart('hhHanNetChart',    labels, rows.map(r=>Math.round(r.hanNet/10000)),    hhHanNetChart,    c=>hhHanNetChart=c,    '#185fa5');
+    drawHhNetChart('hhSarangNetChart', labels, rows.map(r=>Math.round(r.sarangNet/10000)), hhSarangNetChart, c=>hhSarangNetChart=c, '#3b6d11');
+
+    // 7. 테이블
+    const tbody = document.getElementById('hh-tbody');
+    tbody.innerHTML = rows.map(r => {
+      const net = r.hanNet + r.sarangNet;
+      const totRev = r.hanRev + r.sarangRev;
+      const rate = totRev ? Math.round(net/totRev*100) : 0;
+      const srcLabel = r.src==='ie'?'<span class="hh-source hh-src-ie">과거</span>'
+                      :r.src==='mf'?'<span class="hh-source hh-src-mf">Monthly</span>'
+                      :'<span class="hh-source hh-src-both">혼합</span>';
+      return `<tr>
+        <td>${r.ym}</td>
+        <td class="num" style="color:#185fa5;">${r.hanRev.toLocaleString()}</td>
+        <td class="num" style="color:#888780;">${r.hanExp.toLocaleString()}</td>
+        <td class="num" style="color:${r.hanNet>=0?'#185fa5':'#a32d2d'};font-weight:500;">${r.hanNet.toLocaleString()}</td>
+        <td class="num" style="color:#3b6d11;">${r.sarangRev.toLocaleString()}</td>
+        <td class="num" style="color:#888780;">${r.sarangExp.toLocaleString()}</td>
+        <td class="num" style="color:${r.sarangNet>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${r.sarangNet.toLocaleString()}</td>
+        <td class="num" style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
+        <td class="num">${rate}%</td>
+        <td>${srcLabel}</td>
+      </tr>`;
+    }).join('');
+
+    setStatus('✓ 가계통계 로드 완료 · '+rows.length+'개월', 'success');
+  } catch(e) {
+    setStatus('⚠ 가계통계 오류: '+e.message, 'error');
+    console.error(e);
+  } finally { loading(false); }
+}
+
+function drawHhRevChart(labels, rows) {
+  if (hhRevChart) hhRevChart.destroy();
+  hhRevChart = new Chart(document.getElementById('hhRevenueChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'한강매출', data:rows.map(r=>Math.round(r.hanRev/10000)),    backgroundColor:'rgba(24,95,165,0.7)', borderRadius:3 },
+        { label:'사랑매출', data:rows.map(r=>Math.round(r.sarangRev/10000)), backgroundColor:'rgba(59,109,17,0.7)',  borderRadius:3 },
+        { label:'한강실수입', data:rows.map(r=>Math.round(r.hanNet/10000)),    backgroundColor:'rgba(24,95,165,0.2)', borderRadius:3 },
+        { label:'사랑실수입', data:rows.map(r=>Math.round(r.sarangNet/10000)), backgroundColor:'rgba(59,109,17,0.2)',  borderRadius:3 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'top', labels:{ font:{size:12}, padding:10 } } },
+      scales:{ x:{ticks:{font:{size:11}}}, y:{ticks:{callback:v=>v+'만'}} }
+    }
+  });
+}
+
+function drawHhNetChart(canvasId, labels, data, chartRef, setRef, color) {
+  if (chartRef) chartRef.destroy();
+  const newChart = new Chart(document.getElementById(canvasId), {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'실수입', data, backgroundColor:data.map(v=>v>=0?color+'aa':'#a32d2daa'), borderRadius:3 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{ticks:{font:{size:11}}}, y:{ticks:{callback:v=>v+'만'}} }
+    }
+  });
+  setRef(newChart);
 }
 
 /* 초기 로드 */
