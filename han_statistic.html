@@ -130,6 +130,21 @@ tr:hover td { background: #f5f5f0; }
 .hh-src-ie { background: #e6f1fb; color: #185fa5; }
 .hh-src-mf { background: #eaf3de; color: #3b6d11; }
 .hh-src-both { background: #f1efe8; color: #888780; }
+
+/* ── 가계통계 자산 ── */
+.asset-section { background:#fff; border:0.5px solid #ddddd5; border-radius:12px; padding:18px 22px; margin-bottom:16px; }
+.asset-section h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#444441; display:flex; justify-content:space-between; align-items:center; }
+.asset-section h3 .total-val { font-size:18px; font-weight:500; color:#185fa5; }
+.asset-row { display:grid; grid-template-columns:130px 1fr 160px 28px; gap:8px; align-items:center; margin-bottom:8px; }
+.asset-row .aname { font-size:13px; color:#1a1a18; }
+.asset-row input[type=number] { text-align:right; font-variant-numeric:tabular-nums; border:0.5px solid #b4b2a9; border-radius:8px; padding:7px 12px; font-size:14px; }
+.asset-abcd { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+.abcd-card { border-radius:10px; padding:14px 18px; text-align:center; }
+.abcd-card.a { background:#e6f1fb; } .abcd-card.b { background:#eaf3de; }
+.abcd-card.c { background:#fdf3e3; } .abcd-card.d { background:#f1efe8; border:2px solid #b4b2a9; }
+.abcd-card .aclabel { font-size:12px; color:#888780; margin-bottom:4px; }
+.abcd-card .acvalue { font-size:20px; font-weight:500; }
+.asset-mission { background:#fcebeb; border-radius:8px; padding:10px 16px; font-size:13px; color:#a32d2d; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -143,6 +158,7 @@ tr:hover td { background: #f5f5f0; }
     <button class="tab active" onclick="showPage('input',this)">데이터 입력</button>
     <button class="tab" onclick="showPage('stats',this)">한강 통계</button>
     <button class="tab" onclick="showPage('household',this)">한강/사랑 통계</button>
+    <button class="tab" onclick="showPage('assets',this)">가계 통계</button>
   </div>
 </div>
 <div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
@@ -411,6 +427,128 @@ tr:hover td { background: #f5f5f0; }
       </div>
     </div>
   </div>
+
+<!-- ════════════════════════════════
+     가계 통계 페이지
+════════════════════════════════ -->
+<div id="page-assets" class="page">
+  <div class="controls">
+    <span class="ctrl-label">월:</span>
+    <input type="month" id="asset-month" style="width:160px;border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;">
+    <button onclick="loadAssetMonth()">불러오기</button>
+    <button onclick="saveAssets()">저장</button>
+    <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
+    <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
+  </div>
+  <div class="main">
+
+    <!-- A~D 요약 카드 -->
+    <div class="asset-abcd">
+      <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
+      <div class="abcd-card b"><div class="aclabel">B. 장기현금 (5~6 합)</div><div class="acvalue" id="ac-b">-</div></div>
+      <div class="abcd-card c"><div class="aclabel">C. 연금성 (7~8 합)</div><div class="acvalue" id="ac-c">-</div></div>
+      <div class="abcd-card d"><div class="aclabel">D. 총합 (A+B+C)</div><div class="acvalue" id="ac-d" style="font-size:22px;font-weight:600;">-</div></div>
+    </div>
+
+    <!-- 수입 요약 -->
+    <div class="asset-section" style="background:#f5f5f0;">
+      <h3>💰 이달 수입 <span id="income-summary" style="font-size:13px;font-weight:400;color:#888780;"></span></h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">한강 실수입</div><div style="font-size:16px;font-weight:500;" id="is-han">-</div></div>
+        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">사랑 실수입</div><div style="font-size:16px;font-weight:500;" id="is-sarang">-</div></div>
+        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">수입합</div><div style="font-size:16px;font-weight:500;" id="is-total">-</div></div>
+        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">선교헌금합</div><div style="font-size:16px;font-weight:500;" id="is-mission">-</div></div>
+        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비합</div><div style="font-size:16px;font-weight:500;" id="is-reserve">-</div></div>
+      </div>
+      <div class="asset-mission" id="mission-calc" style="display:none;"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <!-- A. 현금 자산 -->
+      <div>
+        <div class="asset-section">
+          <h3>① 통장합 <span class="total-val" id="at-bank">0</span></h3>
+          <div class="asset-row"><span class="aname">통장합 (직접입력)</span><span></span>
+            <input type="number" id="a-bank" min="0" placeholder="0" oninput="recalcAssets()"></div>
+          <p style="font-size:11px;color:#888780;margin-top:4px;">※ 선교헌금합·예비비합 제외한 실제 통장잔액</p>
+        </div>
+        <div class="asset-section">
+          <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
+          <div class="asset-row"><span class="aname">주식합</span><span></span>
+            <input type="number" id="a-stock" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>③ 적금합 <span class="total-val" id="at-savings">0</span></h3>
+          <div class="asset-row"><span class="aname">적금합</span><span></span>
+            <input type="number" id="a-savings" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
+          <div class="asset-row"><span class="aname">정기예금합</span><span></span>
+            <input type="number" id="a-deposit" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+      </div>
+
+      <!-- B~C 자산 -->
+      <div>
+        <div class="asset-section">
+          <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
+          <div class="asset-row"><span class="aname">한강</span><span></span>
+            <input type="number" id="a-yellow-h" min="0" placeholder="0" oninput="recalcAssets()"></div>
+          <div class="asset-row"><span class="aname">사랑</span><span></span>
+            <input type="number" id="a-yellow-s" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
+          <div class="asset-row"><span class="aname">보증금합</span><span></span>
+            <input type="number" id="a-guarantee" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
+          <div class="asset-row"><span class="aname">한강</span><span></span>
+            <input type="number" id="a-retire-h" min="0" placeholder="0" oninput="recalcAssets()"></div>
+          <div class="asset-row"><span class="aname">사랑</span><span></span>
+            <input type="number" id="a-retire-s" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
+          <div class="asset-row"><span class="aname">연금보험합</span><span></span>
+            <input type="number" id="a-annuity" min="0" placeholder="0" oninput="recalcAssets()"></div>
+        </div>
+        <div class="asset-section">
+          <h3>메모</h3>
+          <textarea id="a-memo" style="width:100%;height:60px;border:0.5px solid #b4b2a9;border-radius:8px;padding:8px;font-size:13px;resize:none;" placeholder="이달 특이사항"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 월별 이력 차트 -->
+    <div class="asset-section">
+      <h3>📈 총자산 추이</h3>
+      <div style="position:relative;height:240px;"><canvas id="assetTrendChart"></canvas></div>
+    </div>
+
+    <!-- 월별 이력 테이블 -->
+    <div class="asset-section">
+      <h3>월별 이력</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>월</th>
+            <th class="num" style="color:#185fa5;">A.현금</th>
+            <th class="num" style="color:#3b6d11;">B.장기현금</th>
+            <th class="num" style="color:#ba7517;">C.연금성</th>
+            <th class="num" style="font-weight:600;">D.총합</th>
+            <th class="num">수입합</th>
+            <th class="num">선교헌금</th>
+            <th class="num">예비비</th>
+          </tr></thead>
+          <tbody id="asset-history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -498,6 +636,7 @@ function showPage(name, el) {
   if (name==='stats') updateView();
   if (name==='input') loadRecent();
   if (name==='household') initHousehold();
+  if (name==='assets') initAssets();
 }
 function showSubpage(name, el) {
   document.querySelectorAll('.subpage').forEach(p=>p.classList.remove('active'));
@@ -1166,6 +1305,231 @@ function drawHhNetChart(canvasId, labels, data, chartRef, setRef, color) {
     }
   });
   setRef(newChart);
+}
+
+
+/* ══════════════════════════════════════
+   가계 통계 (Household_stats)
+══════════════════════════════════════ */
+let assetTrendChart;
+
+function getN(id){ const v=document.getElementById(id)?.value; return v===''||v==null?0:parseInt(v)||0; }
+function setN(id,v){ const el=document.getElementById(id); if(el) el.value=(v!=null&&v!==0)?v:''; }
+function fmtW(v){ if(v==null)return'-'; if(Math.abs(v)>=100000000)return (v/100000000).toFixed(1)+'억'; if(Math.abs(v)>=10000)return Math.round(v/10000)+'만'; return v.toLocaleString(); }
+
+function recalcAssets(){
+  const bank     = getN('a-bank');
+  const stock    = getN('a-stock');
+  const savings  = getN('a-savings');
+  const dep      = getN('a-deposit');
+  const yellowH  = getN('a-yellow-h');
+  const yellowS  = getN('a-yellow-s');
+  const guarantee= getN('a-guarantee');
+  const retireH  = getN('a-retire-h');
+  const retireS  = getN('a-retire-s');
+  const annuity  = getN('a-annuity');
+
+  const yellow   = yellowH + yellowS;
+  const retire   = retireH + retireS;
+
+  const A = bank + stock + savings + dep;
+  const B = yellow + guarantee;
+  const C = retire + annuity;
+  const D = A + B + C;
+
+  // 소계 업데이트
+  document.getElementById('at-bank').textContent     = fmtW(bank);
+  document.getElementById('at-stock').textContent    = fmtW(stock);
+  document.getElementById('at-savings').textContent  = fmtW(savings);
+  document.getElementById('at-deposit').textContent  = fmtW(dep);
+  document.getElementById('at-yellow').textContent   = fmtW(yellow);
+  document.getElementById('at-guarantee').textContent= fmtW(guarantee);
+  document.getElementById('at-retirement').textContent= fmtW(retire);
+  document.getElementById('at-annuity').textContent  = fmtW(annuity);
+
+  // A~D 카드
+  document.getElementById('ac-a').textContent = fmtW(A);
+  document.getElementById('ac-b').textContent = fmtW(B);
+  document.getElementById('ac-c').textContent = fmtW(C);
+  document.getElementById('ac-d').textContent = fmtW(D);
+
+  // 선교헌금 자동계산 (한강+사랑 수입합 기반)
+  const incomeTotal = getN('_income_total');
+  if(incomeTotal > 0){
+    const jo11 = Math.min(Math.round(incomeTotal * 0.07), 1500000);
+    const over  = Math.max(0, Math.round(incomeTotal * 0.07) - 1500000);
+    const mission = Math.round(incomeTotal * 0.03) + 700000 + over;
+    const mEl = document.getElementById('mission-calc');
+    mEl.style.display='block';
+    mEl.innerHTML = `선교헌금 계산: 11조 = 가계수입(${fmtW(incomeTotal)}) × 7% = ${fmtW(Math.round(incomeTotal*0.07))} (최대 150만) → <b>${fmtW(jo11)}</b> &nbsp;|&nbsp; 선교헌금 = 수입 × 3%(${fmtW(Math.round(incomeTotal*0.03))}) + 70만 + 초과분(${fmtW(over)}) = <b>${fmtW(mission)}</b>`;
+  }
+}
+
+// 수입 정보 표시 (Monthly_finance에서 자동 로드)
+async function loadMonthlyIncome(month){
+  try{
+    const hanRes = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.han&year_month=eq.'+month+'&select=net_income',{headers:HDR});
+    const sRes   = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.sarang&year_month=eq.'+month+'&select=net_income',{headers:HDR});
+    const hanD   = await hanRes.json();
+    const sarangD= await sRes.json();
+    const hanNet    = hanD.length    ? (hanD[0].net_income||0)    : 0;
+    const sarangNet = sarangD.length ? (sarangD[0].net_income||0) : 0;
+    const total  = hanNet + sarangNet;
+    document.getElementById('is-han').textContent    = fmtW(hanNet);
+    document.getElementById('is-sarang').textContent = fmtW(sarangNet);
+    document.getElementById('is-total').textContent  = fmtW(total);
+    // 숨은 필드에 저장해서 recalc에서 사용
+    let hid = document.getElementById('_income_total');
+    if(!hid){ hid=document.createElement('input'); hid.type='hidden'; hid.id='_income_total'; document.body.appendChild(hid); }
+    hid.value = total;
+    recalcAssets();
+  }catch(e){}
+}
+
+async function initAssets(){
+  // 이번달 기본값
+  const t = new Date();
+  const ym = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');
+  document.getElementById('asset-month').value = ym;
+  await loadAssetMonth();
+  await loadAssetHistory();
+}
+
+async function loadAssetMonth(){
+  const month = document.getElementById('asset-month').value;
+  if(!month) return;
+  loading(true);
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+month+'&limit=1',{headers:HDR});
+    const data = await res.json();
+    if(data.length){
+      const r = data[0];
+      setN('a-bank',     r.bank_total);
+      setN('a-stock',    r.stock_total);
+      setN('a-savings',  r.savings_total);
+      setN('a-deposit',  r.deposit_total);
+      // 노란우산: 합계만 저장되어 있으므로 절반씩
+      const yh = r.yellow_total ? Math.round(r.yellow_total/2) : 0;
+      setN('a-yellow-h', yh); setN('a-yellow-s', yh);
+      setN('a-guarantee',r.guarantee_total);
+      const rh = r.retirement_total ? Math.round(r.retirement_total/2) : 0;
+      setN('a-retire-h', rh); setN('a-retire-s', rh);
+      setN('a-annuity',  r.annuity_total);
+      document.getElementById('a-memo').value = r.memo||'';
+      document.getElementById('is-mission').textContent = fmtW(r.mission_total);
+      document.getElementById('is-reserve').textContent = fmtW(r.reserve_total);
+      showMsg('asset-msg','✓ '+month+' 불러옴',true);
+    } else {
+      // 이전달 값으로 초기화
+      const [y,m2] = month.split('-').map(Number);
+      const prevM = m2===1?`${y-1}-12`:`${y}-${String(m2-1).padStart(2,'0')}`;
+      const res2 = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+prevM+'&limit=1',{headers:HDR});
+      const prev = await res2.json();
+      if(prev.length){
+        const r=prev[0];
+        setN('a-bank',0); setN('a-stock',r.stock_total); setN('a-savings',r.savings_total);
+        setN('a-deposit',r.deposit_total);
+        const yh=r.yellow_total?Math.round(r.yellow_total/2):0;
+        setN('a-yellow-h',yh); setN('a-yellow-s',yh);
+        setN('a-guarantee',r.guarantee_total);
+        const rh=r.retirement_total?Math.round(r.retirement_total/2):0;
+        setN('a-retire-h',rh); setN('a-retire-s',rh);
+        setN('a-annuity',r.annuity_total);
+        showMsg('asset-msg','이전달 참고값 적용됨',true);
+      } else {
+        showMsg('asset-msg','신규 월',true);
+      }
+    }
+    recalcAssets();
+    await loadMonthlyIncome(month);
+  } catch(e){ showMsg('asset-msg','오류: '+e.message,false); }
+  finally{ loading(false); }
+}
+
+async function saveAssets(){
+  const month = document.getElementById('asset-month').value;
+  if(!month){ showMsg('asset-msg','월을 선택하세요.',false); return; }
+
+  const yellowH = getN('a-yellow-h'), yellowS = getN('a-yellow-s');
+  const retireH = getN('a-retire-h'), retireS = getN('a-retire-s');
+  const bank=getN('a-bank'), stock=getN('a-stock'), savings=getN('a-savings'), dep=getN('a-deposit');
+  const yellow=yellowH+yellowS, guarantee=getN('a-guarantee');
+  const retire=retireH+retireS, annuity=getN('a-annuity');
+  const A=bank+stock+savings+dep, B=yellow+guarantee, C=retire+annuity;
+
+  const hanEl=document.getElementById('is-han'), sEl=document.getElementById('is-sarang');
+  const parseWon = el => { const t=el.textContent; if(t==='-')return null; return parseInt(t.replace(/[^0-9\-]/g,''))||null; };
+  const hanNet=parseWon(hanEl), sarangNet=parseWon(sEl);
+  const incTotal = (hanNet||0)+(sarangNet||0);
+
+  const jo11 = Math.min(Math.round(incTotal*0.07),1500000);
+  const over  = Math.max(0,Math.round(incTotal*0.07)-1500000);
+  const missionCalc = Math.round(incTotal*0.03)+700000+over;
+
+  const payload = {
+    year_month:year_month=month,
+    a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
+    han_net:hanNet, sarang_net:sarangNet, income_total:incTotal,
+    mission_total:missionCalc, reserve_total:null,
+    bank_total:bank, stock_total:stock, savings_total:savings, deposit_total:dep,
+    yellow_total:yellow, guarantee_total:guarantee,
+    retirement_total:retire, annuity_total:annuity,
+    memo:document.getElementById('a-memo').value||null,
+  };
+  // year_month 중복 수정
+  payload.year_month = month;
+
+  loading(true);
+  try{
+    const chk=await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+month+'&select=id',{headers:HDR});
+    const ex=await chk.json();
+    let res;
+    if(ex.length){
+      res=await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+month,{method:'PATCH',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+    } else {
+      res=await fetch(SUPABASE_URL+'/rest/v1/Household_stats',{method:'POST',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+    }
+    if(!res.ok){let msg='HTTP '+res.status;try{const e=await res.json();msg=e.message||msg;}catch(e2){}throw new Error(msg);}
+    showMsg('asset-msg','✓ '+month+' 저장 완료!',true);
+    setStatus('✓ 가계통계 '+month+' 저장됨','success');
+    await loadAssetHistory();
+  } catch(e){ showMsg('asset-msg','오류: '+e.message,false); }
+  finally{ loading(false); }
+}
+
+async function loadAssetHistory(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/Household_stats?select=year_month,a_cash,b_longterm,c_pension,d_total,income_total,mission_total,reserve_total&order=year_month.asc&limit=100',{headers:HDR});
+    const data=await res.json();
+    if(!Array.isArray(data)||!data.length){ document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>'; return; }
+
+    // 차트
+    if(assetTrendChart) assetTrendChart.destroy();
+    assetTrendChart = new Chart(document.getElementById('assetTrendChart'),{
+      type:'line',
+      data:{
+        labels:data.map(r=>r.year_month),
+        datasets:[
+          {label:'D.총합',data:data.map(r=>Math.round((r.d_total||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
+          {label:'A.현금',data:data.map(r=>Math.round((r.a_cash||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+          {label:'C.연금성',data:data.map(r=>Math.round((r.c_pension||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},padding:10}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}
+    });
+
+    // 테이블
+    document.getElementById('asset-history-tbody').innerHTML = data.slice().reverse().map(r=>`<tr>
+      <td>${r.year_month}</td>
+      <td class="num" style="color:#185fa5;">${fmtW(r.a_cash)}</td>
+      <td class="num" style="color:#3b6d11;">${fmtW(r.b_longterm)}</td>
+      <td class="num" style="color:#ba7517;">${fmtW(r.c_pension)}</td>
+      <td class="num" style="font-weight:600;">${fmtW(r.d_total)}</td>
+      <td class="num">${fmtW(r.income_total)}</td>
+      <td class="num">${fmtW(r.mission_total)}</td>
+      <td class="num">${fmtW(r.reserve_total)}</td>
+    </tr>`).join('');
+  }catch(e){ console.error(e); }
 }
 
 /* 초기 로드 */
