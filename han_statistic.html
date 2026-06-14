@@ -132,6 +132,8 @@ tr:hover td { background: #f5f5f0; }
 .hh-src-both { background: #f1efe8; color: #888780; }
 
 /* ── 가계통계 자산 ── */
+.sarang-section { display: none; }
+.sarang-section:first-of-type { display: block; }
 .asset-section { background:#fff; border:0.5px solid #ddddd5; border-radius:12px; padding:18px 22px; margin-bottom:16px; }
 .asset-section h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#444441; display:flex; justify-content:space-between; align-items:center; }
 .asset-section h3 .total-val { font-size:18px; font-weight:500; color:#185fa5; }
@@ -159,26 +161,19 @@ tr:hover td { background: #f5f5f0; }
     <button class="tab" onclick="showPage('stats',this)">한강 통계</button>
     <button class="tab" onclick="showPage('household',this)">한강/사랑 통계</button>
     <button class="tab" onclick="showPage('assets',this)">가계 통계</button>
+
   </div>
 </div>
 <div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
-<div id="asset-controls" class="controls" style="display:none;">
-    <span class="ctrl-label">월:</span>
-    <input type="month" id="asset-month" style="width:160px;border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;">
-    <button onclick="loadAssetMonth()">불러오기</button>
-    <button onclick="saveAssets()">저장</button>
-    <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
-    <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
-</div>
 
 <!-- ════════════════════════════════
      데이터 입력 페이지
 ════════════════════════════════ -->
 <div id="page-input" class="page active">
   <div class="subtabs">
-    <button class="subtab active" onclick="showSubpage('daily',this)">일별 데이터</button>
-    <button class="subtab" onclick="showSubpage('han',this)">한강 매출지출</button>
-    <button class="subtab" onclick="showSubpage('sarang',this)">사랑 매출지출</button>
+    <button class="subtab active" onclick="showSubpage('daily',this)">한강일일통계</button>
+    <button class="subtab" onclick="showSubpage('han',this)">한강한달통계</button>
+    <button class="subtab" onclick="showSubpage('sarang',this)">사랑한달통계</button>
   </div>
 
   <!-- 서브: 일별 데이터 -->
@@ -276,6 +271,22 @@ tr:hover td { background: #f5f5f0; }
 
   <!-- 서브: 사랑 매출지출 -->
   <div id="subpage-sarang" class="subpage">
+    <!-- 2차 서브탭 -->
+    <div class="subtabs" style="background:#f5f5f0;border-top:0.5px solid #e0ddd4;padding-left:24px;">
+      <button class="subtab active" id="sarang-sub-rev" onclick="showSarangSection('rev',this)">사랑 매출지출</button>
+      <button class="subtab" id="sarang-sub-jo11" onclick="showSarangSection('jo11',this)">11조/선교헌금</button>
+      <button class="subtab" id="sarang-sub-reserve" onclick="showSarangSection('reserve',this)">예비비</button>
+      <button class="subtab" id="sarang-sub-bank" onclick="showSarangSection('bank',this)">①통장</button>
+      <button class="subtab" id="sarang-sub-stock" onclick="showSarangSection('stock',this)">②주식</button>
+      <button class="subtab" id="sarang-sub-savings" onclick="showSarangSection('savings',this)">③적금</button>
+      <button class="subtab" id="sarang-sub-deposit" onclick="showSarangSection('deposit',this)">④정기예금</button>
+      <button class="subtab" id="sarang-sub-yellow" onclick="showSarangSection('yellow',this)">⑤노란우산</button>
+      <button class="subtab" id="sarang-sub-guarantee" onclick="showSarangSection('guarantee',this)">⑥보증금</button>
+      <button class="subtab" id="sarang-sub-retire" onclick="showSarangSection('retire',this)">⑦퇴직연금</button>
+      <button class="subtab" id="sarang-sub-annuity" onclick="showSarangSection('annuity',this)">⑧연금보험</button>
+    </div>
+    <!-- 사랑 매출지출 섹션 -->
+    <div id="sarang-section-rev" class="sarang-section">
     <div class="main">
       <div class="ie-form-card">
         <h2>사랑의원 월별 매출·지출</h2>
@@ -323,8 +334,247 @@ tr:hover td { background: #f5f5f0; }
         </table></div>
       </div>
     </div>
-  </div>
-</div>
+    </div><!-- /sarang-section-rev -->
+
+    <!-- 가계 입력 섹션들 (asset-controls 공유) -->
+    <div id="asset-controls-inline" style="background:#fff;border-bottom:0.5px solid #ddddd5;padding:10px 24px;display:none;gap:10px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:13px;color:#888780;">월:</span>
+      <input type="month" id="asset-month" style="width:160px;border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;">
+      <button onclick="loadAssetMonth()">불러오기</button>
+      <button onclick="saveAssets()">저장</button>
+      <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
+      <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
+    </div>
+
+    <!-- 11조/선교헌금 섹션 -->
+    <div id="sarang-section-jo11" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;" id="jo11-section-content">
+      <!-- 수입 요약 -->
+      <div class="asset-section" style="background:#f5f5f0;">
+        <h3>💰 이달 수입</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:8px;">
+          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">한강 실수입</div><div style="font-size:16px;font-weight:500;" id="is-han">-</div></div>
+          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">사랑 실수입</div><div style="font-size:16px;font-weight:500;" id="is-sarang">-</div></div>
+          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">수입합</div><div style="font-size:16px;font-weight:500;" id="is-total">-</div></div>
+          <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
+            <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 11조</div>
+            <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-jo11">-</div>
+          </div>
+          <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
+            <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 선교헌금</div>
+            <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-mission-this">-</div>
+          </div>
+          <div style="background:#fff3f3;border-radius:8px;padding:8px 10px;border:1px solid #f5c5c5;">
+            <div style="font-size:11px;color:#888780;margin-bottom:2px;">선교헌금합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
+            <div style="font-size:16px;font-weight:700;color:#a32d2d;" id="is-mission">-</div>
+          </div>
+          <div style="background:#f0f6ff;border-radius:8px;padding:8px 10px;border:1px solid #b0cff5;">
+            <div style="font-size:11px;color:#888780;margin-bottom:2px;">예비비합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
+            <div style="font-size:16px;font-weight:700;color:#185fa5;" id="is-reserve">-</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#888780;margin-bottom:8px;" id="prev-month-label"></div>
+        <div class="asset-mission" id="mission-calc" style="display:none;"></div>
+        <!-- 선교헌금 사용 내역 -->
+        <div style="margin-top:14px;border-top:0.5px solid #e0ddd4;padding-top:12px;">
+          <div style="font-size:13px;font-weight:600;color:#a32d2d;margin-bottom:8px;">📤 선교헌금 사용 내역 <span style="font-weight:400;font-size:12px;color:#888780;">(합계에서 차감)</span></div>
+          <div id="mission-usage-rows"></div>
+          <button class="add-btn" style="margin-top:4px;" onclick="addUsageRow('mission')">+ 사용 내역 추가</button>
+          <div style="margin-top:8px;font-size:13px;">사용 후 잔액: <b id="mission-remain" style="color:#a32d2d;">-</b></div>
+        </div>
+      </div>
+      <!-- 최종저장 -->
+      <div style="background:#1a1a18;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px;">📌 최종저장</div>
+        <div style="color:#888780;font-size:12px;" id="final-save-desc">저장하면 Income_Expense 테이블에 해당 월 데이터가 생성됩니다.</div></div>
+        <button onclick="finalSave()" style="background:#185fa5;border:none;border-radius:8px;padding:12px 28px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;">💾 최종저장</button>
+        <span id="final-save-msg" style="font-size:13px;color:#3b6d11;"></span>
+      </div>
+    </div>
+    </div><!-- /sarang-section-jo11 -->
+
+    <!-- 예비비 섹션 -->
+    <div id="sarang-section-reserve" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div style="margin-top:0;border-top:none;padding-top:0;" class="asset-section">
+        <h3 style="font-size:14px;font-weight:600;color:#185fa5;margin-bottom:4px;">🏦 예비비 관리</h3>
+        <div style="font-size:11px;color:#3b6d11;background:#eaf3de;border-radius:6px;padding:5px 10px;margin-bottom:12px;">✓ 한강·사랑 매출지출 탭의 <b>예비비</b> 항목 저장 후 불러오기 시 자동 연동됩니다 (녹색 배경)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">한강 예비비</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
+              <div>저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
+              <input type="number" id="han-reserve-prev" min="0" placeholder="0" value="0"
+                oninput="prevHanReserve=parseInt(this.value)||0;recalcUsage()"
+                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
+            </div>
+            <div style="margin-bottom:6px;">
+              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="han-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
+              <input type="number" id="reserve-han" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('han-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
+            </div>
+            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
+            <div id="han-reserve-usage-rows"></div>
+            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addHanReserveRow()">+ 사용 추가</button>
+            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#888780;">남은 예비비</span>
+              <b id="han-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
+            </div>
+          </div>
+          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">사랑 예비비</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
+              <div>저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
+              <input type="number" id="sarang-reserve-prev" min="0" placeholder="0" value="0"
+                oninput="prevSarangReserve=parseInt(this.value)||0;recalcUsage()"
+                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
+            </div>
+            <div style="margin-bottom:6px;">
+              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="sarang-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
+              <input type="number" id="reserve-sarang" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('sarang-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
+            </div>
+            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
+            <div id="sarang-reserve-usage-rows"></div>
+            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addSarangReserveRow()">+ 사용 추가</button>
+            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#888780;">남은 예비비</span>
+              <b id="sarang-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;text-align:right;font-size:13px;color:#888780;">총 예비비 잔액 (한강+사랑): <b id="reserve-remain" style="color:#185fa5;font-size:15px;">-</b></div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-reserve -->
+
+    <!-- ①통장 섹션 -->
+    <div id="sarang-section-bank" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-abcd">
+        <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
+        <div class="abcd-card b"><div class="aclabel">B. 장기현금 (5~6 합)</div><div class="acvalue" id="ac-b">-</div></div>
+        <div class="abcd-card c"><div class="aclabel">C. 연금성 (7~8 합)</div><div class="acvalue" id="ac-c">-</div></div>
+        <div class="abcd-card d"><div class="aclabel">D. 총합 (A+B+C)</div><div class="acvalue" id="ac-d" style="font-size:22px;font-weight:600;">-</div></div>
+      </div>
+      <div class="asset-section">
+        <h3>① 통장합 <span class="total-val" id="at-bank">0</span></h3>
+        <p style="font-size:11px;color:#888780;margin-bottom:10px;">※ 은행별로 추가 후 합산됩니다</p>
+        <div id="bank-rows"></div>
+        <button class="add-btn" onclick="addBankRow()">+ 은행 추가</button>
+      </div>
+    </div>
+    </div><!-- /sarang-section-bank -->
+
+    <!-- ②주식 섹션 -->
+    <div id="sarang-section-stock" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
+          <input type="number" id="a-stock" min="0" placeholder="금액 입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
+          <input type="text" id="a-stock-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        </div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-stock -->
+
+    <!-- ③적금 섹션 -->
+    <div id="sarang-section-savings" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>③ 적금합 <span class="total-val" id="at-savings">0</span></h3>
+        <p style="font-size:11px;color:#888780;margin-bottom:8px;">적금 시작/금액 입력 시 자동 계산 (시작일 × 월납입액)</p>
+        <div id="savings-rows"></div>
+        <button class="add-btn" style="margin-top:6px;" onclick="addSavingsRow()">+ 적금 추가</button>
+      </div>
+    </div>
+    </div><!-- /sarang-section-savings -->
+
+    <!-- ④정기예금 섹션 -->
+    <div id="sarang-section-deposit" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
+          <input type="number" id="a-deposit" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
+          <input type="text" id="a-deposit-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        </div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-deposit -->
+
+    <!-- ⑤노란우산 섹션 -->
+    <div id="sarang-section-yellow" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
+        <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 250,000원 자동 적립</p>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;">한강</span>
+          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-h-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
+          <span style="font-size:13px;">사랑</span>
+          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-s-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        </div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-yellow -->
+
+    <!-- ⑥보증금 섹션 -->
+    <div id="sarang-section-guarantee" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
+        <p style="font-size:11px;color:#888780;margin-bottom:6px;">전세금 3억2천/병원보증금 각 3000만원 (비고) · 미입력시 이전값 유지</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
+          <input type="number" id="a-guarantee" min="0" placeholder="직접입력 (비워두면 이전값)" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
+          <input type="text" id="a-guarantee-note" placeholder="비고 (안보이게 입력)" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        </div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-guarantee -->
+
+    <!-- ⑦퇴직연금 섹션 -->
+    <div id="sarang-section-retire" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
+        <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 340,000원 자동 적립</p>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;">한강</span>
+          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-h-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
+          <span style="font-size:13px;">사랑</span>
+          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-s-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        </div>
+      </div>
+    </div>
+    </div><!-- /sarang-section-retire -->
+
+    <!-- ⑧연금보험 섹션 -->
+    <div id="sarang-section-annuity" class="sarang-section" style="display:none;">
+    <div class="main" style="padding-top:20px;">
+      <div class="asset-section">
+        <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
+          <input type="number" id="a-annuity" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
+          <input type="text" id="a-annuity-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        </div>
+      </div>
+      <div class="asset-section">
+        <h3>메모</h3>
+        <textarea id="a-memo" style="width:100%;height:60px;border:0.5px solid #b4b2a9;border-radius:8px;padding:8px;font-size:13px;resize:none;" placeholder="이달 특이사항"></textarea>
+      </div>
+    </div>
+    </div><!-- /sarang-section-annuity -->
+
+  </div><!-- /subpage-sarang -->
+</div><!-- /page-input -->
 
 <!-- ════════════════════════════════
      병원 통계 페이지
@@ -428,7 +678,6 @@ tr:hover td { background: #f5f5f0; }
             <th class="num" style="color:#3b6d11;">사랑실수입</th>
             <th class="num" style="font-weight:600;">합산실수입</th>
             <th class="num">수익률</th>
-            <th style="font-size:11px;color:#888780;">출처</th>
           </tr></thead>
           <tbody id="hh-tbody"></tbody>
         </table>
@@ -442,216 +691,6 @@ tr:hover td { background: #f5f5f0; }
 ════════════════════════════════ -->
 <div id="page-assets" class="page">
   <div class="main" style="padding-top:20px;">
-
-    <!-- A~D 요약 카드 -->
-    <div class="asset-abcd">
-      <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
-      <div class="abcd-card b"><div class="aclabel">B. 장기현금 (5~6 합)</div><div class="acvalue" id="ac-b">-</div></div>
-      <div class="abcd-card c"><div class="aclabel">C. 연금성 (7~8 합)</div><div class="acvalue" id="ac-c">-</div></div>
-      <div class="abcd-card d"><div class="aclabel">D. 총합 (A+B+C)</div><div class="acvalue" id="ac-d" style="font-size:22px;font-weight:600;">-</div></div>
-    </div>
-
-    <!-- 수입 요약 -->
-    <div class="asset-section" style="background:#f5f5f0;">
-      <h3>💰 이달 수입</h3>
-      <!-- 수입 요약 행 -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:8px;">
-        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">한강 실수입</div><div style="font-size:16px;font-weight:500;" id="is-han">-</div></div>
-        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">사랑 실수입</div><div style="font-size:16px;font-weight:500;" id="is-sarang">-</div></div>
-        <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">수입합</div><div style="font-size:16px;font-weight:500;" id="is-total">-</div></div>
-        <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
-          <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 11조</div>
-          <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-jo11">-</div>
-        </div>
-        <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
-          <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 선교헌금</div>
-          <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-mission-this">-</div>
-        </div>
-        <div style="background:#fff3f3;border-radius:8px;padding:8px 10px;border:1px solid #f5c5c5;">
-          <div style="font-size:11px;color:#888780;margin-bottom:2px;">선교헌금합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
-          <div style="font-size:16px;font-weight:700;color:#a32d2d;" id="is-mission">-</div>
-        </div>
-        <div style="background:#f0f6ff;border-radius:8px;padding:8px 10px;border:1px solid #b0cff5;">
-          <div style="font-size:11px;color:#888780;margin-bottom:2px;">예비비합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
-          <div style="font-size:16px;font-weight:700;color:#185fa5;" id="is-reserve">-</div>
-        </div>
-      </div>
-      <!-- 이전달 기준 표시 -->
-      <div style="font-size:12px;color:#888780;margin-bottom:8px;" id="prev-month-label"></div>
-      <div class="asset-mission" id="mission-calc" style="display:none;"></div>
-
-      <!-- 선교헌금 사용 내역 -->
-      <div style="margin-top:14px;border-top:0.5px solid #e0ddd4;padding-top:12px;">
-        <div style="font-size:13px;font-weight:600;color:#a32d2d;margin-bottom:8px;">📤 선교헌금 사용 내역 <span style="font-weight:400;font-size:12px;color:#888780;">(합계에서 차감)</span></div>
-        <div id="mission-usage-rows"></div>
-        <button class="add-btn" style="margin-top:4px;" onclick="addUsageRow('mission')">+ 사용 내역 추가</button>
-        <div style="margin-top:8px;font-size:13px;">사용 후 잔액: <b id="mission-remain" style="color:#a32d2d;">-</b></div>
-      </div>
-
-      <!-- 예비비 입력 및 사용 내역 -->
-      <div style="margin-top:14px;border-top:0.5px solid #e0ddd4;padding-top:12px;">
-        <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:4px;">🏦 예비비 관리 <span style="font-weight:400;font-size:12px;color:#888780;">(한강/사랑 각각 독립 관리 → 잔액 합산)</span></div>
-        <div style="font-size:11px;color:#3b6d11;background:#eaf3de;border-radius:6px;padding:5px 10px;margin-bottom:12px;">✓ 한강·사랑 매출지출 탭의 <b>예비비</b> 항목 저장 후 불러오기 시 자동 연동됩니다 (녹색 배경)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <!-- 한강 예비비 -->
-          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
-            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">한강 예비비</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div style="font-size:12px;color:#888780;">저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
-              <input type="number" id="han-reserve-prev" min="0" placeholder="0"
-                value="0"
-                oninput="prevHanReserve=parseInt(this.value)||0;recalcUsage()"
-                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
-            </div>
-            <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="han-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
-              <input type="number" id="reserve-han" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('han-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
-            </div>
-            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
-            <div id="han-reserve-usage-rows"></div>
-            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addHanReserveRow()">+ 사용 추가</button>
-            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:#888780;">남은 예비비</span>
-              <b id="han-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
-            </div>
-          </div>
-          <!-- 사랑 예비비 -->
-          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
-            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">사랑 예비비</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div style="font-size:12px;color:#888780;">저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
-              <input type="number" id="sarang-reserve-prev" min="0" placeholder="0"
-                value="0"
-                oninput="prevSarangReserve=parseInt(this.value)||0;recalcUsage()"
-                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
-            </div>
-            <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="sarang-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
-              <input type="number" id="reserve-sarang" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('sarang-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
-            </div>
-            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
-            <div id="sarang-reserve-usage-rows"></div>
-            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addSarangReserveRow()">+ 사용 추가</button>
-            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:#888780;">남은 예비비</span>
-              <b id="sarang-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:10px;text-align:right;font-size:13px;color:#888780;">총 예비비 잔액 (한강+사랑): <b id="reserve-remain" style="color:#185fa5;font-size:15px;">-</b></div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <!-- A. 현금 자산 -->
-      <div>
-        <!-- ① 통장합 -->
-        <div class="asset-section">
-          <h3>① 통장합 <span class="total-val" id="at-bank">0</span></h3>
-          <p style="font-size:11px;color:#888780;margin-bottom:10px;">※ 은행별로 추가 후 합산됩니다</p>
-          <div id="bank-rows"></div>
-          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
-            <button class="add-btn" onclick="addBankRow()">+ 은행 추가</button>
-          </div>
-        </div>
-
-        <!-- ② 주식합 -->
-        <div class="asset-section">
-          <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-            <input type="number" id="a-stock" min="0" placeholder="금액 입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-            <input type="text" id="a-stock-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-          </div>
-        </div>
-
-        <!-- ③ 적금합 -->
-        <div class="asset-section">
-          <h3>③ 적금합 <span class="total-val" id="at-savings">0</span></h3>
-          <p style="font-size:11px;color:#888780;margin-bottom:8px;">적금 시작/금액 입력 시 자동 계산 (시작일 × 월납입액)</p>
-          <div id="savings-rows"></div>
-          <button class="add-btn" style="margin-top:6px;" onclick="addSavingsRow()">+ 적금 추가</button>
-        </div>
-
-        <!-- ④ 정기예금합 -->
-        <div class="asset-section">
-          <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-            <input type="number" id="a-deposit" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-            <input type="text" id="a-deposit-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-          </div>
-        </div>
-      </div>
-
-      <!-- B~C 자산 -->
-      <div>
-        <!-- ⑤ 노란우산합 -->
-        <div class="asset-section">
-          <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
-          <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 250,000원 자동 적립</p>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-            <span style="font-size:13px;">한강</span>
-            <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-h-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-            <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
-            <span style="font-size:13px;">사랑</span>
-            <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-s-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-            <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          </div>
-        </div>
-
-        <!-- ⑥ 보증금합 -->
-        <div class="asset-section">
-          <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
-          <p style="font-size:11px;color:#888780;margin-bottom:6px;">전세금 3억2천/병원보증금 각 3000만원 (비고) · 미입력시 이전값 유지</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
-            <input type="number" id="a-guarantee" min="0" placeholder="직접입력 (비워두면 이전값)" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-            <input type="text" id="a-guarantee-note" placeholder="비고 (안보이게 입력)" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-          </div>
-        </div>
-
-        <!-- ⑦ 퇴직연금합 -->
-        <div class="asset-section">
-          <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
-          <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 340,000원 자동 적립</p>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-            <span style="font-size:13px;">한강</span>
-            <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-h-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-            <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
-            <span style="font-size:13px;">사랑</span>
-            <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-s-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-            <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          </div>
-        </div>
-
-        <!-- ⑧ 연금보험합 -->
-        <div class="asset-section">
-          <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
-            <input type="number" id="a-annuity" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-            <input type="text" id="a-annuity-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-          </div>
-        </div>
-
-        <!-- 메모 -->
-        <div class="asset-section">
-          <h3>메모</h3>
-          <textarea id="a-memo" style="width:100%;height:60px;border:0.5px solid #b4b2a9;border-radius:8px;padding:8px;font-size:13px;resize:none;" placeholder="이달 특이사항"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- 최종저장 버튼 -->
-    <div style="background:#1a1a18;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <div style="flex:1;">
-        <div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px;">📌 최종저장</div>
-        <div style="color:#888780;font-size:12px;" id="final-save-desc">저장하면 Income_Expense 테이블에 해당 월 데이터가 생성됩니다.</div>
-      </div>
-      <button onclick="finalSave()" style="background:#185fa5;border:none;border-radius:8px;padding:12px 28px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;">💾 최종저장</button>
-      <span id="final-save-msg" style="font-size:13px;color:#3b6d11;"></span>
-    </div>
 
     <!-- 월별 이력 차트 -->
     <div class="asset-section">
@@ -763,13 +802,13 @@ function showPage(name, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   el.classList.add('active');
-  // asset-controls 탭별 표시/숨김
+  // asset-controls (헤더 고정형) 숨김 - 이제 사랑한달통계 안에 inline으로 처리
   const ac = document.getElementById('asset-controls');
-  if (ac) ac.style.display = (name==='assets') ? '' : 'none';
+  if (ac) ac.style.display = 'none';
   if (name==='stats') updateView();
   if (name==='input') loadRecent();
   if (name==='household') initHousehold();
-  if (name==='assets') initAssets();
+  if (name==='assets') loadAssetHistory();
 }
 function showSubpage(name, el) {
   document.querySelectorAll('.subpage').forEach(p=>p.classList.remove('active'));
@@ -777,8 +816,23 @@ function showSubpage(name, el) {
   document.getElementById('subpage-'+name).classList.add('active');
   el.classList.add('active');
   if (name==='han') initHanForm();
-  if (name==='sarang') initSarangForm();
+  if (name==='sarang') { initSarangForm(); initAssets(); }
   if (name==='daily') loadRecent();
+}
+
+/* ══════════ 사랑한달통계 내 2차 섹션 전환 ══════════ */
+let assetInitDone = false;
+function showSarangSection(name, el) {
+  document.querySelectorAll('.sarang-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#subpage-sarang .subtab').forEach(t=>t.classList.remove('active'));
+  const sec = document.getElementById('sarang-section-'+name);
+  if (sec) sec.style.display = '';
+  el.classList.add('active');
+
+  // asset-controls-inline 표시 여부
+  const ctrl = document.getElementById('asset-controls-inline');
+  const assetSections = ['jo11','reserve','bank','stock','savings','deposit','yellow','guarantee','retire','annuity'];
+  if (ctrl) ctrl.style.display = assetSections.includes(name) ? 'flex' : 'none';
 }
 
 /* ══════════ 일별 데이터 ══════════ */
@@ -1279,7 +1333,7 @@ function nextDay(dateStr) {
 
 
 /* ══════════════════════════════════════
-   가계 통계 (Income_Expense + Monthly_finance)
+   가계 통계 (Income_Expense 전용)
 ══════════════════════════════════════ */
 let hhRevChart, hhHanNetChart, hhSarangNetChart;
 
@@ -1292,61 +1346,29 @@ async function loadHousehold(yr) {
   const toYr   = document.getElementById('hh-year-to')?.value   || yr || '2026';
   loading(true);
   try {
-    // 1. Income_Expense 테이블: 기간 범위
+    // Income_Expense 테이블만 사용 (han_revenue, han_expense, han_net, sarang_revenue, sarang_expense, sarang_net)
     const ieRes = await fetch(
       SUPABASE_URL+'/rest/v1/Income_Expense?year_month=gte.'+fromYr+'-01&year_month=lte.'+toYr+'-12&order=year_month.asc&limit=200',
       {headers:HDR}
     );
     const ieData = await ieRes.json();
 
-    // 2. Monthly_finance 테이블: 해당 연도
-    const mfRes = await fetch(
-      SUPABASE_URL+'/rest/v1/Monthly_finance?year_month=gte.'+fromYr+'-01&year_month=lte.'+toYr+'-12&order=year_month.asc&limit=200',
-      {headers:HDR}
-    );
-    const mfData = await mfRes.json();
-
-    // 3. 병합: 월별로 합산
     const months = {};
-    // Income_Expense 행: han_revenue, han_expense, han_net, sarang_revenue, sarang_expense, sarang_net
     if (Array.isArray(ieData)) {
       for (const r of ieData) {
         const m = r.year_month;
-        if (!months[m]) months[m] = {ym:m, hanRev:0, hanExp:0, hanNet:0, sarangRev:0, sarangExp:0, sarangNet:0, src:'ie'};
-        months[m].hanRev    += r.han_revenue  || 0;
-        months[m].hanExp    += r.han_expense  || 0;
-        months[m].hanNet    += r.han_net      || 0;
+        if (!months[m]) months[m] = {ym:m, hanRev:0, hanExp:0, hanNet:0, sarangRev:0, sarangExp:0, sarangNet:0};
+        months[m].hanRev    += r.han_revenue    || 0;
+        months[m].hanExp    += r.han_expense    || 0;
+        months[m].hanNet    += r.han_net        || 0;
         months[m].sarangRev += r.sarang_revenue || 0;
         months[m].sarangExp += r.sarang_expense || 0;
-        months[m].sarangNet += r.sarang_net   || 0;
-      }
-    }
-    // Monthly_finance 행: clinic('han'/'sarang'), total_revenue, total_expense, net_income
-    if (Array.isArray(mfData)) {
-      for (const r of mfData) {
-        const m = r.year_month;
-        if (!months[m]) months[m] = {ym:m, hanRev:0, hanExp:0, hanNet:0, sarangRev:0, sarangExp:0, sarangNet:0, src:'mf'};
-        else if (months[m].src==='ie') months[m].src='both';
-        if (r.clinic==='han') {
-          // Monthly_finance 값이 있으면 override (더 최신)
-          if (months[m].src==='mf' || months[m].src==='both') {
-            months[m].hanRev  = r.total_revenue || 0;
-            months[m].hanExp  = r.total_expense || 0;
-            months[m].hanNet  = r.net_income    || 0;
-          }
-        } else if (r.clinic==='sarang') {
-          if (months[m].src==='mf' || months[m].src==='both') {
-            months[m].sarangRev = r.total_revenue || 0;
-            months[m].sarangExp = r.total_expense || 0;
-            months[m].sarangNet = r.net_income    || 0;
-          }
-        }
+        months[m].sarangNet += r.sarang_net     || 0;
       }
     }
 
     const rows = Object.values(months).sort((a,b)=>a.ym>b.ym?1:-1);
 
-    // 4. 연간 합계
     const totHanRev    = rows.reduce((s,r)=>s+r.hanRev,0);
     const totHanExp    = rows.reduce((s,r)=>s+r.hanExp,0);
     const totHanNet    = rows.reduce((s,r)=>s+r.hanNet,0);
@@ -1355,9 +1377,9 @@ async function loadHousehold(yr) {
     const totSarangNet = rows.reduce((s,r)=>s+r.sarangNet,0);
     const totNet       = totHanNet + totSarangNet;
 
-    // 5. 요약 카드
     const setM = (id,v,colored) => {
       const el = document.getElementById(id);
+      if(!el) return;
       el.textContent = fmt(v);
       if (colored) el.style.color = v>=0 ? '#3b6d11' : '#a32d2d';
     };
@@ -1369,21 +1391,16 @@ async function loadHousehold(yr) {
     setM('hh-sarang-net', totSarangNet, true);
     setM('hh-total-net',  totNet,       true);
 
-    // 6. 차트
     const labels = rows.map(r=>r.ym.slice(5)+'월');
     drawHhRevChart(labels, rows);
     drawHhNetChart('hhHanNetChart',    labels, rows.map(r=>Math.round(r.hanNet/10000)),    hhHanNetChart,    c=>hhHanNetChart=c,    '#185fa5');
     drawHhNetChart('hhSarangNetChart', labels, rows.map(r=>Math.round(r.sarangNet/10000)), hhSarangNetChart, c=>hhSarangNetChart=c, '#3b6d11');
 
-    // 7. 테이블
     const tbody = document.getElementById('hh-tbody');
     tbody.innerHTML = rows.map(r => {
       const net = r.hanNet + r.sarangNet;
       const totRev = r.hanRev + r.sarangRev;
       const rate = totRev ? Math.round(net/totRev*100) : 0;
-      const srcLabel = r.src==='ie'?'<span class="hh-source hh-src-ie">과거</span>'
-                      :r.src==='mf'?'<span class="hh-source hh-src-mf">Monthly</span>'
-                      :'<span class="hh-source hh-src-both">혼합</span>';
       return `<tr>
         <td>${r.ym}</td>
         <td class="num" style="color:#185fa5;">${r.hanRev.toLocaleString()}</td>
@@ -1394,11 +1411,10 @@ async function loadHousehold(yr) {
         <td class="num" style="color:${r.sarangNet>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${r.sarangNet.toLocaleString()}</td>
         <td class="num" style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
         <td class="num">${rate}%</td>
-        <td>${srcLabel}</td>
       </tr>`;
     }).join('');
 
-    setStatus('✓ 가계통계 로드 완료 · '+fromYr+'~'+toYr+' · '+rows.length+'개월', 'success');
+    setStatus('✓ 가계통계 로드 완료 · '+fromYr+'~'+toYr+' · '+rows.length+'개월 (Income_Expense)', 'success');
   } catch(e) {
     setStatus('⚠ 가계통계 오류: '+e.message, 'error');
     console.error(e);
@@ -1793,9 +1809,13 @@ async function loadMonthlyIncome(month){
 }
 
 async function initAssets(){
+  // 이미 초기화된 경우 재초기화 방지
+  if(assetInitDone) return;
+  assetInitDone = true;
   const t = new Date();
   const ym = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');
-  document.getElementById('asset-month').value = ym;
+  const monthEl = document.getElementById('asset-month');
+  if(monthEl) monthEl.value = ym;
   renderBankRows();
   renderSavingsRows();
   renderUsageRows('mission');
