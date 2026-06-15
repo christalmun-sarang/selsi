@@ -94,10 +94,32 @@ button.add-btn:hover { background: #e6f1fb; }
 .recent-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 20px 24px; }
 .recent-card h2 { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; color: #888780; font-weight: 500; padding: 6px 8px; border-bottom: 0.5px solid #ddddd5; }
-td { padding: 8px 8px; border-bottom: 0.5px solid #f1efe8; }
+/* ── 테이블 공통 ── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: right;
+  color: #888780;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddddd5;
+  white-space: nowrap;
+  background: #fafaf8;
+}
+th:first-child { text-align: left; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: #185fa5; background: #eef4ff; }
+th.sort-asc::after  { content: ' ▲'; color: #185fa5; font-size: 10px; }
+th.sort-desc::after { content: ' ▼'; color: #185fa5; font-size: 10px; }
+td {
+  text-align: right;
+  padding: 8px 12px;
+  border-bottom: 0.5px solid #f1efe8;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+td:first-child { text-align: left; }
+td.num { text-align: right; }
 tr:last-child td { border-bottom: none; }
-td.num { text-align: right; font-variant-numeric: tabular-nums; }
 tr:hover td { background: #f5f5f0; }
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
 .badge-sun { background: #fcebeb; color: #a32d2d; }
@@ -205,8 +227,7 @@ tr:hover td { background: #f5f5f0; }
         <div style="overflow-x:auto;">
           <table>
             <thead><tr>
-              <th>날짜</th><th>요일</th><th class="num">환자</th><th class="num">초진</th><th class="num">재진</th>
-              <th class="num">매출</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">입금액</th><th></th>
+              <th>날짜</th><th style="text-align:left;">요일</th><th>환자</th><th>초진</th><th>재진</th><th>매출</th><th>현금</th><th>카드</th><th>청구액</th><th>입금액</th><th></th>
             </tr></thead>
             <tbody id="recent-tbody"></tbody>
           </table>
@@ -263,7 +284,7 @@ tr:hover td { background: #f5f5f0; }
       <div class="recent-card">
         <h2>한강의원 월별 이력</h2>
         <div style="overflow-x:auto;"><table>
-          <thead><tr><th>월</th><th class="num">총매출</th><th class="num">총지출</th><th class="num">실수입</th><th class="num">수익률</th></tr></thead>
+          <thead><tr><th>월</th><th>총매출</th><th>총지출</th><th>실수입</th><th>수익률</th></tr></thead>
           <tbody id="han-history-tbody"></tbody>
         </table></div>
       </div>
@@ -314,7 +335,7 @@ tr:hover td { background: #f5f5f0; }
       <div class="recent-card">
         <h2>사랑의원 월별 이력</h2>
         <div style="overflow-x:auto;"><table>
-          <thead><tr><th>월</th><th class="num">총매출</th><th class="num">총지출</th><th class="num">실수입</th><th class="num">수익률</th></tr></thead>
+          <thead><tr><th>월</th><th>총매출</th><th>총지출</th><th>실수입</th><th>수익률</th></tr></thead>
           <tbody id="sarang-history-tbody"></tbody>
         </table></div>
       </div>
@@ -613,11 +634,8 @@ tr:hover td { background: #f5f5f0; }
     <button onclick="updateView()">조회</button>
     <button class="secondary" onclick="refreshStats()">↻ 새로고침</button>
     <!-- 정렬 버튼 (테이블용) -->
-    <span id="sort-btns" style="display:none;gap:4px;margin-left:8px;">
-      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('revenue')">매출순</button>
-      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('patients')">환자수순</button>
-      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('new_p')">초진순</button>
-      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('date')">날짜순</button>
+    <span id="sort-btns" style="display:none;font-size:12px;color:#888780;margin-left:8px;">
+      ← 항목 클릭으로 정렬
     </span>
   </div>
   <div class="main">
@@ -684,16 +702,16 @@ tr:hover td { background: #f5f5f0; }
       <h3>월별 상세 (한강 + 사랑)</h3>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr>
-            <th>월</th>
-            <th class="num" style="color:#185fa5;">한강매출</th>
-            <th class="num" style="color:#185fa5;">한강지출</th>
-            <th class="num" style="color:#185fa5;">한강실수입</th>
-            <th class="num" style="color:#3b6d11;">사랑매출</th>
-            <th class="num" style="color:#3b6d11;">사랑지출</th>
-            <th class="num" style="color:#3b6d11;">사랑실수입</th>
-            <th class="num" style="font-weight:600;">합산실수입</th>
-            <th class="num">수익률</th>
+          <thead><tr id="hh-table-head">
+            <th class="sortable" onclick="_sortHH('ym')">월</th>
+            <th class="sortable num" style="color:#185fa5;" onclick="_sortHH('hanRev')">한강매출</th>
+            <th class="sortable num" style="color:#185fa5;" onclick="_sortHH('hanExp')">한강지출</th>
+            <th class="sortable num" style="color:#185fa5;" onclick="_sortHH('hanNet')">한강실수입</th>
+            <th class="sortable num" style="color:#3b6d11;" onclick="_sortHH('sarangRev')">사랑매출</th>
+            <th class="sortable num" style="color:#3b6d11;" onclick="_sortHH('sarangExp')">사랑지출</th>
+            <th class="sortable num" style="color:#3b6d11;" onclick="_sortHH('sarangNet')">사랑실수입</th>
+            <th class="sortable num" style="font-weight:600;" onclick="_sortHH('net')">합산실수입</th>
+            <th class="sortable num" onclick="_sortHH('rate')">수익률</th>
           </tr></thead>
           <tbody id="hh-tbody"></tbody>
         </table>
@@ -725,27 +743,27 @@ tr:hover td { background: #f5f5f0; }
       <h3>월별 이력</h3>
       <div style="overflow-x:auto;">
         <table style="font-size:12px;min-width:1400px;">
-          <thead><tr>
-            <th style="white-space:nowrap;">월</th>
-            <th class="num" style="color:#185fa5;white-space:nowrap;">A.현금</th>
-            <th class="num" style="color:#3b6d11;white-space:nowrap;">B.장기현금</th>
-            <th class="num" style="color:#ba7517;white-space:nowrap;">C.연금성</th>
-            <th class="num" style="font-weight:600;white-space:nowrap;">D.총합</th>
-            <th class="num" style="white-space:nowrap;">한강실수입</th>
-            <th class="num" style="white-space:nowrap;">사랑실수입</th>
-            <th class="num" style="white-space:nowrap;">수입합</th>
-            <th class="num" style="white-space:nowrap;">선교헌금합</th>
-            <th class="num" style="white-space:nowrap;">예비비합</th>
-            <th class="num" style="white-space:nowrap;">한강예비비</th>
-            <th class="num" style="white-space:nowrap;">사랑예비비</th>
-            <th class="num" style="white-space:nowrap;">①통장합</th>
-            <th class="num" style="white-space:nowrap;">②주식합</th>
-            <th class="num" style="white-space:nowrap;">③적금합</th>
-            <th class="num" style="white-space:nowrap;">④정기예금합</th>
-            <th class="num" style="white-space:nowrap;">⑤노란우산합</th>
-            <th class="num" style="white-space:nowrap;">⑥보증금합</th>
-            <th class="num" style="white-space:nowrap;">⑦퇴직연금합</th>
-            <th class="num" style="white-space:nowrap;">⑧연금보험합</th>
+          <thead><tr id="asset-hist-head">
+            <th class="sortable" onclick="_sortAsset('year_month')">월</th>
+            <th class="sortable num" style="color:#185fa5;" onclick="_sortAsset('a_cash')">A.현금</th>
+            <th class="sortable num" style="color:#3b6d11;" onclick="_sortAsset('b_longterm')">B.장기현금</th>
+            <th class="sortable num" style="color:#ba7517;" onclick="_sortAsset('c_pension')">C.연금성</th>
+            <th class="sortable num" style="font-weight:600;" onclick="_sortAsset('d_total')">D.총합</th>
+            <th class="sortable num" onclick="_sortAsset('han_net')">한강실수입</th>
+            <th class="sortable num" onclick="_sortAsset('sarang_net')">사랑실수입</th>
+            <th class="sortable num" onclick="_sortAsset('income_total')">수입합</th>
+            <th class="sortable num" onclick="_sortAsset('mission_total')">선교헌금합</th>
+            <th class="sortable num" onclick="_sortAsset('reserve_total')">예비비합</th>
+            <th class="sortable num" onclick="_sortAsset('reserve_h')">한강예비비</th>
+            <th class="sortable num" onclick="_sortAsset('reserve_s')">사랑예비비</th>
+            <th class="sortable num" onclick="_sortAsset('bank_total')">①통장합</th>
+            <th class="sortable num" onclick="_sortAsset('stock_total')">②주식합</th>
+            <th class="sortable num" onclick="_sortAsset('savings_total')">③적금합</th>
+            <th class="sortable num" onclick="_sortAsset('deposit_total')">④정기예금합</th>
+            <th class="sortable num" onclick="_sortAsset('yellow_total')">⑤노란우산합</th>
+            <th class="sortable num" onclick="_sortAsset('guarantee_total')">⑥보증금합</th>
+            <th class="sortable num" onclick="_sortAsset('retirement_total')">⑦퇴직연금합</th>
+            <th class="sortable num" onclick="_sortAsset('annuity_total')">⑧연금보험합</th>
           </tr></thead>
           <tbody id="asset-history-tbody"></tbody>
         </table>
@@ -879,13 +897,17 @@ async function loadRecent(){
     const tbody=document.getElementById('recent-tbody');
     if(!Array.isArray(data)||!data.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:#888780;padding:20px;">데이터 없음</td></tr>';return;}
     tbody.innerHTML=data.map(r=>`<tr>
-      <td>${r.date||''}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
-      <td class="num">${r.total_patients??'-'}</td><td class="num">${r.new_patients??'-'}</td><td class="num">${r.return_patients??'-'}</td>
-      <td class="num">${r.daily_revenue!=null?r.daily_revenue.toLocaleString():'-'}</td>
-      <td class="num">${r.cash!=null?r.cash.toLocaleString():'-'}</td><td class="num">${r.card!=null?r.card.toLocaleString():'-'}</td>
-      <td class="num">${r.insurance_claim!=null?r.insurance_claim.toLocaleString():'-'}</td>
-      <td class="num">${r.deposit!=null?r.deposit.toLocaleString():'-'}</td>
-      <td><button class="danger" style="padding:3px 10px;font-size:12px;" onclick="deleteDaily('${r.date}')">삭제</button></td>
+      <td>${r.date||''}</td>
+      <td style="text-align:left;">${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
+      <td>${r.total_patients??'-'}</td>
+      <td>${r.new_patients??'-'}</td>
+      <td>${r.return_patients??'-'}</td>
+      <td>${r.daily_revenue!=null?r.daily_revenue.toLocaleString():'-'}</td>
+      <td>${r.cash!=null?r.cash.toLocaleString():'-'}</td>
+      <td>${r.card!=null?r.card.toLocaleString():'-'}</td>
+      <td>${r.insurance_claim!=null?r.insurance_claim.toLocaleString():'-'}</td>
+      <td>${r.deposit!=null?r.deposit.toLocaleString():'-'}</td>
+      <td style="text-align:center;"><button class="danger" style="padding:3px 10px;font-size:12px;" onclick="deleteDaily('${r.date}')">삭제</button></td>
     </tr>`).join('');
     setStatus(`✓ 연결됨 · 최근 ${data.length}건`,'success');
   }catch(e){setStatus('⚠ '+e.message,'error');}
@@ -1027,7 +1049,7 @@ function renderHistoryTable(tbodyId,data,rk,ek,nk){
   tbody.innerHTML=data.map(r=>{
     const rev=Number(r[rk])||0,exp=Number(r[ek])||0,net=Number(r[nk])??rev-exp;
     const rate=rev?Math.round(net/rev*100):0;
-    return`<tr><td>${r.year_month}</td><td class="num">${rev.toLocaleString()}</td><td class="num">${exp.toLocaleString()}</td><td class="num" style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td><td class="num">${rate}%</td></tr>`;
+    return`<tr><td>${r.year_month}</td><td>${rev.toLocaleString()}</td><td>${exp.toLocaleString()}</td><td style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td><td>${rate}%</td></tr>`;
   }).join('');
 }
 
@@ -1087,22 +1109,93 @@ function drawNewPatientChart(labels,data,title){
   document.getElementById('newpt-chart-title').textContent=title;
   newPatientChart=new Chart(document.getElementById('newPatientChart'),{type:'bar',data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}});
 }
-function renderMonthlyTable(rows){document.getElementById('table-title').textContent='월별 상세';document.getElementById('table-head').innerHTML=`<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr><td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td><td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td></tr>`).join('');}
-function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
+function _sortMonthly(col){
+  _toggleDir(col);
+  _currentTableData=[..._currentTableData].sort((a,b)=>{
+    const mul=_sortDir==='asc'?1:-1;
+    if(col==='month') return a[0]>b[0]?mul:-mul;
+    return ((b[1][col]||0)-(a[1][col]||0))*-mul;
+  });
+  renderMonthlyTable(_currentTableData);
+}
+function renderMonthlyTable(rows){
+  document.getElementById('table-title').textContent='월별 상세';
+  document.getElementById('table-head').innerHTML=`
+    <th class="sortable" data-col="month" onclick="_sortMonthly('month')">월</th>
+    <th class="sortable" data-col="revenue" onclick="_sortMonthly('revenue')">매출</th>
+    <th class="sortable" data-col="patients" onclick="_sortMonthly('patients')">환자수</th>
+    <th class="sortable" data-col="new_p" onclick="_sortMonthly('new_p')">초진</th>
+    <th class="sortable" data-col="cash" onclick="_sortMonthly('cash')">현금</th>
+    <th class="sortable" data-col="card" onclick="_sortMonthly('card')">카드</th>
+    <th class="sortable" data-col="claim" onclick="_sortMonthly('claim')">청구액</th>
+    <th class="sortable" data-col="days" onclick="_sortMonthly('days')">진료일</th>`;
+  _updateSortHeaders('table-head', _sortCol);
+  document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr>
+    <td>${m}</td>
+    <td>${d.revenue.toLocaleString()}</td>
+    <td>${d.patients.toLocaleString()}</td>
+    <td>${d.new_p.toLocaleString()}</td>
+    <td>${d.cash.toLocaleString()}</td>
+    <td>${d.card.toLocaleString()}</td>
+    <td>${d.claim.toLocaleString()}</td>
+    <td>${d.days}</td>
+  </tr>`).join('');
+}
+function _sortYearly(col){
+  _toggleDir(col);
+  _currentTableData=[..._currentTableData].sort((a,b)=>{
+    const mul=_sortDir==='asc'?1:-1;
+    if(col==='year') return a[0]>b[0]?mul:-mul;
+    return ((b[1][col]||0)-(a[1][col]||0))*-mul;
+  });
+  renderYearlyTable(_currentTableData);
+}
+function renderYearlyTable(rows){
+  document.getElementById('table-title').textContent='연도별 상세';
+  document.getElementById('table-head').innerHTML=`
+    <th class="sortable" data-col="year" onclick="_sortYearly('year')">연도</th>
+    <th class="sortable" data-col="revenue" onclick="_sortYearly('revenue')">매출</th>
+    <th class="sortable" data-col="patients" onclick="_sortYearly('patients')">환자수</th>
+    <th class="sortable" data-col="new_p" onclick="_sortYearly('new_p')">초진</th>
+    <th class="sortable" data-col="avgrev" onclick="_sortYearly('avgrev')">일평균매출</th>
+    <th class="sortable" data-col="avgpat" onclick="_sortYearly('avgpat')">일평균환자</th>
+    <th class="sortable" data-col="days" onclick="_sortYearly('days')">진료일</th>`;
+  _updateSortHeaders('table-head', _sortCol);
+  document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr>
+    <td>${y}</td>
+    <td>${d.revenue.toLocaleString()}</td>
+    <td>${d.patients.toLocaleString()}</td>
+    <td>${d.new_p.toLocaleString()}</td>
+    <td>${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td>
+    <td>${d.days?Math.round(d.patients/d.days):'-'}</td>
+    <td>${d.days}</td>
+  </tr>`).join('');
+}
+function _sortDaily(col){ _toggleDir(col); _currentTableData=[..._currentTableData].sort((a,b)=>_cmp(a,b,col,_sortDir)); renderDailyTable(_currentTableData,true); }
 function renderDailyTable(data, noSort=false){
   const rows=noSort?data:[...data].sort((a,b)=>b.date>a.date?1:-1);
   document.getElementById('table-title').textContent=`일별 상세 (${rows.length}건)`;
-  document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">입금</th>`;
+  document.getElementById('table-head').innerHTML=`
+    <th class="sortable" data-col="date" onclick="_sortDaily('date')">날짜</th>
+    <th style="text-align:left;">요일</th>
+    <th class="sortable" data-col="daily_revenue" onclick="_sortDaily('daily_revenue')">매출</th>
+    <th class="sortable" data-col="total_patients" onclick="_sortDaily('total_patients')">환자</th>
+    <th class="sortable" data-col="new_patients" onclick="_sortDaily('new_patients')">초진</th>
+    <th class="sortable" data-col="cash" onclick="_sortDaily('cash')">현금</th>
+    <th class="sortable" data-col="card" onclick="_sortDaily('card')">카드</th>
+    <th class="sortable" data-col="insurance_claim" onclick="_sortDaily('insurance_claim')">청구액</th>
+    <th class="sortable" data-col="deposit" onclick="_sortDaily('deposit')">입금</th>`;
+  _updateSortHeaders('table-head', _sortCol);
   document.getElementById('table-body').innerHTML=rows.map(r=>`<tr>
     <td>${r.date}</td>
-    <td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
-    <td class="num">${(r.daily_revenue||0).toLocaleString()}</td>
-    <td class="num">${r.total_patients||0}</td>
-    <td class="num">${r.new_patients||0}</td>
-    <td class="num">${(r.cash||0).toLocaleString()}</td>
-    <td class="num">${(r.card||0).toLocaleString()}</td>
-    <td class="num">${(r.insurance_claim||0).toLocaleString()}</td>
-    <td class="num">${(r.deposit||0).toLocaleString()}</td>
+    <td style="text-align:left;">${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
+    <td>${(r.daily_revenue||0).toLocaleString()}</td>
+    <td>${r.total_patients||0}</td>
+    <td>${r.new_patients||0}</td>
+    <td>${(r.cash||0).toLocaleString()}</td>
+    <td>${(r.card||0).toLocaleString()}</td>
+    <td>${(r.insurance_claim||0).toLocaleString()}</td>
+    <td>${(r.deposit||0).toLocaleString()}</td>
   </tr>`).join('');
 }
 
@@ -1124,8 +1217,33 @@ function onViewTypeChange(){
 }
 (function(){ onViewTypeChange(); })();
 
-// 현재 테이블 데이터 (정렬용)
+// 정렬 상태
 let _currentTableData = [], _currentTableType = '';
+let _sortCol = '', _sortDir = 'desc'; // 현재 정렬 컬럼/방향
+
+// th 헤더에 정렬 클래스 업데이트
+function _updateSortHeaders(tableHeadId, col) {
+  const ths = document.querySelectorAll('#'+tableHeadId+' th.sortable');
+  ths.forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if(th.dataset.col === col) th.classList.add(_sortDir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+
+// 정렬 방향 토글
+function _toggleDir(col) {
+  if(_sortCol === col) _sortDir = _sortDir==='desc'?'asc':'desc';
+  else { _sortCol=col; _sortDir='desc'; }
+}
+
+// 숫자/문자 비교
+function _cmp(a, b, col, dir) {
+  const mul = dir==='asc' ? 1 : -1;
+  const av = typeof a[col]==='number'?a[col]:(parseFloat(String(a[col]).replace(/,/g,''))||0);
+  const bv = typeof b[col]==='number'?b[col]:(parseFloat(String(b[col]).replace(/,/g,''))||0);
+  if(av===bv) return 0;
+  return av > bv ? mul : -mul;
+}
 
 async function updateView(){
   const vt=document.getElementById('view-type').value;
@@ -1208,6 +1326,46 @@ function sortTable(by){
    (index.html의 drawHhRevChart/drawHhNetChart 구조 적용)
 ══════════════════════════════════════════════ */
 let hhRevChart, hhHanNetChart, hhSarangNetChart;
+let _hhRows = [], _hhSortCol='', _hhSortDir='desc';
+function renderHHTable(rows){
+  document.getElementById('hh-tbody').innerHTML=rows.map(r=>{
+    const net=r.hanNet+r.sarangNet, totRev=r.hanRev+r.sarangRev;
+    const rate=totRev?Math.round(net/totRev*100):0;
+    return`<tr>
+      <td>${r.ym}</td>
+      <td style="color:#185fa5;">${r.hanRev.toLocaleString()}</td>
+      <td style="color:#888780;">${r.hanExp.toLocaleString()}</td>
+      <td style="color:${r.hanNet>=0?'#185fa5':'#a32d2d'};font-weight:500;">${r.hanNet.toLocaleString()}</td>
+      <td style="color:#3b6d11;">${r.sarangRev.toLocaleString()}</td>
+      <td style="color:#888780;">${r.sarangExp.toLocaleString()}</td>
+      <td style="color:${r.sarangNet>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${r.sarangNet.toLocaleString()}</td>
+      <td style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
+      <td>${rate}%</td>
+    </tr>`;
+  }).join('');
+  // 헤더 정렬 표시
+  document.querySelectorAll('#hh-table-head th.sortable').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if(th.getAttribute('onclick')?.includes("'"+_hhSortCol+"'"))
+      th.classList.add(_hhSortDir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+function _sortHH(col){
+  if(_hhSortCol===col) _hhSortDir=_hhSortDir==='desc'?'asc':'desc';
+  else{_hhSortCol=col;_hhSortDir='desc';}
+  const mul=_hhSortDir==='asc'?1:-1;
+  const sorted=[..._hhRows].sort((a,b)=>{
+    if(col==='ym') return a.ym>b.ym?mul:-mul;
+    if(col==='net') return ((a.hanNet+a.sarangNet)-(b.hanNet+b.sarangNet))*mul;
+    if(col==='rate'){
+      const ar=a.hanRev+a.sarangRev, br=b.hanRev+b.sarangRev;
+      const an=a.hanNet+a.sarangNet, bn=b.hanNet+b.sarangNet;
+      return ((ar?an/ar:0)-(br?bn/br:0))*mul;
+    }
+    return ((a[col]||0)-(b[col]||0))*mul;
+  });
+  renderHHTable(sorted);
+}
 async function initHousehold(){ await loadHousehold(); }
 async function loadHousehold(){
   const fromM=document.getElementById('hh-month-from')?.value||'2024-02';
@@ -1248,19 +1406,8 @@ async function loadHousehold(){
     if(hhSarangNetChart) hhSarangNetChart.destroy();
     hhSarangNetChart=new Chart(document.getElementById('hhSarangNetChart'),{type:'bar',data:{labels,datasets:[{label:'사랑실수입',data:rows.map(r=>Math.round(r.sarangNet/10000)),backgroundColor:rows.map(r=>r.sarangNet>=0?'#3b6d11aa':'#a32d2daa'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     // 테이블
-    document.getElementById('hh-tbody').innerHTML=rows.map(r=>{
-      const net=r.hanNet+r.sarangNet, totRev=r.hanRev+r.sarangRev;
-      const rate=totRev?Math.round(net/totRev*100):0;
-      return`<tr><td>${r.ym}</td>
-        <td class="num" style="color:#185fa5;">${r.hanRev.toLocaleString()}</td>
-        <td class="num" style="color:#888780;">${r.hanExp.toLocaleString()}</td>
-        <td class="num" style="color:${r.hanNet>=0?'#185fa5':'#a32d2d'};font-weight:500;">${r.hanNet.toLocaleString()}</td>
-        <td class="num" style="color:#3b6d11;">${r.sarangRev.toLocaleString()}</td>
-        <td class="num" style="color:#888780;">${r.sarangExp.toLocaleString()}</td>
-        <td class="num" style="color:${r.sarangNet>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${r.sarangNet.toLocaleString()}</td>
-        <td class="num" style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
-        <td class="num">${rate}%</td></tr>`;
-    }).join('');
+    _hhRows = rows;
+    renderHHTable(rows);
     setStatus(`✓ 한강/사랑 통계 · ${rows.length}개월 (${fromM}~${toM})`,'success');
   }catch(e){setStatus('⚠ 한강/사랑통계 오류: '+e.message,'error');console.error(e);}
   finally{loading(false);}
@@ -1271,6 +1418,46 @@ async function loadHousehold(){
    (index.html의 loadAssetHistory 구조 동일 적용)
 ══════════════════════════════════════════════ */
 let assetTrendChart;
+let _assetRows = [], _assetSortCol='', _assetSortDir='desc';
+function renderAssetTable(rows){
+  document.getElementById('asset-history-tbody').innerHTML=rows.map(r=>`<tr>
+    <td>${r.year_month}</td>
+    <td style="color:#185fa5;">${fmtW(r.a_cash)}</td>
+    <td style="color:#3b6d11;">${fmtW(r.b_longterm)}</td>
+    <td style="color:#ba7517;">${fmtW(r.c_pension)}</td>
+    <td style="font-weight:600;">${fmtW(r.d_total)}</td>
+    <td>${fmtW(r.han_net)}</td>
+    <td>${fmtW(r.sarang_net)}</td>
+    <td>${fmtW(r.income_total)}</td>
+    <td>${fmtW(r.mission_total)}</td>
+    <td>${fmtW(r.reserve_total)}</td>
+    <td>${fmtW(r.reserve_h)}</td>
+    <td>${fmtW(r.reserve_s)}</td>
+    <td>${fmtW(r.bank_total)}</td>
+    <td>${fmtW(r.stock_total)}</td>
+    <td>${fmtW(r.savings_total)}</td>
+    <td>${fmtW(r.deposit_total)}</td>
+    <td>${fmtW(r.yellow_total)}</td>
+    <td>${fmtW(r.guarantee_total)}</td>
+    <td>${fmtW(r.retirement_total)}</td>
+    <td>${fmtW(r.annuity_total)}</td>
+  </tr>`).join('');
+  document.querySelectorAll('#asset-hist-head th.sortable').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if(th.getAttribute('onclick')?.includes("'"+_assetSortCol+"'"))
+      th.classList.add(_assetSortDir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+function _sortAsset(col){
+  if(_assetSortCol===col) _assetSortDir=_assetSortDir==='desc'?'asc':'desc';
+  else{_assetSortCol=col;_assetSortDir='desc';}
+  const mul=_assetSortDir==='asc'?1:-1;
+  const sorted=[..._assetRows].sort((a,b)=>{
+    if(col==='year_month') return a.year_month>b.year_month?mul:-mul;
+    return ((Number(a[col])||0)-(Number(b[col])||0))*mul;
+  });
+  renderAssetTable(sorted);
+}
 async function loadAssetHistory(){
   const fromM=document.getElementById('asset-hist-from')?.value||'2024-02';
   const toM=document.getElementById('asset-hist-to')?.value||'2026-12';
@@ -1287,28 +1474,8 @@ async function loadAssetHistory(){
       {label:'A.현금',data:data.map(r=>Math.round((Number(r.a_cash)||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
       {label:'C.연금성',data:data.map(r=>Math.round((Number(r.c_pension)||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},padding:10}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
-    document.getElementById('asset-history-tbody').innerHTML=data.slice().reverse().map(r=>`<tr>
-      <td style="white-space:nowrap;">${r.year_month}</td>
-      <td class="num" style="color:#185fa5;">${fmtW(r.a_cash)}</td>
-      <td class="num" style="color:#3b6d11;">${fmtW(r.b_longterm)}</td>
-      <td class="num" style="color:#ba7517;">${fmtW(r.c_pension)}</td>
-      <td class="num" style="font-weight:600;">${fmtW(r.d_total)}</td>
-      <td class="num">${fmtW(r.han_net)}</td>
-      <td class="num">${fmtW(r.sarang_net)}</td>
-      <td class="num">${fmtW(r.income_total)}</td>
-      <td class="num">${fmtW(r.mission_total)}</td>
-      <td class="num">${fmtW(r.reserve_total)}</td>
-      <td class="num">${fmtW(r.reserve_h)}</td>
-      <td class="num">${fmtW(r.reserve_s)}</td>
-      <td class="num">${fmtW(r.bank_total)}</td>
-      <td class="num">${fmtW(r.stock_total)}</td>
-      <td class="num">${fmtW(r.savings_total)}</td>
-      <td class="num">${fmtW(r.deposit_total)}</td>
-      <td class="num">${fmtW(r.yellow_total)}</td>
-      <td class="num">${fmtW(r.guarantee_total)}</td>
-      <td class="num">${fmtW(r.retirement_total)}</td>
-      <td class="num">${fmtW(r.annuity_total)}</td>
-    </tr>`).join('');
+    _assetRows = data.slice().reverse();
+    renderAssetTable(_assetRows);
     setStatus(`✓ 가계통계 로드 완료 · ${data.length}개월 (${fromM}~${toM})`,'success');
   }catch(e){setStatus('⚠ 가계통계 오류: '+e.message,'error');console.error(e);}
 }
@@ -1620,7 +1787,46 @@ async function finalSave(){
   if(msgEl){msgEl.textContent=`✓ ${month} 최종저장 완료!`;setTimeout(()=>msgEl.textContent='',5000);}
 }
 
+/* ══ 검색 설정 localStorage 저장/복원 ══ */
+function saveSettings(){
+  const s = {
+    viewType: document.getElementById('view-type')?.value,
+    yearSelect: document.getElementById('year-select')?.value,
+    yearFrom: document.getElementById('year-from')?.value,
+    yearTo: document.getElementById('year-to')?.value,
+    dateFrom: document.getElementById('date-from')?.value,
+    dateTo: document.getElementById('date-to')?.value,
+    hhMonthFrom: document.getElementById('hh-month-from')?.value,
+    hhMonthTo: document.getElementById('hh-month-to')?.value,
+    assetHistFrom: document.getElementById('asset-hist-from')?.value,
+    assetHistTo: document.getElementById('asset-hist-to')?.value,
+  };
+  try { localStorage.setItem('han_stat_settings', JSON.stringify(s)); } catch(e){}
+}
+function loadSettings(){
+  try {
+    const s = JSON.parse(localStorage.getItem('han_stat_settings')||'{}');
+    if(s.viewType) document.getElementById('view-type').value=s.viewType;
+    if(s.yearSelect) document.getElementById('year-select').value=s.yearSelect;
+    if(s.yearFrom) document.getElementById('year-from').value=s.yearFrom;
+    if(s.yearTo) document.getElementById('year-to').value=s.yearTo;
+    if(s.dateFrom) document.getElementById('date-from').value=s.dateFrom;
+    if(s.dateTo) document.getElementById('date-to').value=s.dateTo;
+    if(s.hhMonthFrom) document.getElementById('hh-month-from').value=s.hhMonthFrom;
+    if(s.hhMonthTo) document.getElementById('hh-month-to').value=s.hhMonthTo;
+    if(s.assetHistFrom) document.getElementById('asset-hist-from').value=s.assetHistFrom;
+    if(s.assetHistTo) document.getElementById('asset-hist-to').value=s.assetHistTo;
+    onViewTypeChange();
+  } catch(e){}
+}
+// 조회 버튼 클릭 시 설정 저장
+document.querySelectorAll('.controls button:not(.secondary)').forEach(btn=>{
+  const orig = btn.onclick;
+  btn.addEventListener('click', saveSettings);
+});
+
 /* 초기 로드 */
+loadSettings();
 loadRecent();
 </script>
 
