@@ -387,7 +387,7 @@ tr:hover td { background: #f5f5f0; }
       <!-- 최종저장 -->
       <div style="background:#1a1a18;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px;">📌 최종저장</div>
-        <div style="color:#888780;font-size:12px;" id="final-save-desc">저장하면 Household_statistics 테이블에 해당 월 데이터가 업데이트됩니다.</div></div>
+        <div style="color:#888780;font-size:12px;" id="final-save-desc">저장하면 Household_statistics에 저장됩니다.</div></div>
         <button onclick="finalSave()" style="background:#185fa5;border:none;border-radius:8px;padding:12px 28px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;">💾 최종저장</button>
         <span id="final-save-msg" style="font-size:13px;color:#3b6d11;"></span>
       </div>
@@ -726,12 +726,10 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const HDR = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
 const DOW = ['일','월','화','수','목','금','토'];
 const TABLE = 'Household_statistics'; // ← 단일 테이블
-// year_month 형식 변환 (DB: 202606 형식, UI: 2026-06 형식)
-function ym2db(ym){ return ym ? ym.replace('-','') : ym; }       // '2026-06' → '202606'
-function db2ym(db){ if(!db)return db; const s=String(db); return s.length===6?s.slice(0,4)+'-'+s.slice(4):s; } // '202606' → '2026-06'
-function prevMonthDB(dbym){ // '202601' → '202512'
-  const y=parseInt(dbym.slice(0,4)), m=parseInt(dbym.slice(4));
-  return m===1?`${y-1}12`:String(y)+(m-1<10?'0':'')+(m-1);
+// year_month: YYYY-MM 형식 통일 (DB도 동일)
+function prevMonthUI(ym){
+  const [y,m] = ym.split('-').map(Number);
+  return m===1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
 }
 
 // ── 한강 기본 항목 정의 ──
@@ -775,15 +773,14 @@ const SARANG_EXP_DEFAULT = [
 /* ══════════ 공통 유틸 ══════════ */
 let _loadingCount = 0;
 function loading(on){ _loadingCount=Math.max(0,_loadingCount+(on?1:-1)); document.getElementById('loading-overlay').classList[_loadingCount>0?'add':'remove']('visible'); }
-function fmt(n){ n=n!=null?Number(n):null; if(n==null||isNaN(n))return'-'; if(Math.abs(n)>=100000000)return(n/100000000).toFixed(1)+'억'; if(Math.abs(n)>=10000)return Math.round(n/10000)+'만'; return n.toLocaleString(); }
-function fmtW(v){ v=v!=null?Number(v):null; if(v==null||isNaN(v))return'-'; if(Math.abs(v)>=100000000)return(v/100000000).toFixed(1)+'억'; if(Math.abs(v)>=10000)return Math.round(v/10000)+'만'; return v.toLocaleString(); }
+function fmt(n){ n=(n!=null&&n!=='')?Number(n):null; if(n==null||isNaN(n))return'-'; if(Math.abs(n)>=100000000)return(n/100000000).toFixed(1)+'억'; if(Math.abs(n)>=10000)return Math.round(n/10000)+'만'; return n.toLocaleString(); }
+function fmtW(v){ v=(v!=null&&v!=='')?Number(v):null; if(v==null||isNaN(v))return'-'; if(Math.abs(v)>=100000000)return(v/100000000).toFixed(1)+'억'; if(Math.abs(v)>=10000)return Math.round(v/10000)+'만'; return v.toLocaleString(); }
 function numOrNull(id){ const v=document.getElementById(id)?.value.trim(); return (!v||v==='')?null:parseInt(v,10)||0; }
 function getN(id){ return parseInt(document.getElementById(id)?.value||0)||0; }
 function setN(id,v){ const el=document.getElementById(id); if(el&&v!=null) el.value=v; }
 function showMsg(id,msg,ok){ const el=document.getElementById(id); if(!el)return; el.textContent=msg; el.className='form-msg '+(ok?'ok':'err'); setTimeout(()=>el.textContent='',5000); }
 function setStatus(msg,type='success'){ const el=document.getElementById('status-bar'); el.className='status-bar '+type; el.textContent=msg; }
-function prevMonth(ym){ const [y,m]=ym.split('-').map(Number); return m===1?`${y-1}-12`:`${y}-${String(m-1).padStart(2,'0')}`; }
-function prevMonthUI(ym){ return prevMonth(ym); } // UI형식 유지
+
 
 /* ══════════ 탭/서브탭 전환 ══════════ */
 function showPage(name, el) {
@@ -958,9 +955,9 @@ async function loadHanMonth(){
   if(!month)return;
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}&select=h_items,han_revenue,han_expense,han_net&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=h_items,han_revenue,han_expense,han_net&limit=1`,{headers:HDR});
     const data=await res.json();
-    const prevM=prevMonth(month);
+    const prevM=prevMonthUI(month);
     if(data.length && data[0].h_items){
       const saved=typeof data[0].h_items==='string'?JSON.parse(data[0].h_items):data[0].h_items;
       hanRevItems=saved.rev||HAN_REV_DEFAULT.map(i=>({...i,amount:null}));
@@ -970,7 +967,7 @@ async function loadHanMonth(){
       showMsg('han-msg',`✓ ${month} 불러옴`,true);
     } else {
       // 이전달 고정항목 적용
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(prevM)}&select=h_items&limit=1`,{headers:HDR});
+      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=h_items&limit=1`,{headers:HDR});
       const prev=await res2.json();
       if(prev.length && prev[0].h_items){
         const p=typeof prev[0].h_items==='string'?JSON.parse(prev[0].h_items):prev[0].h_items;
@@ -993,9 +990,9 @@ async function loadSarangMonth(){
   if(!month)return;
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}&select=s_items,sarang_revenue,sarang_expense,sarang_net&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=s_items,sarang_revenue,sarang_expense,sarang_net&limit=1`,{headers:HDR});
     const data=await res.json();
-    const prevM=prevMonth(month);
+    const prevM=prevMonthUI(month);
     if(data.length && data[0].s_items){
       const saved=typeof data[0].s_items==='string'?JSON.parse(data[0].s_items):data[0].s_items;
       sarangRevItems=saved.rev||SARANG_REV_DEFAULT.map(i=>({...i,amount:null}));
@@ -1004,7 +1001,7 @@ async function loadSarangMonth(){
       if(saved.expLastDate) document.getElementById('sarang-exp-lastdate').value=saved.expLastDate;
       showMsg('sarang-msg',`✓ ${month} 불러옴`,true);
     } else {
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(prevM)}&select=s_items&limit=1`,{headers:HDR});
+      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=s_items&limit=1`,{headers:HDR});
       const prev=await res2.json();
       if(prev.length && prev[0].s_items){
         const p=typeof prev[0].s_items==='string'?JSON.parse(prev[0].s_items):prev[0].s_items;
@@ -1031,7 +1028,7 @@ async function saveHan(){
   const revLastDate=document.getElementById('han-rev-lastdate')?.value||null;
   const expLastDate=document.getElementById('han-exp-lastdate')?.value||null;
   const hItems=JSON.stringify({rev:hanRevItems,exp:hanExpItems,revLastDate,expLastDate});
-  const payload={year_month:ym2db(month),han_revenue:totRev,han_expense:totExp,han_net:totRev-totExp,h_items:hItems};
+  const payload={year_month:month,han_revenue:totRev,han_expense:totExp,han_net:totRev-totExp,h_items:hItems};
   await upsertHS(month,payload,'han-msg',`한강 ${month}`);
   loadHanHistory();
 }
@@ -1043,7 +1040,7 @@ async function saveSarang(){
   const revLastDate=document.getElementById('sarang-rev-lastdate')?.value||null;
   const expLastDate=document.getElementById('sarang-exp-lastdate')?.value||null;
   const sItems=JSON.stringify({rev:sarangRevItems,exp:sarangExpItems,revLastDate,expLastDate});
-  const payload={year_month:ym2db(month),sarang_revenue:totRev,sarang_expense:totExp,sarang_net:totRev-totExp,s_items:sItems};
+  const payload={year_month:month,sarang_revenue:totRev,sarang_expense:totExp,sarang_net:totRev-totExp,s_items:sItems};
   await upsertHS(month,payload,'sarang-msg',`사랑 ${month}`);
   loadSarangHistory();
 }
@@ -1052,11 +1049,11 @@ async function saveSarang(){
 async function upsertHS(month,payload,msgId,label){
   loading(true);
   try{
-    const chk=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}&select=year_month&limit=1`,{headers:HDR});
+    const chk=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=year_month&limit=1`,{headers:HDR});
     const ex=await chk.json();
     let res;
     if(Array.isArray(ex)&&ex.length){
-      res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}`,{method:'PATCH',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+      res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}`,{method:'PATCH',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
     } else {
       res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`,{method:'POST',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
     }
@@ -1086,9 +1083,9 @@ function renderHistoryTable(tbodyId,data,revKey,expKey,netKey){
   const tbody=document.getElementById(tbodyId);
   if(!Array.isArray(data)||!data.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
   tbody.innerHTML=data.map(r=>{
-    const rev=Number(r[revKey])||0,exp=Number(r[expKey])||0,net=r[netKey]!=null?Number(r[netKey]):rev-exp;
+    const rev=r[revKey]||0,exp=r[expKey]||0,net=r[netKey]??rev-exp;
     const rate=rev?Math.round(net/rev*100):0;
-    return`<tr><td>${db2ym(r.year_month)}</td><td class="num">${rev.toLocaleString()}</td><td class="num">${exp.toLocaleString()}</td>
+    return`<tr><td>${r.year_month}</td><td class="num">${rev.toLocaleString()}</td><td class="num">${exp.toLocaleString()}</td>
       <td class="num" style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td>
       <td class="num">${rate}%</td></tr>`;
   }).join('');
@@ -1171,15 +1168,15 @@ async function loadHousehold(){
   const toYr=document.getElementById('hh-year-to')?.value||'2026';
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromYr}01&year_month=lte.${toYr}12&order=year_month.asc&limit=200`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromYr}-01&year_month=lte.${toYr}-12&order=year_month.asc&limit=200`,{headers:HDR});
     const rows=await res.json();
-    if(!Array.isArray(rows)){throw new Error('응답 형식 오류: '+JSON.stringify(rows));}
+    if(!Array.isArray(rows)||rows.error){throw new Error('응답오류: '+JSON.stringify(rows).slice(0,100));}
     if(!rows.length){
-      setStatus(`⚠ Household_statistics에 ${fromYr}~${toYr} 데이터 없음`,'error');
-      document.getElementById('hh-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px;">조회된 데이터 없음</td></tr>';
+      document.getElementById('hh-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px;">조회된 데이터 없음 (기간: ${fromYr}~${toYr})</td></tr>';
+      setStatus(`⚠ Household_statistics ${fromYr}~${toYr} 데이터 없음`,'error');
       loading(false); return;
     }
-    const totHanRev=rows.reduce((s,r)=>s+(Number(r.han_revenue)||0),0);
+    const totHanRev=rows.reduce((s,r)=>s+(r.han_revenue||0),0);
     const totHanExp=rows.reduce((s,r)=>s+(r.han_expense||0),0);
     const totHanNet=rows.reduce((s,r)=>s+(r.han_net||0),0);
     const totSarangRev=rows.reduce((s,r)=>s+(r.sarang_revenue||0),0);
@@ -1190,25 +1187,25 @@ async function loadHousehold(){
     setM('hh-han-rev',totHanRev); setM('hh-han-exp',totHanExp); setM('hh-han-net',totHanNet,true);
     setM('hh-sarang-rev',totSarangRev); setM('hh-sarang-exp',totSarangExp); setM('hh-sarang-net',totSarangNet,true);
     setM('hh-total-net',totNet,true);
-    const labels=rows.map(r=>db2ym(r.year_month).slice(5)+'월');
+    const labels=rows.map(r=>r.year_month.slice(5)+'월');
     // 차트
     if(hhRevChart)hhRevChart.destroy();
     hhRevChart=new Chart(document.getElementById('hhRevenueChart'),{type:'bar',data:{labels,datasets:[
-      {label:'한강매출',data:rows.map(r=>Math.round((Number(r.han_revenue)||0)/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
-      {label:'사랑매출',data:rows.map(r=>Math.round((Number(r.sarang_revenue)||0)/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
-      {label:'합산실수입',data:rows.map(r=>Math.round(((Number(r.han_net)||0)+(Number(r.sarang_net)||0))/10000)),backgroundColor:'rgba(26,26,24,0.15)',borderRadius:3},
+      {label:'한강매출',data:rows.map(r=>Math.round((r.han_revenue||0)/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
+      {label:'사랑매출',data:rows.map(r=>Math.round((r.sarang_revenue||0)/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
+      {label:'합산실수입',data:rows.map(r=>Math.round(((r.han_net||0)+(r.sarang_net||0))/10000)),backgroundColor:'rgba(26,26,24,0.15)',borderRadius:3},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     const drawNet=(canvasId,data,oldChart,setChart,color)=>{if(oldChart)oldChart.destroy();const c=new Chart(document.getElementById(canvasId),{type:'line',data:{labels,datasets:[{data,borderColor:color,backgroundColor:color.replace(')',',0.08)').replace('rgb','rgba'),borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});setChart(c);};
-    drawNet('hhHanNetChart',rows.map(r=>Math.round((Number(r.han_net)||0)/10000)),hhHanNetChart,c=>hhHanNetChart=c,'rgb(24,95,165)');
-    drawNet('hhSarangNetChart',rows.map(r=>Math.round((Number(r.sarang_net)||0)/10000)),hhSarangNetChart,c=>hhSarangNetChart=c,'rgb(59,109,17)');
+    drawNet('hhHanNetChart',rows.map(r=>Math.round((r.han_net||0)/10000)),hhHanNetChart,c=>hhHanNetChart=c,'rgb(24,95,165)');
+    drawNet('hhSarangNetChart',rows.map(r=>Math.round((r.sarang_net||0)/10000)),hhSarangNetChart,c=>hhSarangNetChart=c,'rgb(59,109,17)');
     // 테이블
     document.getElementById('hh-tbody').innerHTML=rows.map(r=>{
       const net=(Number(r.han_net)||0)+(Number(r.sarang_net)||0);
       const totRev=(Number(r.han_revenue)||0)+(Number(r.sarang_revenue)||0);
       const rate=totRev?Math.round(net/totRev*100):0;
-      return`<tr><td>${db2ym(r.year_month)}</td>
-        <td class="num" style="color:#185fa5;">${(Number(r.han_revenue)||0).toLocaleString()}</td>
-        <td class="num" style="color:#888780;">${(Number(r.han_expense)||0).toLocaleString()}</td>
+      return`<tr><td>${r.year_month}</td>
+        <td class="num" style="color:#185fa5;">${(r.han_revenue||0).toLocaleString()}</td>
+        <td class="num" style="color:#888780;">${(r.han_expense||0).toLocaleString()}</td>
         <td class="num" style="color:${(r.han_net||0)>=0?'#185fa5':'#a32d2d'};font-weight:500;">${(r.han_net||0).toLocaleString()}</td>
         <td class="num" style="color:#3b6d11;">${(r.sarang_revenue||0).toLocaleString()}</td>
         <td class="num" style="color:#888780;">${(r.sarang_expense||0).toLocaleString()}</td>
@@ -1231,13 +1228,13 @@ async function loadAssetHistory(){
     const data=await res.json();
     if(!Array.isArray(data)||!data.length){document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
     if(assetTrendChart)assetTrendChart.destroy();
-    assetTrendChart=new Chart(document.getElementById('assetTrendChart'),{type:'line',data:{labels:data.map(r=>db2ym(r.year_month)),datasets:[
-      {label:'D.총합',data:data.map(r=>Math.round((Number(r.d_total)||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
-      {label:'A.현금',data:data.map(r=>Math.round((Number(r.a_cash)||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
-      {label:'C.연금성',data:data.map(r=>Math.round((Number(r.c_pension)||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+    assetTrendChart=new Chart(document.getElementById('assetTrendChart'),{type:'line',data:{labels:data.map(r=>r.year_month),datasets:[
+      {label:'D.총합',data:data.map(r=>Math.round((r.d_total||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
+      {label:'A.현금',data:data.map(r=>Math.round((r.a_cash||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+      {label:'C.연금성',data:data.map(r=>Math.round((r.c_pension||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},padding:10}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     document.getElementById('asset-history-tbody').innerHTML=data.slice().reverse().map(r=>`<tr>
-      <td>${db2ym(r.year_month)}</td>
+      <td>${r.year_month}</td>
       <td class="num" style="color:#185fa5;">${fmtW(r.a_cash)}</td>
       <td class="num" style="color:#3b6d11;">${fmtW(r.b_longterm)}</td>
       <td class="num" style="color:#ba7517;">${fmtW(r.c_pension)}</td>
@@ -1427,10 +1424,10 @@ function recalcAssets(){
 /* ── 수입 연동 (Household_statistics h_items/s_items 예비비 자동 적용) ── */
 async function loadMonthlyIncome(month){
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}&select=han_net,sarang_net,h_items,s_items&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=han_net,sarang_net,h_items,s_items&limit=1`,{headers:HDR});
     const data=await res.json();
-    const hanNet=data.length?(Number(data[0].han_net)||0):0;
-    const sarangNet=data.length?(Number(data[0].sarang_net)||0):0;
+    const hanNet=data.length?(data[0].han_net||0):0;
+    const sarangNet=data.length?(data[0].sarang_net||0):0;
     const total=hanNet+sarangNet;
     document.getElementById('is-han').textContent=fmtW(hanNet);
     document.getElementById('is-sarang').textContent=fmtW(sarangNet);
@@ -1475,10 +1472,10 @@ async function loadAssetMonth(){
   const month=document.getElementById('asset-month').value;
   if(!month)return;
   loading(true);
-  const prevM=prevMonth(month);
+  const prevM=prevMonthUI(month);
   try{
     // 이전달 누적값
-    const prevRes=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(prevM)}&select=mission_total,reserve_h,reserve_s,mission_m,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
+    const prevRes=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=mission_total,reserve_h,reserve_s,mission_m,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
     const prevBase=await prevRes.json();
     if(prevBase.length){
       prevMissionTotal=prevBase[0].mission_total||0;
@@ -1494,7 +1491,7 @@ async function loadAssetMonth(){
     const sPI=document.getElementById('sarang-reserve-prev'); if(sPI)sPI.value=prevSarangReserve||0;
 
     // 이번달 데이터
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(month)}&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&limit=1`,{headers:HDR});
     const data=await res.json();
     if(data.length){
       const r=data[0];
@@ -1542,7 +1539,7 @@ async function loadAssetMonth(){
       showMsg('asset-msg','✓ '+month+' 불러옴',true);
     } else {
       // 신규월: 이전달 자산 이어받기
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${ym2db(prevM)}&limit=1`,{headers:HDR});
+      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&limit=1`,{headers:HDR});
       const prev=await res2.json();
       bankRows=[];savingsRows=[];missionUsage=[];hanReserveUsage=[];sarangReserveUsage=[];
       document.getElementById('reserve-han').value='';
@@ -1616,7 +1613,7 @@ async function saveAssets(){
   const mUsed=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
 
   const payload={
-    year_month:ym2db(month),
+    year_month:month,
     a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
     han_net:hanNet, sarang_net:sarangNet, income_total:incTotal,
     mission_total:missionTotal_, reserve_total:hanRemain+sarangRemain,
