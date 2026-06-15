@@ -169,6 +169,25 @@ tr:hover td { background: #f5f5f0; }
 .abcd-card .aclabel { font-size:12px; color:#888780; margin-bottom:4px; }
 .abcd-card .acvalue { font-size:20px; font-weight:500; }
 .asset-mission { background:#fcebeb; border-radius:8px; padding:10px 16px; font-size:13px; color:#a32d2d; margin-top:8px; }
+
+/* ── 가계입력 공통 ── */
+.gi-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:8px; }
+.gi-table th { background:#f5f5f0; color:#888780; font-weight:500; padding:7px 10px; border:0.5px solid #ddddd5; text-align:center; white-space:nowrap; }
+.gi-table td { padding:6px 10px; border:0.5px solid #e8e6df; vertical-align:middle; }
+.gi-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
+.gi-table td.label { color:#888780; font-size:12px; white-space:nowrap; }
+.gi-table input[type=number], .gi-table input[type=text] {
+  border:0.5px solid #b4b2a9; border-radius:6px; padding:5px 8px;
+  font-size:13px; width:100%; box-sizing:border-box;
+}
+.gi-table input[type=number] { text-align:right; }
+.gi-table tr.total-row td { background:#f0f6ff; font-weight:600; }
+.gi-table tr.result-row td { background:#1a1a18; color:#fff; font-weight:700; }
+.gi-section-title { font-size:13px; font-weight:600; color:#444441; margin:16px 0 8px; padding-bottom:4px; border-bottom:1.5px solid #ddddd5; }
+.gi-note { font-size:11px; color:#888780; margin-bottom:10px; }
+.gi-auto { background:#eaf3de !important; }
+.gi-calc { background:#e6f1fb !important; }
+.gi-result { background:#fff3f3 !important; color:#a32d2d; font-weight:700; }
 </style>
 </head>
 <body>
@@ -370,100 +389,153 @@ tr:hover td { background: #f5f5f0; }
 
     <!-- 11조/선교헌금 섹션 -->
     <div id="gahye-section-jo11" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;" id="jo11-section-content">
-      <!-- 수입 요약 -->
-      <div class="asset-section" style="background:#f5f5f0;">
-        <h3>💰 이달 수입</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:8px;">
-          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">한강 실수입</div><div style="font-size:16px;font-weight:500;" id="is-han">-</div></div>
-          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">사랑 실수입</div><div style="font-size:16px;font-weight:500;" id="is-sarang">-</div></div>
-          <div><div style="font-size:12px;color:#888780;margin-bottom:4px;">수입합</div><div style="font-size:16px;font-weight:500;" id="is-total">-</div></div>
-          <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
-            <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 11조</div>
-            <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-jo11">-</div>
-          </div>
-          <div style="background:#fff8f8;border-radius:8px;padding:8px 10px;">
-            <div style="font-size:11px;color:#888780;margin-bottom:2px;">이번달 선교헌금</div>
-            <div style="font-size:15px;font-weight:600;color:#a32d2d;" id="is-mission-this">-</div>
-          </div>
-          <div style="background:#fff3f3;border-radius:8px;padding:8px 10px;border:1px solid #f5c5c5;">
-            <div style="font-size:11px;color:#888780;margin-bottom:2px;">선교헌금합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
-            <div style="font-size:16px;font-weight:700;color:#a32d2d;" id="is-mission">-</div>
-          </div>
-          <div style="background:#f0f6ff;border-radius:8px;padding:8px 10px;border:1px solid #b0cff5;">
-            <div style="font-size:11px;color:#888780;margin-bottom:2px;">예비비합 <span style="color:#185fa5;">(저번달+이번달)</span></div>
-            <div style="font-size:16px;font-weight:700;color:#185fa5;" id="is-reserve">-</div>
-          </div>
-        </div>
-        <div style="font-size:12px;color:#888780;margin-bottom:8px;" id="prev-month-label"></div>
-        <div class="asset-mission" id="mission-calc" style="display:none;"></div>
-        <!-- 선교헌금 사용 내역 -->
-        <div style="margin-top:14px;border-top:0.5px solid #e0ddd4;padding-top:12px;">
-          <div style="font-size:13px;font-weight:600;color:#a32d2d;margin-bottom:8px;">📤 선교헌금 사용 내역 <span style="font-weight:400;font-size:12px;color:#888780;">(합계에서 차감)</span></div>
-          <div id="mission-usage-rows"></div>
-          <button class="add-btn" style="margin-top:4px;" onclick="addUsageRow('mission')">+ 사용 내역 추가</button>
-          <div style="margin-top:8px;font-size:13px;">사용 후 잔액: <b id="mission-remain" style="color:#a32d2d;">-</b></div>
+    <div class="main" style="padding-top:16px;">
+      <div class="asset-section">
+        <h3>🙏 11조 / 선교헌금 계산</h3>
+        <p class="gi-note">불러오기 시 이전달 선교헌금합(mission_total)과 이번달 가계수입(income_total)을 자동 조회합니다.</p>
+        <table class="gi-table">
+          <thead>
+            <tr>
+              <th>항목</th><th>#</th>
+              <th>전월 이월</th><th>#</th>
+              <th>가계수입 income_total<br><span id="jo11-month-label" style="font-weight:400;color:#888780;font-size:11px;"></span></th><th>#</th>
+              <th>11조</th><th>#</th>
+              <th>선교헌금</th><th>#</th>
+              <th>선교헌금사용</th><th>#</th>
+              <th>선교헌금합</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">선교헌금</td>
+              <td style="text-align:center;font-size:11px;color:#888780;">자동</td>
+              <td class="num gi-auto"><span id="jo11-prev-mission">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">자동</td>
+              <td class="num gi-auto"><span id="jo11-income">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">계산</td>
+              <td class="num gi-calc"><span id="jo11-amount">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">계산</td>
+              <td class="num gi-calc"><span id="jo11-mission-this">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">직접입력</td>
+              <td><input type="number" id="jo11-mission-used" placeholder="0" oninput="calcJo11()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:120px;text-align:right;"></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">확정</td>
+              <td class="num gi-result"><span id="jo11-mission-total">-</span></td>
+              <td><input type="text" id="jo11-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px;color:#888780;margin-top:8px;padding:8px 12px;background:#fafaf8;border-radius:6px;" id="jo11-formula-desc">
+          · 11조 = 가계수입 × 7% (최대 150만원)<br>
+          · 선교헌금 = 가계수입 × 3% + 66만원 + 11조 초과분<br>
+          · 선교헌금합 = 전월이월 + 이번달 선교헌금 − 사용금액
         </div>
       </div>
+
       <!-- 최종저장 -->
-      <div style="background:#1a1a18;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="background:#1a1a18;border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px;">📌 최종저장</div>
         <div style="color:#888780;font-size:12px;" id="final-save-desc">저장하면 Household_statistics에 저장됩니다.</div></div>
-        <button onclick="finalSave()" style="background:#185fa5;border:none;border-radius:8px;padding:12px 28px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;">💾 최종저장</button>
+        <button onclick="finalSave()" style="background:#185fa5;border:none;border-radius:8px;padding:12px 28px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;">💾 최종저장</button>
         <span id="final-save-msg" style="font-size:13px;color:#3b6d11;"></span>
       </div>
+
+      <!-- (하위 호환 hidden 요소) -->
+      <span id="is-han" style="display:none">-</span>
+      <span id="is-sarang" style="display:none">-</span>
+      <span id="is-total" style="display:none">-</span>
+      <span id="is-jo11" style="display:none">-</span>
+      <span id="is-mission-this" style="display:none">-</span>
+      <span id="is-mission" style="display:none">-</span>
+      <span id="is-reserve" style="display:none">-</span>
+      <span id="prev-month-label" style="display:none"></span>
+      <span id="mission-calc" style="display:none"></span>
+      <div id="mission-usage-rows" style="display:none"></div>
+      <span id="mission-remain" style="display:none"></span>
     </div>
     </div><!-- /gahye-section-jo11 -->
 
     <!-- 예비비 섹션 -->
     <div id="gahye-section-reserve" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;">
-      <div style="margin-top:0;border-top:none;padding-top:0;" class="asset-section">
-        <h3 style="font-size:14px;font-weight:600;color:#185fa5;margin-bottom:4px;">🏦 예비비 관리</h3>
-        <div style="font-size:11px;color:#3b6d11;background:#eaf3de;border-radius:6px;padding:5px 10px;margin-bottom:12px;">✓ 한강·사랑 매출지출 탭의 <b>예비비</b> 항목 저장 후 불러오기 시 자동 연동됩니다 (녹색 배경)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
-            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">한강 예비비</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div>저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
-              <input type="number" id="han-reserve-prev" min="0" placeholder="0" value="0"
-                oninput="prevHanReserve=parseInt(this.value)||0;recalcUsage()"
-                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
-            </div>
-            <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="han-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
-              <input type="number" id="reserve-han" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('han-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
-            </div>
-            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
-            <div id="han-reserve-usage-rows"></div>
-            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addHanReserveRow()">+ 사용 추가</button>
-            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:#888780;">남은 예비비</span>
-              <b id="han-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
-            </div>
-          </div>
-          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
-            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">사랑 예비비</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div>저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
-              <input type="number" id="sarang-reserve-prev" min="0" placeholder="0" value="0"
-                oninput="prevSarangReserve=parseInt(this.value)||0;recalcUsage()"
-                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
-            </div>
-            <div style="margin-bottom:6px;">
-              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="sarang-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
-              <input type="number" id="reserve-sarang" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('sarang-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
-            </div>
-            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
-            <div id="sarang-reserve-usage-rows"></div>
-            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addSarangReserveRow()">+ 사용 추가</button>
-            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:#888780;">남은 예비비</span>
-              <b id="sarang-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
-            </div>
-          </div>
+    <div class="main" style="padding-top:16px;">
+      <div class="asset-section">
+        <h3>🏦 예비비 관리</h3>
+        <p class="gi-note">불러오기 시 이전달 한강/사랑 예비비 잔액 자동 조회. 한강/사랑 매출지출 탭의 예비비 항목 저장 후 이번달 예비비 자동 연동(녹색)</p>
+
+        <!-- 한강 예비비 -->
+        <div class="gi-section-title">한강 예비비</div>
+        <table class="gi-table">
+          <thead>
+            <tr>
+              <th>항목</th><th>#</th>
+              <th>정신이월예비비<br>reserve_h</th><th>#</th>
+              <th>한강예비비</th><th>#</th>
+              <th>예비비 사용</th><th>#</th>
+              <th>이번달 예비비<br>reserve_h</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">한강예비비</td>
+              <td style="text-align:center;font-size:11px;color:#888780;">이전달 불러옴</td>
+              <td class="num gi-auto"><span id="res-h-prev">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">직접입력</td>
+              <td><input type="number" id="reserve-han" placeholder="0" oninput="calcReserve()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;" class="gi-auto-input"></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">직접입력</td>
+              <td><input type="number" id="res-h-used" placeholder="0" oninput="calcReserve()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;"></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">확정</td>
+              <td class="num gi-result"><span id="res-h-final">-</span></td>
+              <td><input type="text" id="res-h-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 사랑 예비비 -->
+        <div class="gi-section-title" style="margin-top:16px;">사랑 예비비</div>
+        <table class="gi-table">
+          <thead>
+            <tr>
+              <th>항목</th><th>#</th>
+              <th>사랑이월예비비<br>reserve_s</th><th>#</th>
+              <th>사랑예비비</th><th>#</th>
+              <th>예비비 사용</th><th>#</th>
+              <th>이번달 예비비<br>reserve_s</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">사랑예비비</td>
+              <td style="text-align:center;font-size:11px;color:#888780;">이전달 불러옴</td>
+              <td class="num gi-auto"><span id="res-s-prev">-</span></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">직접입력</td>
+              <td><input type="number" id="reserve-sarang" placeholder="0" oninput="calcReserve()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;" class="gi-auto-input"></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">직접입력</td>
+              <td><input type="number" id="res-s-used" placeholder="0" oninput="calcReserve()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;"></td>
+              <td style="text-align:center;font-size:11px;color:#888780;">확정</td>
+              <td class="num gi-result"><span id="res-s-final">-</span></td>
+              <td><input type="text" id="res-s-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 합계 -->
+        <div style="margin-top:14px;padding:12px 16px;background:#e6f1fb;border-radius:8px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:13px;color:#888780;">예비비합 reserve_total:</span>
+          <span style="font-size:18px;font-weight:700;color:#185fa5;" id="res-total-final">-</span>
         </div>
-        <div style="margin-top:10px;text-align:right;font-size:13px;color:#888780;">총 예비비 잔액 (한강+사랑): <b id="reserve-remain" style="color:#185fa5;font-size:15px;">-</b></div>
+
+        <!-- 하위호환 hidden -->
+        <span id="han-reserve-prev" style="display:none">0</span>
+        <span id="sarang-reserve-prev" style="display:none">0</span>
+        <span id="han-reserve-remain" style="display:none">-</span>
+        <span id="sarang-reserve-remain" style="display:none">-</span>
+        <span id="reserve-remain" style="display:none">-</span>
+        <span id="han-reserve-auto-badge" style="display:none"></span>
+        <span id="sarang-reserve-auto-badge" style="display:none"></span>
+        <div id="han-reserve-usage-rows" style="display:none"></div>
+        <div id="sarang-reserve-usage-rows" style="display:none"></div>
       </div>
     </div>
     </div><!-- /gahye-section-reserve -->
@@ -526,67 +598,118 @@ tr:hover td { background: #f5f5f0; }
 
     <!-- ⑤노란우산 섹션 -->
     <div id="gahye-section-yellow" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
-        <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 250,000원 자동 적립</p>
-        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-          <span style="font-size:13px;">한강</span>
-          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-h-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        <p class="gi-note">이전달 yellow_total 불러와서 한강/사랑 이월분 자동분배. 월납입액은 직접 입력.</p>
+        <table class="gi-table">
+          <thead>
+            <tr>
+              <th>년월</th><th>구분</th>
+              <th>이월금액<br>yellow_total</th>
+              <th>한강이월</th><th>사랑이월</th>
+              <th>월입력(h)</th><th>월입력(s)</th>
+              <th>노란우산합</th><th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label" id="yellow-month-label">-</td>
+              <td class="label">장기현금</td>
+              <td class="num gi-auto"><span id="yellow-prev-total">-</span></td>
+              <td class="num gi-calc"><span id="yellow-h-prev">-</span></td>
+              <td class="num gi-calc"><span id="yellow-s-prev">-</span></td>
+              <td><input type="number" id="yellow-h-monthly" value="250000" oninput="calcYellow()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100px;text-align:right;"></td>
+              <td><input type="number" id="yellow-s-monthly" value="250000" oninput="calcYellow()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100px;text-align:right;"></td>
+              <td class="num gi-result"><span id="yellow-total-final">-</span></td>
+              <td><input type="text" id="yellow-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px;color:#888780;margin-top:6px;">
+          · 한강이월 = yellow_total / 2 &nbsp;|&nbsp; 노란우산합 = 한강이월 + 사랑이월 + 월입력(h) + 월입력(s)
         </div>
-        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
-          <span style="font-size:13px;">사랑</span>
-          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="250000" id="yellow-s-monthly" oninput="recalcYellow()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-yellow-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-        </div>
+        <!-- 하위 호환 -->
+        <input type="hidden" id="a-yellow-h"><input type="hidden" id="a-yellow-s">
       </div>
     </div>
     </div><!-- /gahye-section-yellow -->
 
     <!-- ⑥보증금 섹션 -->
     <div id="gahye-section-guarantee" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
-        <p style="font-size:11px;color:#888780;margin-bottom:6px;">전세금 3억2천/병원보증금 각 3000만원 (비고) · 미입력시 이전값 유지</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
-          <input type="number" id="a-guarantee" min="0" placeholder="직접입력 (비워두면 이전값)" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-          <input type="text" id="a-guarantee-note" placeholder="비고 (안보이게 입력)" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        <p class="gi-note">항목 추가/삭제로 직접 관리. 총합이 guarantee_total로 저장됩니다.</p>
+        <table class="gi-table">
+          <thead>
+            <tr><th>항목명</th><th>총합</th><th>병원함</th><th>하은성집</th><th>비고</th><th></th></tr>
+          </thead>
+          <tbody id="guarantee-rows"></tbody>
+        </table>
+        <button class="add-btn" onclick="addGuaranteeRow()" style="margin-top:6px;">+ 항목 추가</button>
+        <div style="margin-top:10px;padding:10px 14px;background:#e6f1fb;border-radius:8px;font-size:14px;font-weight:600;color:#185fa5;">
+          합계: <span id="guarantee-total-disp">0</span>원
         </div>
+        <input type="hidden" id="a-guarantee">
+        <input type="hidden" id="a-guarantee-note">
       </div>
     </div>
     </div><!-- /gahye-section-guarantee -->
 
     <!-- ⑦퇴직연금 섹션 -->
     <div id="gahye-section-retire" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
-        <p style="font-size:11px;color:#888780;margin-bottom:8px;">매달 한강/사랑 각 340,000원 자동 적립</p>
-        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-          <span style="font-size:13px;">한강</span>
-          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-h-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-h" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
+        <p class="gi-note">이전달 retirement_total 자동 불러옴. 항목 추가/삭제 가능. 월입력 직접 입력.</p>
+        <table class="gi-table" id="retire-table">
+          <thead>
+            <tr>
+              <th>년월</th><th>구분</th>
+              <th>퇴직연금합</th>
+              <th>국민퇴직연금(h)</th><th>국민퇴직연금(s)</th>
+              <th>월입력(h)</th><th>월입력(s)</th>
+              <th>비고</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="retire-rows"></tbody>
+        </table>
+        <button class="add-btn" onclick="addRetireRow()" style="margin-top:6px;">+ 항목 추가</button>
+        <div style="margin-top:10px;padding:10px 14px;background:#fdf3e3;border-radius:8px;font-size:14px;font-weight:600;color:#ba7517;">
+          퇴직연금합: <span id="retire-total-disp">0</span>원
         </div>
-        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;align-items:center;">
-          <span style="font-size:13px;">사랑</span>
-          <div><label style="font-size:11px;color:#888780;">입금액</label><input type="number" value="340000" id="retire-s-monthly" oninput="recalcRetire()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-          <div><label style="font-size:11px;color:#888780;">누적합계</label><input type="number" id="a-retire-s" min="0" placeholder="0" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;width:100%;text-align:right;"></div>
-        </div>
+        <!-- 하위 호환 -->
+        <input type="hidden" id="a-retire-h"><input type="hidden" id="a-retire-s">
+        <input type="hidden" id="retire-h-monthly" value="340000"><input type="hidden" id="retire-s-monthly" value="340000">
       </div>
     </div>
     </div><!-- /gahye-section-retire -->
 
     <!-- ⑧연금보험 섹션 -->
     <div id="gahye-section-annuity" class="gahye-section" style="display:none;">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
-          <input type="number" id="a-annuity" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-          <input type="text" id="a-annuity-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
+        <p class="gi-note">이전달 annuity_total 자동 불러옴. 항목 추가/삭제 가능. 월입력 직접 입력.</p>
+        <table class="gi-table">
+          <thead>
+            <tr>
+              <th>년월</th><th>구분</th><th>총합</th>
+              <th>교보연금저축(h)</th><th>교보연금저축(s)</th>
+              <th>월입력(h)</th><th>월입력(s)</th><th>비고</th>
+              <th>수협연금보험(h)</th><th>수협연금보험(s)</th><th>비고</th>
+              <th>농협종신(h)</th><th>농협종신(s)</th>
+              <th>월입력(h)</th><th>월입력(s)</th><th>비고</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="annuity-rows"></tbody>
+        </table>
+        <button class="add-btn" onclick="addAnnuityRow()" style="margin-top:6px;">+ 항목 추가</button>
+        <div style="margin-top:10px;padding:10px 14px;background:#fdf3e3;border-radius:8px;font-size:14px;font-weight:600;color:#ba7517;">
+          연금보험합: <span id="annuity-total-disp">0</span>원
         </div>
+        <input type="hidden" id="a-annuity"><input type="hidden" id="a-annuity-note">
       </div>
       <div class="asset-section">
         <h3>메모</h3>
@@ -1488,8 +1611,12 @@ let prevMissionTotal=0, prevHanReserve=0, prevSarangReserve=0;
 
 function recalcAssets(){
   const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
-  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s'), guar=getN('a-guarantee');
-  const rH=getN('a-retire-h'), rS=getN('a-retire-s'), ann=getN('a-annuity');
+  const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
+  const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
+  const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
+  const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
+  const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
+  const ann=annuityRows.reduce((s,r)=>s+(r.total||0),0);
   const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann, D=A+B+C;
   document.getElementById('at-bank').textContent=fmtW(bank);
   document.getElementById('at-stock').textContent=fmtW(stock);
@@ -1730,7 +1857,15 @@ async function loadAssetMonth(){
       } else { showMsg('asset-msg','신규 월',true); }
     }
     renderBankRows(); renderSavingsRows(); renderUsageRows('mission');
-    renderHanReserveUsage(); renderSarangReserveUsage(); recalcAssets();
+    renderHanReserveUsage(); renderSarangReserveUsage();
+    // 새 섹션 초기화
+    initJo11Section(month);
+    initReserveSection();
+    initYellowSection(month);
+    initGuaranteeSection();
+    initRetireSection(month);
+    initAnnuitySection(month);
+    recalcAssets();
     await loadMonthlyIncome(month);
   }catch(e){showMsg('asset-msg','오류: '+e.message,false);console.error(e);}
   finally{loading(false);}
@@ -1739,22 +1874,26 @@ async function loadAssetMonth(){
 async function saveAssets(){
   const month=document.getElementById('asset-month').value; if(!month){showMsg('asset-msg','월을 선택하세요.',false);return;}
   const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
-  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s'), guar=getN('a-guarantee');
-  const rH=getN('a-retire-h'), rS=getN('a-retire-s'), ann=getN('a-annuity');
+  const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
+  const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
+  const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
+  const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
+  const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
+  const ann=annuityRows.reduce((s,r)=>s+(r.total||0),0);
   const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann;
   const hanNet=Number(document.getElementById('is-han')?.textContent?.replace(/[^0-9\-]/g,''))||0;
   const sarangNet=Number(document.getElementById('is-sarang')?.textContent?.replace(/[^0-9\-]/g,''))||0;
   const incTotal=hanNet+sarangNet;
   const jo11=Math.min(Math.round(incTotal*0.07),1500000);
   const over=Math.max(0,Math.round(incTotal*0.07)-1500000);
-  const missionThis=Math.round(incTotal*0.03)+700000+over;
-  const missionTotal_=prevMissionTotal+missionThis;
+  const missionThis=Math.round(incTotal*0.03)+660000+over;
+  const mU=parseInt(document.getElementById('jo11-mission-used')?.value||0)||0;
+  const missionTotal_=_jo11PrevMission+missionThis-mU;
   const rHVal=parseInt(document.getElementById('reserve-han')?.value||0)||0;
   const rSVal=parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  const hU=hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const sU=sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const hRem=prevHanReserve+rHVal-hU, sRem=prevSarangReserve+rSVal-sU;
-  const mU=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hU=parseInt(document.getElementById('res-h-used')?.value||0)||0;
+  const sU=parseInt(document.getElementById('res-s-used')?.value||0)||0;
+  const hRem=_resPrevH+rHVal-hU, sRem=_resPrevS+rSVal-sU;
   const payload={
     year_month:month, a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
     income_total:incTotal, mission_total:missionTotal_, reserve_total:hRem+sRem,
@@ -1767,16 +1906,365 @@ async function saveAssets(){
     mission_m:JSON.stringify({usage:missionUsage,total:missionTotal_,used:mU,remain:missionTotal_-mU}),
     reserve_h_m:JSON.stringify({usage:hanReserveUsage,reserveHan:rHVal,hanReserveRemain:hRem}),
     reserve_s_m:JSON.stringify({usage:sarangReserveUsage,reserveSarang:rSVal,sarangReserveRemain:sRem}),
-    yellow_m:JSON.stringify({h:yH,s:yS,hMonthly:getN('yellow-h-monthly'),sMonthly:getN('yellow-s-monthly')}),
-    retirement_m:JSON.stringify({h:rH,s:rS,hMonthly:getN('retire-h-monthly'),sMonthly:getN('retire-s-monthly')}),
+    yellow_m:JSON.stringify({h:yH,s:yS,hMonthly:getN('yellow-h-monthly'),sMonthly:getN('yellow-s-monthly'),note:document.getElementById('yellow-note')?.value||''}),
+    retirement_m:JSON.stringify({rows:retireRows}),
     deposit_m:JSON.stringify({note:document.getElementById('a-deposit-note')?.value||''}),
     stock_m:JSON.stringify({note:document.getElementById('a-stock-note')?.value||''}),
-    quarantee_m:JSON.stringify({note:document.getElementById('a-guarantee-note')?.value||''}),
-    annuity_m:JSON.stringify({note:document.getElementById('a-annuity-note')?.value||''}),
+    quarantee_m:JSON.stringify({rows:guaranteeRows}),
+    annuity_m:JSON.stringify({rows:annuityRows}),
+    mission_m:JSON.stringify({used:parseInt(document.getElementById('jo11-mission-used')?.value||0)||0,note:document.getElementById('jo11-note')?.value||'',prevMission:_jo11PrevMission,income:_jo11Income}),
+    reserve_h_m:JSON.stringify({reserveHan:parseInt(document.getElementById('reserve-han')?.value||0)||0,used:parseInt(document.getElementById('res-h-used')?.value||0)||0,hanReserveRemain:_resPrevH+(parseInt(document.getElementById('reserve-han')?.value||0)||0)-(parseInt(document.getElementById('res-h-used')?.value||0)||0),note:document.getElementById('res-h-note')?.value||''}),
+    reserve_s_m:JSON.stringify({reserveSarang:parseInt(document.getElementById('reserve-sarang')?.value||0)||0,used:parseInt(document.getElementById('res-s-used')?.value||0)||0,sarangReserveRemain:_resPrevS+(parseInt(document.getElementById('reserve-sarang')?.value||0)||0)-(parseInt(document.getElementById('res-s-used')?.value||0)||0),note:document.getElementById('res-s-note')?.value||''}),
   };
   await upsertHS(month,payload,'asset-msg',`가계통계 ${month}`);
   await loadAssetHistory();
 }
+
+
+/* ══════════════════════════════════════════════
+   11조/선교헌금 계산
+══════════════════════════════════════════════ */
+let _jo11PrevMission=0, _jo11Income=0;
+
+async function initJo11Section(month){
+  const pm = prevM(month);
+  const lbl = document.getElementById('jo11-month-label');
+  if(lbl) lbl.textContent = month + ' 자료';
+  try {
+    // 이전달 mission_total
+    const r1 = await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=mission_total&limit=1`,{headers:HDR});
+    const d1 = await r1.json();
+    _jo11PrevMission = Number(d1[0]?.mission_total)||0;
+    const prevEl = document.getElementById('jo11-prev-mission');
+    if(prevEl) prevEl.textContent = _jo11PrevMission.toLocaleString();
+
+    // 이번달 income_total
+    const r2 = await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=income_total,han_net,sarang_net&limit=1`,{headers:HDR});
+    const d2 = await r2.json();
+    _jo11Income = Number(d2[0]?.income_total) || (Number(d2[0]?.han_net)||0) + (Number(d2[0]?.sarang_net)||0);
+    const incEl = document.getElementById('jo11-income');
+    if(incEl) incEl.textContent = _jo11Income.toLocaleString();
+
+    // 기존 저장값 복원
+    const r3 = await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=mission_m&limit=1`,{headers:HDR});
+    const d3 = await r3.json();
+    if(d3[0]?.mission_m){
+      const mm = typeof d3[0].mission_m==='string'?JSON.parse(d3[0].mission_m):d3[0].mission_m;
+      if(mm.used!=null) { const el=document.getElementById('jo11-mission-used'); if(el) el.value=mm.used; }
+      if(mm.note)       { const el=document.getElementById('jo11-note');         if(el) el.value=mm.note; }
+    }
+  } catch(e){ console.error('initJo11:',e); }
+  calcJo11();
+}
+
+function calcJo11(){
+  const inc = _jo11Income;
+  const jo11 = Math.min(Math.round(inc*0.07), 1500000);
+  const over = Math.max(0, Math.round(inc*0.07)-1500000);
+  const missionThis = Math.round(inc*0.03) + 660000 + over;
+  const used = parseInt(document.getElementById('jo11-mission-used')?.value||0)||0;
+  const total = _jo11PrevMission + missionThis - used;
+
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString();};
+  s('jo11-amount', jo11);
+  s('jo11-mission-this', missionThis);
+  s('jo11-mission-total', total);
+  // 하위호환
+  const h=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString();};
+  h('is-jo11', jo11); h('is-mission-this', missionThis); h('is-mission', total);
+}
+
+/* ══════════════════════════════════════════════
+   예비비 계산
+══════════════════════════════════════════════ */
+let _resPrevH=0, _resPrevS=0;
+
+async function initReserveSection(){
+  const month = document.getElementById('asset-month')?.value; if(!month) return;
+  const pm = prevM(month);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=reserve_h,reserve_s,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
+    const d = await r.json();
+    if(d.length){
+      // 이전달 최종 잔액 (reserve_h_m.hanReserveRemain 우선, 없으면 reserve_h)
+      try{const rhm=d[0].reserve_h_m?(typeof d[0].reserve_h_m==='string'?JSON.parse(d[0].reserve_h_m):d[0].reserve_h_m):{};
+        _resPrevH=rhm.hanReserveRemain??Number(d[0].reserve_h)||0;}
+      catch(e2){_resPrevH=Number(d[0].reserve_h)||0;}
+      try{const rsm=d[0].reserve_s_m?(typeof d[0].reserve_s_m==='string'?JSON.parse(d[0].reserve_s_m):d[0].reserve_s_m):{};
+        _resPrevS=rsm.sarangReserveRemain??Number(d[0].reserve_s)||0;}
+      catch(e2){_resPrevS=Number(d[0].reserve_s)||0;}
+    }
+    const e1=document.getElementById('res-h-prev'); if(e1) e1.textContent=_resPrevH.toLocaleString();
+    const e2=document.getElementById('res-s-prev'); if(e2) e2.textContent=_resPrevS.toLocaleString();
+    // 이번달 저장값 복원
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=reserve_h,reserve_s,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2.length){
+      try{const rhm=d2[0].reserve_h_m?(typeof d2[0].reserve_h_m==='string'?JSON.parse(d2[0].reserve_h_m):d2[0].reserve_h_m):{};
+        if(rhm.reserveHan!=null){const el=document.getElementById('reserve-han');if(el)el.value=rhm.reserveHan;}
+        if(rhm.used!=null){const el=document.getElementById('res-h-used');if(el)el.value=rhm.used;}
+        if(rhm.note){const el=document.getElementById('res-h-note');if(el)el.value=rhm.note;}}catch(e2){}
+      try{const rsm=d2[0].reserve_s_m?(typeof d2[0].reserve_s_m==='string'?JSON.parse(d2[0].reserve_s_m):d2[0].reserve_s_m):{};
+        if(rsm.reserveSarang!=null){const el=document.getElementById('reserve-sarang');if(el)el.value=rsm.reserveSarang;}
+        if(rsm.used!=null){const el=document.getElementById('res-s-used');if(el)el.value=rsm.used;}
+        if(rsm.note){const el=document.getElementById('res-s-note');if(el)el.value=rsm.note;}}catch(e2){}
+    }
+    // h_items, s_items에서 예비비 자동연동
+    const r3=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=h_items,s_items&limit=1`,{headers:HDR});
+    const d3=await r3.json();
+    if(d3[0]?.h_items){try{const p=typeof d3[0].h_items==='string'?JSON.parse(d3[0].h_items):d3[0].h_items;const ei=(p.exp||[]).find(i=>i.name==='예비비');if(ei?.amount!=null){const el=document.getElementById('reserve-han');if(el){el.value=ei.amount;el.style.background='#eaf3de';}}}catch(e2){}}
+    if(d3[0]?.s_items){try{const p=typeof d3[0].s_items==='string'?JSON.parse(d3[0].s_items):d3[0].s_items;const ei=(p.exp||[]).find(i=>i.name==='예비비');if(ei?.amount!=null){const el=document.getElementById('reserve-sarang');if(el){el.value=ei.amount;el.style.background='#eaf3de';}}}catch(e2){}}
+  }catch(e){console.error('initReserve:',e);}
+  calcReserve();
+}
+
+function calcReserve(){
+  const rH=parseInt(document.getElementById('reserve-han')?.value||0)||0;
+  const rS=parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
+  const uH=parseInt(document.getElementById('res-h-used')?.value||0)||0;
+  const uS=parseInt(document.getElementById('res-s-used')?.value||0)||0;
+  const fH=_resPrevH+rH-uH, fS=_resPrevS+rS-uS;
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString();};
+  s('res-h-final',fH); s('res-s-final',fS);
+  s('res-total-final',fH+fS);
+  // 하위호환
+  s('han-reserve-remain',fH); s('sarang-reserve-remain',fS); s('reserve-remain',fH+fS); s('is-reserve',fH+fS);
+}
+
+/* ══════════════════════════════════════════════
+   노란우산 계산
+══════════════════════════════════════════════ */
+let _yellowPrevTotal=0;
+
+async function initYellowSection(month){
+  const pm=prevM(month);
+  const lbl=document.getElementById('yellow-month-label'); if(lbl) lbl.textContent=month;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=yellow_total,yellow_m&limit=1`,{headers:HDR});
+    const d=await r.json();
+    _yellowPrevTotal=Number(d[0]?.yellow_total)||0;
+    const el=document.getElementById('yellow-prev-total'); if(el) el.textContent=_yellowPrevTotal.toLocaleString();
+    const hPrev=Math.round(_yellowPrevTotal/2), sPrev=Math.round(_yellowPrevTotal/2);
+    const e1=document.getElementById('yellow-h-prev'); if(e1) e1.textContent=hPrev.toLocaleString();
+    const e2=document.getElementById('yellow-s-prev'); if(e2) e2.textContent=sPrev.toLocaleString();
+    // 이번달 저장값
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=yellow_m&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]?.yellow_m){
+      const ym=typeof d2[0].yellow_m==='string'?JSON.parse(d2[0].yellow_m):d2[0].yellow_m;
+      if(ym.hMonthly!=null) setN('yellow-h-monthly',ym.hMonthly);
+      if(ym.sMonthly!=null) setN('yellow-s-monthly',ym.sMonthly);
+      if(ym.note){const el=document.getElementById('yellow-note');if(el)el.value=ym.note;}
+    }
+  }catch(e){console.error('initYellow:',e);}
+  calcYellow();
+}
+
+function calcYellow(){
+  const hPrev=Math.round(_yellowPrevTotal/2), sPrev=Math.round(_yellowPrevTotal/2);
+  const hM=parseInt(document.getElementById('yellow-h-monthly')?.value||0)||0;
+  const sM=parseInt(document.getElementById('yellow-s-monthly')?.value||0)||0;
+  const total=hPrev+sPrev+hM+sM;
+  const el=document.getElementById('yellow-total-final'); if(el) el.textContent=total.toLocaleString();
+  document.getElementById('at-yellow').textContent=fmtW(total);
+  // hidden inputs for recalcAssets
+  setN('a-yellow-h', hPrev+hM); setN('a-yellow-s', sPrev+sM);
+  recalcAssets();
+}
+
+/* ══════════════════════════════════════════════
+   보증금 항목 관리
+══════════════════════════════════════════════ */
+let guaranteeRows=[];
+
+function addGuaranteeRow(data){
+  guaranteeRows.push(data||{name:'장기현금',total:0,hospital:0,house:0,note:''});
+  renderGuaranteeRows();
+}
+function renderGuaranteeRows(){
+  const tbody=document.getElementById('guarantee-rows'); if(!tbody) return;
+  tbody.innerHTML='';
+  guaranteeRows.forEach((r,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input type="text" value="${r.name||''}" oninput="guaranteeRows[${idx}].name=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100%;font-size:13px;"></td>
+      <td class="num" style="font-weight:600;color:#185fa5;">${(r.total||0).toLocaleString()}</td>
+      <td><input type="number" value="${r.hospital||''}" oninput="guaranteeRows[${idx}].hospital=parseInt(this.value)||0;guaranteeRows[${idx}].total=(guaranteeRows[${idx}].hospital||0)+(guaranteeRows[${idx}].house||0);renderGuaranteeRows();calcGuarantee()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:120px;text-align:right;"></td>
+      <td><input type="number" value="${r.house||''}" oninput="guaranteeRows[${idx}].house=parseInt(this.value)||0;guaranteeRows[${idx}].total=(guaranteeRows[${idx}].hospital||0)+(guaranteeRows[${idx}].house||0);renderGuaranteeRows();calcGuarantee()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;"></td>
+      <td><input type="text" value="${r.note||''}" oninput="guaranteeRows[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
+      <td><button onclick="guaranteeRows.splice(${idx},1);renderGuaranteeRows();calcGuarantee()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  calcGuarantee();
+}
+function calcGuarantee(){
+  const total=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
+  const el=document.getElementById('guarantee-total-disp'); if(el) el.textContent=total.toLocaleString();
+  document.getElementById('at-guarantee').textContent=fmtW(total);
+  setN('a-guarantee',total);
+  recalcAssets();
+}
+async function initGuaranteeSection(){
+  const month=document.getElementById('asset-month')?.value; if(!month) return;
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]?.quarantee_m){
+      const gm=typeof d[0].quarantee_m==='string'?JSON.parse(d[0].quarantee_m):d[0].quarantee_m;
+      if(gm.rows?.length) { guaranteeRows=gm.rows; renderGuaranteeRows(); return; }
+    }
+    // 이전달에서 이어받기
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]?.quarantee_m){
+      const gm=typeof d2[0].quarantee_m==='string'?JSON.parse(d2[0].quarantee_m):d2[0].quarantee_m;
+      if(gm.rows?.length) { guaranteeRows=gm.rows.map(r=>({...r})); renderGuaranteeRows(); return; }
+    }
+    // 기본값
+    if(!guaranteeRows.length) guaranteeRows=[{name:'장기현금',total:380000000,hospital:60000000,house:320000000,note:''}];
+  }catch(e){console.error('initGuarantee:',e);}
+  renderGuaranteeRows();
+}
+
+/* ══════════════════════════════════════════════
+   퇴직연금 항목 관리
+══════════════════════════════════════════════ */
+let retireRows=[];
+
+function addRetireRow(data){
+  retireRows.push(data||{ym:'',type:'연금',total:0,h:0,s:0,hMonthly:340000,sMonthly:340000,note:''});
+  renderRetireRows();
+}
+function renderRetireRows(){
+  const tbody=document.getElementById('retire-rows'); if(!tbody) return;
+  const month=document.getElementById('asset-month')?.value||'';
+  tbody.innerHTML='';
+  retireRows.forEach((r,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="text-align:center;">${r.ym||month}</td>
+      <td><input type="text" value="${r.type||'연금'}" oninput="retireRows[${idx}].type=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:60px;font-size:12px;"></td>
+      <td class="num" style="font-weight:600;color:#ba7517;">${(r.total||0).toLocaleString()}</td>
+      <td><input type="number" value="${r.h||''}" oninput="retireRows[${idx}].h=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:120px;text-align:right;font-size:12px;"></td>
+      <td><input type="number" value="${r.s||''}" oninput="retireRows[${idx}].s=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:120px;text-align:right;font-size:12px;"></td>
+      <td><input type="number" value="${r.hMonthly||340000}" oninput="retireRows[${idx}].hMonthly=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:90px;text-align:right;font-size:12px;"></td>
+      <td><input type="number" value="${r.sMonthly||340000}" oninput="retireRows[${idx}].sMonthly=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:90px;text-align:right;font-size:12px;"></td>
+      <td><input type="text" value="${r.note||''}" oninput="retireRows[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:4px 6px;width:100%;background:#fafaf8;font-size:12px;"></td>
+      <td><button onclick="retireRows.splice(${idx},1);renderRetireRows();calcRetire()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  calcRetire();
+}
+function calcRetireTotals(idx){
+  const r=retireRows[idx];
+  r.total=(r.h||0)+(r.s||0)+(r.hMonthly||0)+(r.sMonthly||0);
+  renderRetireRows();
+}
+function calcRetire(){
+  const total=retireRows.reduce((s,r)=>s+(r.total||0),0);
+  const el=document.getElementById('retire-total-disp'); if(el) el.textContent=total.toLocaleString();
+  document.getElementById('at-retirement').textContent=fmtW(total);
+  setN('a-retire-h', Math.round(total/2)); setN('a-retire-s', Math.round(total/2));
+  recalcAssets();
+}
+async function initRetireSection(month){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]?.retirement_m){
+      const rm=typeof d[0].retirement_m==='string'?JSON.parse(d[0].retirement_m):d[0].retirement_m;
+      if(rm.rows?.length){retireRows=rm.rows;renderRetireRows();return;}
+    }
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]?.retirement_m){
+      const rm=typeof d2[0].retirement_m==='string'?JSON.parse(d2[0].retirement_m):d2[0].retirement_m;
+      if(rm.rows?.length){retireRows=rm.rows.map(r=>({...r,ym:month}));renderRetireRows();return;}
+    }
+    const prevTotal=Number(d2[0]?.retirement_total)||0;
+    if(!retireRows.length) retireRows=[{ym:month,type:'연금',total:prevTotal+(340000*2),h:Math.round(prevTotal/2),s:Math.round(prevTotal/2),hMonthly:340000,sMonthly:340000,note:''}];
+  }catch(e){console.error('initRetire:',e);}
+  renderRetireRows();
+}
+
+/* ══════════════════════════════════════════════
+   연금보험 항목 관리
+══════════════════════════════════════════════ */
+let annuityRows=[];
+
+function addAnnuityRow(data){
+  annuityRows.push(data||{ym:'',type:'연금',total:0,kyoboH:0,kyoboS:0,kyoboHm:340000,kyoboSm:340000,kyoboNote:'',suhyupH:0,suhyupS:0,suhyupNote:'',nongH:0,nongS:0,nongHm:1064520,nongSm:1064520,nongNote:''});
+  renderAnnuityRows();
+}
+function renderAnnuityRows(){
+  const tbody=document.getElementById('annuity-rows'); if(!tbody) return;
+  const month=document.getElementById('asset-month')?.value||'';
+  tbody.innerHTML='';
+  annuityRows.forEach((r,idx)=>{
+    const calcTotal=()=>{
+      r.total=(r.kyoboH||0)+(r.kyoboS||0)+(r.kyoboHm||0)+(r.kyoboSm||0)+(r.suhyupH||0)+(r.suhyupS||0)+(r.nongH||0)+(r.nongS||0)+(r.nongHm||0)+(r.nongSm||0);
+      renderAnnuityRows(); calcAnnuity();
+    };
+    const inp=(val,key,w)=>`<input type="number" value="${val||''}" oninput="annuityRows[${idx}].${key}=parseInt(this.value)||0;" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 5px;width:${w||'100px'};text-align:right;font-size:11px;">`;
+    const inpT=(val,key)=>`<input type="text" value="${val||''}" oninput="annuityRows[${idx}].${key}=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:4px 5px;width:80px;background:#fafaf8;font-size:11px;">`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="text-align:center;font-size:12px;">${r.ym||month}</td>
+      <td style="font-size:12px;">${r.type||'연금'}</td>
+      <td class="num" style="font-weight:600;color:#ba7517;font-size:12px;">${(r.total||0).toLocaleString()}</td>
+      <td>${inp(r.kyoboH,'kyoboH','100px')}</td>
+      <td>${inp(r.kyoboS,'kyoboS','100px')}</td>
+      <td>${inp(r.kyoboHm,'kyoboHm','80px')}</td>
+      <td>${inp(r.kyoboSm,'kyoboSm','80px')}</td>
+      <td>${inpT(r.kyoboNote,'kyoboNote')}</td>
+      <td>${inp(r.suhyupH,'suhyupH','100px')}</td>
+      <td>${inp(r.suhyupS,'suhyupS','100px')}</td>
+      <td>${inpT(r.suhyupNote,'suhyupNote')}</td>
+      <td>${inp(r.nongH,'nongH','100px')}</td>
+      <td>${inp(r.nongS,'nongS','100px')}</td>
+      <td>${inp(r.nongHm,'nongHm','90px')}</td>
+      <td>${inp(r.nongSm,'nongSm','90px')}</td>
+      <td>${inpT(r.nongNote,'nongNote')}</td>
+      <td><button onclick="annuityRows.splice(${idx},1);renderAnnuityRows();calcAnnuity()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;">✕</button></td>`;
+    // 각 input에 oninput으로 calcTotal 추가
+    tr.querySelectorAll('input[type=number]').forEach(inp=>{
+      const orig=inp.getAttribute('oninput')||'';
+      inp.setAttribute('oninput', orig+`;annuityRows[${idx}].total=(annuityRows[${idx}].kyoboH||0)+(annuityRows[${idx}].kyoboS||0)+(annuityRows[${idx}].kyoboHm||0)+(annuityRows[${idx}].kyoboSm||0)+(annuityRows[${idx}].suhyupH||0)+(annuityRows[${idx}].suhyupS||0)+(annuityRows[${idx}].nongH||0)+(annuityRows[${idx}].nongS||0)+(annuityRows[${idx}].nongHm||0)+(annuityRows[${idx}].nongSm||0);calcAnnuity()`);
+    });
+    tbody.appendChild(tr);
+  });
+  calcAnnuity();
+}
+function calcAnnuity(){
+  const total=annuityRows.reduce((s,r)=>s+(r.total||0),0);
+  const el=document.getElementById('annuity-total-disp'); if(el) el.textContent=total.toLocaleString();
+  document.getElementById('at-annuity').textContent=fmtW(total);
+  setN('a-annuity',total);
+  recalcAssets();
+}
+async function initAnnuitySection(month){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]?.annuity_m){
+      const am=typeof d[0].annuity_m==='string'?JSON.parse(d[0].annuity_m):d[0].annuity_m;
+      if(am.rows?.length){annuityRows=am.rows;renderAnnuityRows();return;}
+    }
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]?.annuity_m){
+      const am=typeof d2[0].annuity_m==='string'?JSON.parse(d2[0].annuity_m):d2[0].annuity_m;
+      if(am.rows?.length){annuityRows=am.rows.map(r=>({...r,ym:month}));renderAnnuityRows();return;}
+    }
+    const prevTotal=Number(d2[0]?.annuity_total)||0;
+    if(!annuityRows.length) annuityRows=[{ym:month,type:'연금',total:prevTotal,kyoboH:0,kyoboS:0,kyoboHm:340000,kyoboSm:340000,kyoboNote:'1503~',suhyupH:0,suhyupS:0,suhyupNote:'',nongH:0,nongS:0,nongHm:1064520,nongSm:1064520,nongNote:'2503~30'}];
+  }catch(e){console.error('initAnnuity:',e);}
+  renderAnnuityRows();
+}
+
 
 async function finalSave(){
   const month=document.getElementById('asset-month').value;
