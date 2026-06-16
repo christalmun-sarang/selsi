@@ -971,6 +971,18 @@ function showGahyeSection(name,el){
   if(sec) sec.style.display='';
   el.classList.add('active');
   document.getElementById('asset-controls-inline').style.display='flex';
+  // 섹션별 계산 갱신
+  const month=document.getElementById('asset-month')?.value;
+  if(month){
+    if(name==='jo11')      calcJo11();
+    if(name==='reserve')   calcReserve();
+    if(name==='yellow')    calcYellow();
+    if(name==='guarantee') calcGuarantee();
+    if(name==='retire')    calcRetire();
+    if(name==='annuity')   calcAnnuity();
+    if(name==='bank')      recalcBank();
+    if(name==='savings')   renderSavingsRows();
+  }
 }
 let _assetInited=false;
 function initGahye(){
@@ -979,7 +991,7 @@ function initGahye(){
   const f=document.getElementById('gahye-section-jo11'); if(f) f.style.display='';
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const fb=document.getElementById('gahye-sub-jo11'); if(fb) fb.classList.add('active');
-  if(!_assetInited){ _assetInited=true; initAssets(); }
+  initAssets(); // 항상 초기화 (월 변경 등 반영)
 }
 
 /* ══ 일별 데이터 (Han_statics) ══ */
@@ -1645,6 +1657,11 @@ function recalcAssets(){
 
 /* 통장 */
 function getBankTotal(){ return bankRows.reduce((s,r)=>s+(r.amount||0),0); }
+function recalcBank(){
+  const t=getBankTotal();
+  const el=document.getElementById('at-bank'); if(el) el.textContent=fmtW(t);
+  recalcAssets();
+}
 function addBankRow(data){ bankRows.push(data||{bank:'',amount:0,date:''}); renderBankRows(); }
 function renderBankRows(){
   const c=document.getElementById('bank-rows'); c.innerHTML='';
@@ -1657,7 +1674,7 @@ function renderBankRows(){
       <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
     c.appendChild(d);
   });
-  document.getElementById('at-bank').textContent=fmtW(getBankTotal()); recalcAssets();
+  recalcBank();
 }
 
 /* 적금 */
@@ -1765,6 +1782,7 @@ async function loadMonthlyIncome(month){
   }catch(e){console.error('loadMonthlyIncome:',e);}
 }
 
+let _lastAssetMonth = '';
 async function initAssets(){
   const t=new Date();
   const ym=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}`;
@@ -1858,17 +1876,17 @@ async function loadAssetMonth(){
     }
     renderBankRows(); renderSavingsRows(); renderUsageRows('mission');
     renderHanReserveUsage(); renderSarangReserveUsage();
-    // 새 섹션 초기화
-    initJo11Section(month);
-    initReserveSection();
-    initYellowSection(month);
-    initGuaranteeSection();
-    initRetireSection(month);
-    initAnnuitySection(month);
     recalcAssets();
     await loadMonthlyIncome(month);
   }catch(e){showMsg('asset-msg','오류: '+e.message,false);console.error(e);}
   finally{loading(false);}
+  // 새 섹션 초기화 (loadAssetMonth 완료 후 별도 실행)
+  try{ await initJo11Section(month); }catch(e){console.error('jo11:',e);}
+  try{ await initReserveSection(); }catch(e){console.error('reserve:',e);}
+  try{ await initYellowSection(month); }catch(e){console.error('yellow:',e);}
+  try{ await initGuaranteeSection(); }catch(e){console.error('guarantee:',e);}
+  try{ await initRetireSection(month); }catch(e){console.error('retire:',e);}
+  try{ await initAnnuitySection(month); }catch(e){console.error('annuity:',e);}
 }
 
 async function saveAssets(){
