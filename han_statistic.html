@@ -154,8 +154,7 @@ tr:hover td { background: #f5f5f0; }
 .hh-src-both { background: #f1efe8; color: #888780; }
 
 /* ── 가계통계 자산 ── */
-.gahye-section { display: none; }
-.gahye-section:first-of-type { display: block; }
+.gahye-section { display: none !important; }
 .asset-section { background:#fff; border:0.5px solid #ddddd5; border-radius:12px; padding:18px 22px; margin-bottom:16px; }
 .asset-section h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#444441; display:flex; justify-content:space-between; align-items:center; }
 .asset-section h3 .total-val { font-size:18px; font-weight:500; color:#185fa5; }
@@ -385,10 +384,11 @@ tr:hover td { background: #f5f5f0; }
       <button onclick="saveAssets()">저장</button>
       <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
       <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
+      <button class="secondary" style="font-size:11px;padding:4px 8px;color:#888780;" onclick="_debugGahye()">🔍 화면갱신</button>
     </div>
 
     <!-- 11조/선교헌금 섹션 -->
-    <div id="gahye-section-jo11" class="gahye-section" style="display:none;">
+    <div id="gahye-section-jo11" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>🙏 11조 / 선교헌금 계산</h3>
@@ -456,7 +456,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-jo11 -->
 
     <!-- 예비비 섹션 -->
-    <div id="gahye-section-reserve" class="gahye-section" style="display:none;">
+    <div id="gahye-section-reserve" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>🏦 예비비 관리</h3>
@@ -541,7 +541,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-reserve -->
 
     <!-- ①통장 섹션 -->
-    <div id="gahye-section-bank" class="gahye-section" style="display:none;">
+    <div id="gahye-section-bank" class="gahye-section">
     <div class="main" style="padding-top:20px;">
       <div class="asset-abcd">
         <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
@@ -559,7 +559,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-bank -->
 
     <!-- ②주식 섹션 -->
-    <div id="gahye-section-stock" class="gahye-section" style="display:none;">
+    <div id="gahye-section-stock" class="gahye-section">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
@@ -572,7 +572,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-stock -->
 
     <!-- ③적금 섹션 -->
-    <div id="gahye-section-savings" class="gahye-section" style="display:none;">
+    <div id="gahye-section-savings" class="gahye-section">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>③ 적금합 <span class="total-val" id="at-savings">0</span></h3>
@@ -584,7 +584,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-savings -->
 
     <!-- ④정기예금 섹션 -->
-    <div id="gahye-section-deposit" class="gahye-section" style="display:none;">
+    <div id="gahye-section-deposit" class="gahye-section">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
@@ -597,7 +597,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-deposit -->
 
     <!-- ⑤노란우산 섹션 -->
-    <div id="gahye-section-yellow" class="gahye-section" style="display:none;">
+    <div id="gahye-section-yellow" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
@@ -636,7 +636,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-yellow -->
 
     <!-- ⑥보증금 섹션 -->
-    <div id="gahye-section-guarantee" class="gahye-section" style="display:none;">
+    <div id="gahye-section-guarantee" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
@@ -658,7 +658,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-guarantee -->
 
     <!-- ⑦퇴직연금 섹션 -->
-    <div id="gahye-section-retire" class="gahye-section" style="display:none;">
+    <div id="gahye-section-retire" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
@@ -687,7 +687,7 @@ tr:hover td { background: #f5f5f0; }
     </div><!-- /gahye-section-retire -->
 
     <!-- ⑧연금보험 섹션 -->
-    <div id="gahye-section-annuity" class="gahye-section" style="display:none;">
+    <div id="gahye-section-annuity" class="gahye-section">
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
@@ -970,7 +970,7 @@ function showGahyeSection(name,el){
   document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const sec=document.getElementById('gahye-section-'+name);
-  if(sec) sec.style.display='';
+  if(sec){ sec.style.removeProperty('display'); sec.style.setProperty('display','block','important'); }
   if(el) el.classList.add('active');
   document.getElementById('asset-controls-inline').style.display='flex';
   // 섹션별 렌더/계산 갱신
@@ -986,27 +986,19 @@ function showGahyeSection(name,el){
 // 현재 활성 섹션 재표시 (데이터 로드 후 호출)
 function refreshActiveGahyeSection(){
   const name = _activeGahyeSection || 'jo11';
-  document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.gahye-section').forEach(s=>{ s.style.display='none'; });
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
-  const sec=document.getElementById('gahye-section-'+name);
-  if(sec) sec.style.display='';
-  const btn=document.getElementById('gahye-sub-'+name);
+  const sec = document.getElementById('gahye-section-'+name);
+  if(sec){ sec.style.removeProperty('display'); sec.style.setProperty('display','block','important'); }
+  const btn = document.getElementById('gahye-sub-'+name);
   if(btn) btn.classList.add('active');
-  // 갱신
-  if(name==='jo11')      calcJo11();
-  if(name==='reserve')   calcReserve();
-  if(name==='yellow')    calcYellow();
-  if(name==='guarantee') { renderGuaranteeRows(); calcGuarantee(); }
-  if(name==='retire')    { renderRetireRows(); calcRetire(); }
-  if(name==='annuity')   { renderAnnuityRows(); calcAnnuity(); }
-  if(name==='bank')      { renderBankRows(); recalcBank(); }
 }
 
 let _assetInited=false;
 function initGahye(){
   document.getElementById('asset-controls-inline').style.display='flex';
   document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
-  const f=document.getElementById('gahye-section-jo11'); if(f) f.style.display='';
+  const f=document.getElementById('gahye-section-jo11'); if(f){ f.style.removeProperty('display'); f.style.setProperty('display','block','important'); }
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const fb=document.getElementById('gahye-sub-jo11'); if(fb) fb.classList.add('active');
   if(!_assetInited){ _assetInited=true; initAssets(); }
@@ -1903,7 +1895,15 @@ async function loadAssetMonth(){
       try{ await initRetireSection(_m); }catch(e){console.error('retire:',e);}
       try{ await initAnnuitySection(_m); }catch(e){console.error('annuity:',e);}
       // 모든 init 완료 후 현재 탭 화면 갱신
+      // 최종 화면 갱신: 현재 활성 탭 표시
       refreshActiveGahyeSection();
+      // 각 섹션 렌더도 강제 실행
+      const _n = _activeGahyeSection || 'jo11';
+      if(_n==='bank')      { renderBankRows(); recalcBank(); }
+      if(_n==='savings')   renderSavingsRows();
+      if(_n==='guarantee') { renderGuaranteeRows(); calcGuarantee(); }
+      if(_n==='retire')    { renderRetireRows(); calcRetire(); }
+      if(_n==='annuity')   { renderAnnuityRows(); calcAnnuity(); }
       showMsg('asset-msg', `✓ ${_m} 불러오기 완료`, true);
     })();
   }
@@ -2334,6 +2334,26 @@ function saveSettings(){
     assetHistTo: document.getElementById('asset-hist-to')?.value,
   };
   try { localStorage.setItem('han_stat_settings', JSON.stringify(s)); } catch(e){}
+}
+function _debugGahye(){
+  const name = _activeGahyeSection || 'jo11';
+  console.log('[debug] activeSection:', name);
+  console.log('[debug] jo11Income:', _jo11Income, 'prevMission:', _jo11PrevMission);
+  console.log('[debug] guaranteeRows:', guaranteeRows.length, 'retireRows:', retireRows.length);
+  // 강제로 현재 섹션 표시
+  document.querySelectorAll('.gahye-section').forEach(s=>{ s.style.display='none'; s.style.cssText='display:none!important'; });
+  const sec = document.getElementById('gahye-section-'+name);
+  if(sec){ sec.style.cssText='display:block!important'; console.log('[debug] sec found:', sec.id); }
+  else { console.log('[debug] sec NOT found for:', name); }
+  // 갱신
+  try{ calcJo11(); }catch(e){ console.error('calcJo11:',e); }
+  try{ calcReserve(); }catch(e){ console.error('calcReserve:',e); }
+  try{ calcYellow(); }catch(e){ console.error('calcYellow:',e); }
+  try{ renderGuaranteeRows(); calcGuarantee(); }catch(e){ console.error('guarantee:',e); }
+  try{ renderRetireRows(); calcRetire(); }catch(e){ console.error('retire:',e); }
+  try{ renderAnnuityRows(); calcAnnuity(); }catch(e){ console.error('annuity:',e); }
+  try{ renderBankRows(); recalcBank(); }catch(e){ console.error('bank:',e); }
+  alert('화면 갱신 완료 (콘솔에서 [debug] 확인)');
 }
 function loadSettings(){
   try {
