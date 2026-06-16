@@ -1667,6 +1667,11 @@ function recalcAssets(){
 
 /* 통장 */
 function getBankTotal(){ return bankRows.reduce((s,r)=>s+(r.amount||0),0); }
+function recalcBank(){
+  const t=getBankTotal();
+  const el=document.getElementById('at-bank'); if(el) el.textContent=fmtW(t);
+  recalcAssets();
+}
 function addBankRow(data){ bankRows.push(data||{bank:'',amount:0,date:''}); renderBankRows(); }
 function renderBankRows(){
   const c=document.getElementById('bank-rows'); c.innerHTML='';
@@ -1679,7 +1684,7 @@ function renderBankRows(){
       <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
     c.appendChild(d);
   });
-  document.getElementById('at-bank').textContent=fmtW(getBankTotal()); recalcAssets();
+  recalcBank();
 }
 
 /* 적금 */
@@ -1919,9 +1924,20 @@ async function saveAssets(){
   const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
   const ann=annuityRows.reduce((s,r)=>s+(r.total||0),0);
   const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann;
-  const hanNet=Number(document.getElementById('is-han')?.textContent?.replace(/[^0-9\-]/g,''))||0;
-  const sarangNet=Number(document.getElementById('is-sarang')?.textContent?.replace(/[^0-9\-]/g,''))||0;
-  const incTotal=hanNet+sarangNet;
+  // income: DB에서 직접 조회 (fmtW 축약값 파싱 오류 방지)
+  let hanNet=0, sarangNet=0, incTotal=0;
+  try{
+    const _ir=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=han_net,sarang_net,income_total&limit=1`,{headers:HDR});
+    const _id=await _ir.json();
+    if(Array.isArray(_id)&&_id.length){
+      hanNet=Number(_id[0].han_net)||0;
+      sarangNet=Number(_id[0].sarang_net)||0;
+      incTotal=Number(_id[0].income_total)||(hanNet+sarangNet);
+    } else {
+      // 신규 월: _jo11Income 사용
+      incTotal=_jo11Income||0;
+    }
+  }catch(_e2){ incTotal=_jo11Income||0; }
   const jo11=Math.min(Math.round(incTotal*0.07),1500000);
   const over=Math.max(0,Math.round(incTotal*0.07)-1500000);
   const missionThis=Math.round(incTotal*0.03)+660000+over;
@@ -1934,7 +1950,7 @@ async function saveAssets(){
   const hRem=_resPrevH+rHVal-hU, sRem=_resPrevS+rSVal-sU;
   const payload={
     year_month:month, a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
-    income_total:incTotal, mission_total:missionTotal_, reserve_total:hRem+sRem,
+    mission_total:missionTotal_, reserve_total:hRem+sRem,
     reserve_h:rHVal, reserve_s:rSVal,
     bank_total:bank, stock_total:stock, savings_total:savings, deposit_total:dep,
     yellow_total:yH+yS, guarantee_total:guar, retirement_total:rH+rS, annuity_total:ann,
