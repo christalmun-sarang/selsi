@@ -964,17 +964,6 @@ function refreshActiveGahyeSection(){
   if(sec){ sec.style.removeProperty('display'); sec.style.setProperty('display','block','important'); }
   const btn = document.getElementById('gahye-sub-'+name);
   if(btn) btn.classList.add('active');
-  // 섹션별 렌더 및 합계 갱신
-  if(name==='jo11')      calcJo11();
-  if(name==='reserve')   calcReserve();
-  if(name==='yellow')    { renderAssetRows('yellow'); calcAssetTotal('yellow'); }
-  if(name==='bank')      { renderAssetRows('bank');   calcAssetTotal('bank'); }
-  if(name==='stock')     { renderAssetRows('stock');  calcAssetTotal('stock'); }
-  if(name==='savings')   renderSavingsRows();
-  if(name==='deposit')   { renderAssetRows('deposit');calcAssetTotal('deposit'); }
-  if(name==='guarantee') { renderAssetRows('guarantee');calcAssetTotal('guarantee'); }
-  if(name==='retire')    { renderAssetRows('retire'); calcAssetTotal('retire'); }
-  if(name==='annuity')   { renderAssetRows('annuity');calcAssetTotal('annuity'); }
 }
 
 let _assetInited=false;
@@ -1664,8 +1653,7 @@ function recalcAssets(){
   const bankGross=getAssetTotal('bank');
   const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
   const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
-  const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
-  const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
+  const yH=Math.round(getAssetTotal('yellow')/2); const yS=yH;
   const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
   const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
   const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
@@ -1804,103 +1792,6 @@ function recalcReserve(){
 function recalcYellow(){ recalcAssets(); }
 function recalcRetire(){ recalcAssets(); }
 
-
-/* == 보증금/퇴직연금/연금보험 래퍼 함수 (공통 렌더러 사용) == */
-function addGuaranteeRow(d){ addAssetRow('guarantee',{name:d&&d.name||'보증금',amount:d&&(d.total||d.amount)||0,date:d&&d.date||'',note:d&&d.note||''}); }
-function renderGuaranteeRows(){ renderAssetRows('guarantee'); }
-function calcGuarantee(){ calcAssetTotal('guarantee'); }
-
-function addRetireRow(d){ addAssetRow('retire',{name:d&&(d.name||d.type)||'퇴직연금',amount:d&&(d.total||d.amount)||0,date:d&&(d.date||d.ym)||'',note:d&&d.note||''}); }
-function renderRetireRows(){ renderAssetRows('retire'); }
-function calcRetire(){ calcAssetTotal('retire'); }
-function calcRetireTotals(){ calcAssetTotal('retire'); }
-
-function addAnnuityRow(d){ addAssetRow('annuity',{name:d&&d.name||'연금보험',amount:d&&(d.total||d.amount)||0,date:d&&(d.date||d.ym)||'',note:d&&d.note||''}); }
-function renderAnnuityRows(){ renderAssetRows('annuity'); }
-function calcAnnuity(){ calcAssetTotal('annuity'); }
-
-async function initGuaranteeSection(){
-  const month=document.getElementById('asset-month')&&document.getElementById('asset-month').value; if(!month) return;
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]&&d[0].quarantee_m){
-      const gm=typeof d[0].quarantee_m==='string'?JSON.parse(d[0].quarantee_m):d[0].quarantee_m;
-      if(gm.rows&&gm.rows.length){
-        guaranteeRows=gm.rows.map(function(r){return{name:r.name||'보증금',amount:r.total||r.amount||0,date:r.date||'',note:r.note||''};});
-        renderAssetRows('guarantee'); return;
-      }
-    }
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]&&d2[0].quarantee_m){
-      const gm=typeof d2[0].quarantee_m==='string'?JSON.parse(d2[0].quarantee_m):d2[0].quarantee_m;
-      if(gm.rows&&gm.rows.length){
-        guaranteeRows=gm.rows.map(function(r){return{name:r.name||'보증금',amount:r.total||r.amount||0,date:'',note:r.note||''};});
-        renderAssetRows('guarantee'); return;
-      }
-    }
-    const prev=Number(d2[0]&&d2[0].guarantee_total)||0;
-    if(!guaranteeRows.length) guaranteeRows=[{name:'보증금',amount:prev||380000000,date:'',note:''}];
-  }catch(e){console.error('initGuarantee:',e);}
-  renderAssetRows('guarantee');
-}
-
-async function initRetireSection(month){
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]&&d[0].retirement_m){
-      const rm=typeof d[0].retirement_m==='string'?JSON.parse(d[0].retirement_m):d[0].retirement_m;
-      if(rm.rows&&rm.rows.length){
-        retireRows=rm.rows.map(function(r){return{name:r.name||r.type||'퇴직연금',amount:r.total||r.amount||0,date:r.date||r.ym||'',note:r.note||''};});
-        renderAssetRows('retire'); return;
-      }
-    }
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]&&d2[0].retirement_m){
-      const rm=typeof d2[0].retirement_m==='string'?JSON.parse(d2[0].retirement_m):d2[0].retirement_m;
-      if(rm.rows&&rm.rows.length){
-        retireRows=rm.rows.map(function(r){return{name:r.name||r.type||'퇴직연금',amount:r.total||r.amount||0,date:'',note:r.note||''};});
-        renderAssetRows('retire'); return;
-      }
-    }
-    const prev=Number(d2[0]&&d2[0].retirement_total)||0;
-    if(!retireRows.length) retireRows=[{name:'퇴직연금',amount:prev+(340000*2),date:'',note:'이전달+340,000x2'}];
-  }catch(e){console.error('initRetire:',e);}
-  renderAssetRows('retire');
-}
-
-async function initAnnuitySection(month){
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]&&d[0].annuity_m){
-      const am=typeof d[0].annuity_m==='string'?JSON.parse(d[0].annuity_m):d[0].annuity_m;
-      if(am.rows&&am.rows.length){
-        annuityRows=am.rows.map(function(r){return{name:r.name||'연금보험',amount:r.total||r.amount||0,date:r.date||'',note:r.note||''};});
-        renderAssetRows('annuity'); return;
-      }
-    }
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]&&d2[0].annuity_m){
-      const am=typeof d2[0].annuity_m==='string'?JSON.parse(d2[0].annuity_m):d2[0].annuity_m;
-      if(am.rows&&am.rows.length){
-        annuityRows=am.rows.map(function(r){return{name:r.name||'연금보험',amount:r.total||r.amount||0,date:'',note:r.note||''};});
-        renderAssetRows('annuity'); return;
-      }
-    }
-    const prev=Number(d2[0]&&d2[0].annuity_total)||0;
-    if(!annuityRows.length) annuityRows=[{name:'연금보험',amount:prev,date:'',note:'이전달'}];
-  }catch(e){console.error('initAnnuity:',e);}
-  renderAssetRows('annuity');
-}
-
 async function loadMonthlyIncome(month){
   try{
     const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=han_net,sarang_net,h_items,s_items&limit=1`,{headers:HDR});
@@ -1948,7 +1839,7 @@ async function loadAssetMonth(){
       const mm=r.mission_m?(typeof r.mission_m==='string'?JSON.parse(r.mission_m):r.mission_m):{};
       const rhm=r.reserve_h_m?(typeof r.reserve_h_m==='string'?JSON.parse(r.reserve_h_m):r.reserve_h_m):{};
       const rsm=r.reserve_s_m?(typeof r.reserve_s_m==='string'?JSON.parse(r.reserve_s_m):r.reserve_s_m):{};
-      bankRows=(bm.rows||[]).map(function(r){return{name:r.name||r.bank||'',amount:r.amount||0,date:r.date||'',note:r.note||''};}); savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
+      bankRows=(bm.rows||[]).map(function(r){return{name:r.name||r.bank||'',amount:r.amount||0,date:r.date||'',note:r.note||''};}); renderAssetRows('bank'); savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
       hanReserveUsage=rhm.usage||[]; sarangReserveUsage=rsm.usage||[];
       if(rhm.reserveHan!=null) setN('reserve-han',rhm.reserveHan);
       if(rsm.reserveSarang!=null) setN('reserve-sarang',rsm.reserveSarang);
@@ -2049,8 +1940,7 @@ async function saveAssets(){
   const bankGross=getAssetTotal('bank');
   const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
   const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
-  const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
-  const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
+  const yH=Math.round(getAssetTotal('yellow')/2); const yS=yH;
   const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
   const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
   const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
@@ -2276,13 +2166,7 @@ async function initYellowSection(month){
 }
 function calcYellow(){calcAssetTotal('yellow');}
 
-/* 초기 로드 */
-loadSettings();
-loadRecent();
-</script>
-
-</body>
-</html>/* ══ 연금보험 (공통 렌더러 사용) ══ */
+/* ══ 연금보험 (공통 렌더러 사용) ══ */
 function addAnnuityRow(data){ addAssetRow('annuity', data ? {name:data.name||'연금보험',amount:data.total||data.amount||0,date:data.date||data.ym||'',note:data.note||''} : {name:'연금보험',amount:0,date:'',note:''}); }
 function renderAnnuityRows(){ renderAssetRows('annuity'); }
 function calcAnnuity(){ calcAssetTotal('annuity'); }
@@ -2313,3 +2197,43 @@ async function initAnnuitySection(month){
   renderAssetRows('annuity');
 }
 
+
+/* ══ 검색 설정 localStorage 저장/복원 ══ */
+function saveSettings(){
+  try{
+    const s={viewType:document.getElementById('view-type')?.value,
+      yearSelect:document.getElementById('year-select')?.value,
+      yearFrom:document.getElementById('year-from')?.value,
+      yearTo:document.getElementById('year-to')?.value,
+      dateFrom:document.getElementById('date-from')?.value,
+      dateTo:document.getElementById('date-to')?.value,
+      hhMonthFrom:document.getElementById('hh-month-from')?.value,
+      hhMonthTo:document.getElementById('hh-month-to')?.value,
+      assetHistFrom:document.getElementById('asset-hist-from')?.value,
+      assetHistTo:document.getElementById('asset-hist-to')?.value};
+    localStorage.setItem('han_stat_v2',JSON.stringify(s));
+  }catch(e){}
+}
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem('han_stat_v2')||'{}');
+    if(s.viewType){const el=document.getElementById('view-type');if(el)el.value=s.viewType;}
+    if(s.yearSelect){const el=document.getElementById('year-select');if(el)el.value=s.yearSelect;}
+    if(s.yearFrom){const el=document.getElementById('year-from');if(el)el.value=s.yearFrom;}
+    if(s.yearTo){const el=document.getElementById('year-to');if(el)el.value=s.yearTo;}
+    if(s.dateFrom){const el=document.getElementById('date-from');if(el)el.value=s.dateFrom;}
+    if(s.dateTo){const el=document.getElementById('date-to');if(el)el.value=s.dateTo;}
+    if(s.hhMonthFrom){const el=document.getElementById('hh-month-from');if(el)el.value=s.hhMonthFrom;}
+    if(s.hhMonthTo){const el=document.getElementById('hh-month-to');if(el)el.value=s.hhMonthTo;}
+    if(s.assetHistFrom){const el=document.getElementById('asset-hist-from');if(el)el.value=s.assetHistFrom;}
+    if(s.assetHistTo){const el=document.getElementById('asset-hist-to');if(el)el.value=s.assetHistTo;}
+    onViewTypeChange();
+  }catch(e){}
+}
+/* 초기 로드 */
+loadSettings();
+loadRecent();
+
+</script>
+</body>
+</html>
